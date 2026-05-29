@@ -1,1 +1,34 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# build
+dist/
+
+# env files — commit .env.example instead
 .env
+.env.local
+.env.*.local
+
+# Prisma
+prisma/migrations/*.lock
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
