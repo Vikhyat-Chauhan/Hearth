@@ -103,11 +103,4 @@ If asked to build something: start with plan mode, propose a ruthlessly scoped v
 
 ## Plan Mode Output Convention
 
-Whenever producing a plan, always end with a **"Sub-agent Prompt"** section — a self-contained, ready-to-paste prompt a fresh coding agent can receive to implement the plan. It must include:
-- One-sentence goal
-- Relevant file paths and their roles
-- Ordered list of specific tasks
-- Key constraints/conventions (e.g. amounts in dollars, auth pattern, no new deps)
-- What "done" looks like
-
-Write it as if the agent has never seen this conversation.
+Whenever producing a plan, always end with a **"Sub-agent Prompt"** section — a self-contained prompt ready to paste into a fresh Claude Code session. See PROJECT.md Step 3 for the full required fields and post-completion instructions.
