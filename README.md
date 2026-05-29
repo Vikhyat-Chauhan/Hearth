@@ -26,7 +26,7 @@ CLAUDE.md       — Session context & agent steering playbook
 |---|---|
 | Framework | Next.js 14 (App Router, TypeScript) |
 | Frontend | React + Tailwind CSS |
-| Database | Supabase (Postgres) + Prisma |
+| Database | Supabase (Postgres) + Drizzle ORM |
 | Auth | Supabase Auth — email/password |
 | Deployment | Vercel |
 

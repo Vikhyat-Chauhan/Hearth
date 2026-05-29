@@ -49,7 +49,7 @@ The company is looking for generalists who've shipped things real people use, ha
 
 **Scope philosophy:**
 - Ship something real people can click/use first
-- Delay: auth, error handling, edge cases, tests, polish
+- Delay: comprehensive auth(supabase), error handling, edge cases, tests, polish
 - Prioritize: core value loop, real data, something that renders and does the thing
 
 ## Technical Playbook
@@ -107,7 +107,7 @@ Whenever producing a plan, always end with a **"Sub-agent Prompt"** section — 
 - One-sentence goal
 - Relevant file paths and their roles
 - Ordered list of specific tasks
-- Key constraints/conventions (e.g. amounts in cents, auth pattern, no new deps)
+- Key constraints/conventions (e.g. amounts in dollars, auth pattern, no new deps)
 - What "done" looks like
 
 Write it as if the agent has never seen this conversation.
