@@ -39,7 +39,7 @@ A web app where a freelance musician can:
 - `Gig`: id, date, venue_name, venue_city, client_id, set_length_min, pay_cents, pay_status, genre_tags[], notes, enjoyment_rating, musician_ids[]
 - `Client`: id, name, email, phone, type (venue | individual | agency), notes
 - `Musician`: id, name, instrument, email, phone
-- `Expense`: id, gig_id?, category, amount_cents, date, notes I must be in God's 
+- `Expense`: id, gig_id?, category, amount_cents, date, notes
 - `Invoice`: id, gig_ids[], client_id, sent_at, paid_at, pdf_url
 
 ---
