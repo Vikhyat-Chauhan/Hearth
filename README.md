@@ -6,42 +6,42 @@ A reusable scaffold for driving rapid, parallel agentic development sprints with
 
 ## How It Works
 
-A planning agent reads the project spec, selects parallelizable features, and spawns independent sub-agents to implement them concurrently. Each sub-agent owns one feature branch, implements it, and reports back before branches are merged and deployed.
+A planning agent reads the project spec, selects parallelizable features, and spawns independent sub-agents to implement them concurrently. Each sub-agent owns one feature, implements it, and reports back before the next sprint begins.
 
 ---
 
 ## Repo Structure
 
 ```
-SPEC.md         — Project spec (populated at sprint start)
-PROJECT.md      — Sprint workflow & agent orchestration design
-CLAUDE.md       — Session context & agent steering playbook
+CLAUDE.md         — Agent steering guide (stack, principles, directory map, backlog)
+docs/SETUP.md     — Pre-sprint setup checklist (repo, Vercel link, green deploy)
+docs/ORC.md       — Orchestrator playbook (Sprint 0 foundation + parallel sprint pattern)
+docs/SPEC.md      — Spec template (populated at intake)
 ```
 
 ---
 
 ## Default Tech Stack
 
-| Concern | Choice |
-|---|---|
-| Framework | Next.js 14 (App Router, TypeScript) |
-| Frontend | React + Tailwind CSS |
-| Database | Supabase (Postgres) + Drizzle ORM |
-| Auth | Supabase Auth — email/password |
-| Deployment | Vercel |
+| Concern    | Choice                                   |
+|------------|------------------------------------------|
+| Framework  | Next.js (App Router, TypeScript)         |
+| Frontend   | React + Tailwind CSS                     |
+| Database   | Supabase + Drizzle ORM *(if needed)*     |
+| Auth       | Supabase Auth — email/password *(if needed)* |
+| Deployment | Vercel                                   |
 
 ---
 
 ## Sprint Workflow
 
-1. Planning agent reads `SPEC.md`, selects 3 parallelizable features
-2. Creates a Git branch per feature (`feat/<slug>-<hash>`)
-3. Generates a self-contained prompt for each sub-agent
-4. Sub-agents implement and update `CLAUDE.md` on completion
-5. Integration sub-agents verify UI, data flow, and build health
-6. Merge, commit, deploy to Vercel
+1. **Setup** — clone, link Vercel, deploy green (`docs/SETUP.md`)
+2. **Intake** — fill `docs/SPEC.md` and update `CLAUDE.md` with app name, backlog, DB decision
+3. **Sprint 0** — one agent lays shared types, layout, and a thin working slice
+4. **Sprint 1+** — 2–3 parallel agents, each owning one non-overlapping feature
+5. **Deploy** — merge, `vercel --prod`, confirm live URL in `CLAUDE.md`
 
-See `PROJECT.md` for the full repeating sprint pattern and `CLAUDE.md` for agent steering guidance.
+See `docs/ORC.md` for the full orchestrator playbook and sub-agent prompt template.
 
 ---
 
