@@ -1,5 +1,3 @@
-@AGENTS.md
-
 # [Project Name] — Agent Steering Guide
 
 > [One-sentence description of what the app does and who it's for.]
