@@ -22,9 +22,27 @@ with it without a crash?" If not, cut scope *within* the feature — remove a co
 tab, stub a button — until the answer is yes. A smaller feature that works beats a larger
 one that doesn't.
 
+**Story extraction — no new user questions; infer from the spec:**
+For every P0 and P1 feature, fill the `## Stories` section in `docs/SPEC.md` using this reasoning:
+- **ENTRY:** What URL does a user navigate to? (Create features → `/[plural-noun]/new` or a modal on the list page. View features → `/[plural-noun]`.)
+- **FLOW:** What are the 2–4 physical actions the user takes (navigate, fill, click, observe)?
+- **EXIT:** What does the user see — or what data row exists — the instant the feature succeeds?
+
+If the spec already contains flow details, copy them verbatim. If not, infer the obvious happy path. Do NOT ask the user clarifying questions. Fill with best inference and move on — the sub-agent refines, it doesn't invent.
+
+**DB decision (inline — no separate agent):**
+After the scope check, make one call:
+- Does any P0/P1 feature require data to persist across browser refreshes or across users?
+  - No → `DB decision: in-memory, no DB`
+  - Yes → `DB decision: Supabase (Postgres)` (assume already provisioned; `.env.local` has the keys)
+- When in doubt, choose in-memory. A working mock beats a broken Supabase integration every time.
+
 ---
 
-Once `docs/SPEC.md` is written, **launch two agents in parallel**:
+**Write to CLAUDE.md (same pass — no second agent):**
+After writing `docs/SPEC.md`, populate `CLAUDE.md` in the same turn:
+1. Set `APP_NAME` in `package.json`.
+2. Fill CLAUDE.md: description, Backlog (P0→P1→P2), DB decision line, Tech Stack, domain rules.
+3. Copy `## Stories` from `docs/SPEC.md` into `CLAUDE.md` verbatim, immediately after `## Backlog`. P2 items have no story block — leave as one-liners.
 
-- **Agent 1** → `docs/DB_FORK.md` (fast: one decision, ~60 seconds; writes result to `CLAUDE.md`)
-- **Agent 2** → `docs/LOAD.md` (starts non-DB portions immediately; picks up DB decision from `CLAUDE.md` once Agent 1 writes it)
+Then hand off to the user to start Sprint 0.

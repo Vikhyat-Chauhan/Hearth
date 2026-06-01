@@ -28,11 +28,12 @@ DB decision: **(set during the DB fork — "in-memory, no DB" or "Supabase / Pos
 - All internal pages: `export const dynamic = "force-dynamic"`.
 - No new npm dependencies without explicit user approval — exhaust existing packages first.
 
-**Apply ONLY if DB decision = Supabase:**
+**Skip the block below if DB decision = in-memory:**
 
-- Monetary amounts stored as **cents** (integers) — never floats.
-- All DB access through `src/db/index.ts` only — never import the Drizzle client elsewhere.
-- Protected API routes: `createClient()` + `getUser()` → return 401 if no session.
+> *Supabase only:*
+> - Monetary amounts stored as **cents** (integers) — never floats.
+> - All DB access through `src/db/index.ts` only — never import the Drizzle client elsewhere.
+> - Protected API routes: `createClient()` + `getUser()` → return 401 if no session.
 
 **Domain-specific (add during intake):**
 
@@ -66,6 +67,19 @@ Keeps parallel agents off each other's files. Update as files are created.
 
 ---
 
+## Stories
+
+*(Filled during intake. One block per P0/P1 feature — copied verbatim from docs/SPEC.md.)*
+
+### [Feature Name]
+ENTRY: [entry condition]
+FLOW:
+  1. [step]
+  2. [step]
+EXIT:  [success state]
+
+---
+
 ## Active Feature Streams
 
 | Status | Stream ID | Feature |
@@ -84,6 +98,8 @@ Keeps parallel agents off each other's files. Update as files are created.
 
 ## Handoff Contract
 
-On completion, each agent writes its notes back here per the POST-COMPLETION block in
-`docs/ORC.md`: mark the stream **Complete**, record shortcuts taken, and move the feature
-to **Implemented Features**. `CLAUDE.md` is the shared memory across all terminals.
+On completion, each agent updates this file directly:
+1. In **Active Feature Streams**: change `[ ] In Progress` → `[x] Complete` for the stream.
+2. In **Implemented Features**: add a row — feature name, priority, key files, stream ID.
+
+`CLAUDE.md` is the shared memory across all terminals.

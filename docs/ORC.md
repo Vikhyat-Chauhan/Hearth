@@ -6,15 +6,17 @@ You may spawn Task subagents to read and explore the repo, but feature work runs
 
 ---
 
-## Sprint 0 — Foundation (sequential, ONE agent)
+## Sprint 0 — Foundation (ONE agent, ≤3 minutes of scope)
 
-Never fan out from a cold start — parallel agents collide on shared files and waste minutes. Emit ONE prompt that lays down:
+Never fan out from a cold start — parallel agents collide on shared files and waste minutes. Emit ONE prompt that lays down exactly:
 
-- shared types and the data shapes every feature will use
-- layout + routing
-- one thin **working vertical slice**, visible in the browser
+1. Root layout with a nav bar linking to each P0 feature's route.
+2. One stub page per P0 feature — correct URL, heading, placeholder content. No logic yet.
+3. Fill `src/lib/types.ts` with the data shapes from `## Data Model` in CLAUDE.md.
 
-Once this commits, `schema.ts` and `src/lib/types.ts` are **frozen**. Later features request changes to them through the user — never in parallel.
+**DONE WHEN:** `npm run dev` shows the nav and all P0 routes render without errors. Nothing else — no API routes, no data fetching, no forms. That is Sprint 1.
+
+Once committed: `src/lib/types.ts` is **frozen**. Later features request changes through the user — never in parallel.
 
 ---
 
@@ -33,14 +35,21 @@ Once this commits, `schema.ts` and `src/lib/types.ts` are **frozen**. Later feat
 
 ## Sub-Agent Prompt Template
 
+**Before emitting each prompt:** look up the feature's story block in `## Stories` in `CLAUDE.md`.
+- `GOAL` = "Starting from <ENTRY>, build <feature name> so that <EXIT>."
+- `TASKS` list = FLOW steps verbatim, preceded by step 1: "Create/update the route at <ENTRY path>."
+- `DONE WHEN` = EXIT value, copied verbatim.
+
+If a feature has no story block (a promoted P2), write one inline using the same three fields before emitting.
+
 ```text
-GOAL: <one sentence — what this agent builds>
+GOAL: Starting from <ENTRY>, build <feature name> so that <EXIT>.
 
 FILES: <files to create/modify — must not overlap another stream or the frozen schema/types>
 
 TASKS:
-1. <atomic step>
-2. <atomic step>
+1. Create/update the route at <ENTRY path> with a page component.
+<FLOW steps verbatim, renumbered starting from 2>
 
 CONSTRAINTS:
 - Read CLAUDE.md first and follow it (stack, Golden Principles, Directory Map, DB decision).
@@ -49,9 +58,11 @@ CONSTRAINTS:
 
 DON'T: no auth, RBAC, edit/delete, pagination, filters, tests, or error handling unless named in TASKS.
 
-DONE WHEN: <exact observable outcome in the browser>. Run `npm run dev` and confirm before committing.
+DONE WHEN: <EXIT — copied verbatim>. Run `npm run dev` and confirm before committing.
 
-ON GREEN: commit, then update CLAUDE.md per its Handoff Contract.
+ON GREEN: commit. Then in CLAUDE.md:
+- In ## Active Feature Streams: change `[ ] In Progress` → `[x] Complete` for this stream.
+- In ## Implemented Features: add a row with feature name, priority, key files, stream ID.
 ```
 
 ---
