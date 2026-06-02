@@ -1,3 +1,5 @@
+> **Phase B · Intake** — agent at T=0. Prev ← [Setup](1-SETUP.md) · Next → [Sprints](3-ORCHESTRATION.md)
+
 # Phase B — Spec Intake (T=0)
 
 Determine the spec source, in priority order:

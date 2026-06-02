@@ -1,3 +1,5 @@
+> **Phase A · Setup** — me, before the clock. Next → [Phase B: Intake](2-INTAKE.md)
+
 # Phase A — Before the Clock (one-time, idempotent)
 
 Do ALL of this **before** the interview — done live it only burns minutes and shows no judgment.
