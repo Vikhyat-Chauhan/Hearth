@@ -3,7 +3,6 @@
 > [One-sentence description of what the app does and who it's for.]
 
 Live URL: **(paste after first deploy)**
-DB decision: **(set during the DB fork — "in-memory, no DB" or "Supabase / Postgres")**
 
 ---
 
@@ -13,7 +12,7 @@ DB decision: **(set during the DB fork — "in-memory, no DB" or "Supabase / Pos
 |------------|---------------------------------------------------|
 | Framework  | Next.js (App Router, TypeScript)                  |
 | Frontend   | React + Tailwind CSS                              |
-| Database   | *(only if DB decision = Supabase)* Supabase + Drizzle ORM |
+| Database   | Supabase + Drizzle ORM                                    |
 | Auth       | *(only if needed)* Supabase Auth — email/password |
 | Deployment | Vercel (`vercel --prod`)                          |
 
@@ -28,12 +27,17 @@ DB decision: **(set during the DB fork — "in-memory, no DB" or "Supabase / Pos
 - All internal pages: `export const dynamic = "force-dynamic"`.
 - No new npm dependencies without explicit user approval — exhaust existing packages first.
 
-**Skip the block below if DB decision = in-memory:**
+- Monetary amounts stored as **cents** (integers) — never floats.
+- All DB access through `src/db/index.ts` only — never import the Drizzle client elsewhere.
+- Protected API routes: `createClient()` + `getUser()` → return 401 if no session.
 
-> *Supabase only:*
-> - Monetary amounts stored as **cents** (integers) — never floats.
-> - All DB access through `src/db/index.ts` only — never import the Drizzle client elsewhere.
-> - Protected API routes: `createClient()` + `getUser()` → return 401 if no session.
+- **Navbar auth contract (always enforced when a Navbar is created):**
+  1. Create `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server) if they don't exist — wrappers around `@supabase/ssr`.
+  2. Create `src/app/login/page.tsx` — Supabase email/password form. On success → redirect to `/`.
+  3. Create `src/app/auth/callback/route.ts` — exchanges Supabase auth code for a session.
+  4. Add `src/middleware.ts` that redirects unauthenticated requests on `/(app)/*` to `/login`.
+  5. `Navbar.tsx` is a server component: reads session via server client. Renders a Login link (`/login`) when no session; renders user avatar + email + Logout dropdown when session exists. Logout calls `supabase.auth.signOut()` and redirects to `/login`.
+  6. Add `@supabase/ssr` to `package.json` if not already present (the one approved exception to the no-new-deps rule for auth).
 
 **Domain-specific (add during intake):**
 
@@ -49,11 +53,15 @@ Keeps parallel agents off each other's files. Update as files are created.
 |------|---------|
 | `src/app/(app)/` | App pages |
 | `src/app/api/` | API route handlers |
+| `src/app/login/` | Login page |
+| `src/app/auth/callback/` | Supabase auth callback handler |
 | `src/components/` | Shared UI components |
 | `src/lib/types.ts` | Shared types / data shapes |
 | `src/lib/utils.ts` | Shared utilities |
-| `src/db/index.ts` | *(Supabase only)* DB client + table exports — single entry point |
-| `src/db/schema.ts` | *(Supabase only)* Drizzle schema |
+| `src/lib/supabase/` | Supabase client helpers (client.ts + server.ts) |
+| `src/middleware.ts` | Route protection — redirects unauthed users to /login |
+| `src/db/index.ts` | DB client + table exports — single entry point |
+| `src/db/schema.ts` | Drizzle schema |
 
 ---
 

@@ -30,19 +30,14 @@ For every P0 and P1 feature, fill the `## Stories` section in `docs/SPEC.md` usi
 
 If the spec already contains flow details, copy them verbatim. If not, infer the obvious happy path. Do NOT ask the user clarifying questions. Fill with best inference and move on — the sub-agent refines, it doesn't invent.
 
-**DB decision (inline — no separate agent):**
-After the scope check, make one call:
-- Does any P0/P1 feature require data to persist across browser refreshes or across users?
-  - No → `DB decision: in-memory, no DB`
-  - Yes → `DB decision: Supabase (Postgres)` (assume already provisioned; `.env.local` has the keys)
-- When in doubt, choose in-memory. A working mock beats a broken Supabase integration every time.
+**DB:** Always Supabase (Postgres). Assume already provisioned; `.env.local` has the keys.
 
 ---
 
 **Write to CLAUDE.md (same pass — no second agent):**
 After writing `docs/SPEC.md`, populate `CLAUDE.md` in the same turn:
 1. Set `APP_NAME` in `package.json`.
-2. Fill CLAUDE.md: description, Backlog (P0→P1→P2), DB decision line, Tech Stack, domain rules.
+2. Fill CLAUDE.md: description, Backlog (P0→P1→P2), Tech Stack, domain rules.
 3. Copy `## Stories` from `docs/SPEC.md` into `CLAUDE.md` verbatim, immediately after `## Backlog`. P2 items have no story block — leave as one-liners.
 
 Then hand off to the user to start Sprint 0.
