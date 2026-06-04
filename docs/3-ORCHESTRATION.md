@@ -63,7 +63,7 @@ CONSTRAINTS:
 - Don't touch another stream's files or the frozen schema.ts / types.ts — request changes via the user.
 - BUDGET: max 2–3 files, 2 HTTP methods, one screen. If it needs more, it's two features — tell the user to split it.
 
-DON'T: RBAC, pagination, filters, tests, or error handling unless named in TASKS.
+DON'T: no auth, RBAC, pagination, filters, tests, or error handling unless named in TASKS.
 
 DONE WHEN: <EXIT — copied verbatim>. Run `npm run dev` and confirm before committing.
 
