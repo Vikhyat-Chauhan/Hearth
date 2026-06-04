@@ -22,7 +22,7 @@ Live URL: **(paste after first deploy)**
 
 **Universal — always enforced:**
 
-- Build the thinnest thing that demos. Stub anything not in scope. Prefer read + create over full CRUD.
+- Build the thinnest thing that demos. Stub anything not in scope.
 - A feature must run even if another active stream's files are missing — never call another stream's endpoint at runtime. Seed or query locally instead.
 - All internal pages: `export const dynamic = "force-dynamic"`.
 - No new npm dependencies without explicit user approval — exhaust existing packages first.
@@ -82,8 +82,11 @@ Keeps parallel agents off each other's files. Update as files are created.
 ### [Feature Name]
 ENTRY: [entry condition]
 FLOW:
+
   1. [step]
   2. [step]
+    -
+  n. [step]  
 EXIT:  [success state]
 
 ---

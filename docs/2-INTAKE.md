@@ -26,6 +26,7 @@ one that doesn't.
 
 **Story extraction — no new user questions; infer from the spec:**
 For every P0 and P1 feature, fill the `## Stories` section in `docs/SPEC.md` using this reasoning:
+
 - **ENTRY:** What URL does a user navigate to? (Create features → `/[plural-noun]/new` or a modal on the list page. View features → `/[plural-noun]`.)
 - **FLOW:** What are the 2–4 physical actions the user takes (navigate, fill, click, observe)?
 - **EXIT:** What does the user see — or what data row exists — the instant the feature succeeds?
