@@ -22,14 +22,17 @@ Live URL: **(paste after first deploy)**
 
 **Universal — always enforced:**
 
-- Build the thinnest thing that demos. Stub anything not in scope.
-- A feature must run even if another active stream's files are missing — never call another stream's endpoint at runtime. Seed or query locally instead.
-- All internal pages: `export const dynamic = "force-dynamic"`.
+- Build the simplest thing that is correct and complete — no broken states, no gold-plating. Simple ≠ hollow: in-scope features are real, out-of-scope ones are stubbed.
+- A feature must run even if another active stream's files are missing — never call another stream's endpoint at runtime. Streams integrate through the frozen contracts (`types.ts`, `schema.ts`, `validation.ts`), not through runtime coupling.
+- In-scope features **persist to the real database** through `src/db/index.ts`. Mock only what is explicitly out of scope.
+- Every mutation input is **validated** with the entity's zod schema in `src/lib/validation.ts` before it touches the DB; invalid input is rejected with a clear error.
+- Every async UI renders **loading, empty, and error** states using the shared primitives in `src/components/states/`. API logic is wrapped so failures return a structured error, never an unhandled 500 (see `src/lib/api.ts`).
+- Every feature ships a **test** for its core path plus at least one failure case (invalid input rejected). A feature is done only when the **Quality Gate** passes: `npm run typecheck && npm run lint && npm run test && npm run build`, plus the smoke check.
 - No new npm dependencies without explicit user approval — exhaust existing packages first.
 
 - Monetary amounts stored as **cents** (integers) — never floats.
 - All DB access through `src/db/index.ts` only — never import the Drizzle client elsewhere.
-- Protected API routes: `createClient()` + `getUser()` → return 401 if no session.
+- Protected API routes (user-owned entities): `createClient()` + `getUser()` → return 401 if no session; scope every query to the current user.
 
 - **Navbar auth contract (always enforced when a Navbar is created):**
   1. Create `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server) if they don't exist — wrappers around `@supabase/ssr`.
@@ -56,12 +59,18 @@ Keeps parallel agents off each other's files. Update as files are created.
 | `src/app/login/` | Login page |
 | `src/app/auth/callback/` | Supabase auth callback handler |
 | `src/components/` | Shared UI components |
-| `src/lib/types.ts` | Shared types / data shapes |
+| `src/components/states/` | Loading / Empty / Error UI primitives (reuse everywhere) |
+| `src/lib/types.ts` | Shared types / data shapes — **frozen after Sprint 0** |
+| `src/lib/validation.ts` | zod schemas per entity (create/update) — **frozen after Sprint 0** |
+| `src/lib/api.ts` | Consistent JSON response + error-handling helpers for routes |
 | `src/lib/utils.ts` | Shared utilities |
 | `src/lib/supabase/` | Supabase client helpers (client.ts + server.ts) |
 | `src/middleware.ts` | Route protection — redirects unauthed users to /login |
 | `src/db/index.ts` | DB client + table exports — single entry point |
-| `src/db/schema.ts` | Drizzle schema |
+| `src/db/schema.ts` | Drizzle schema — **frozen after Sprint 0** |
+| `src/app/error.tsx` · `loading.tsx` · `not-found.tsx` | App-level error boundary / loading / 404 |
+| `src/test/` | Test setup + cross-cutting tests (feature tests may colocate) |
+| `.github/workflows/ci.yml` | CI: typecheck + lint + build + test on every PR |
 
 ---
 
@@ -86,8 +95,12 @@ FLOW:
   1. [step]
   2. [step]
     -
-  n. [step]  
+  n. [step]
 EXIT:  [success state]
+ACCEPTANCE CRITERIA:
+  - [happy path: row persisted, survives reload]
+  - [failure path: invalid input rejected, nothing persisted]
+  - [ownership, if applicable: user sees only their own rows]
 
 ---
 
@@ -107,10 +120,25 @@ EXIT:  [success state]
 
 ---
 
+## Definition of Done
+
+A feature is **not** done until all of these hold. Self-check before flipping a stream to Complete:
+
+- [ ] In-scope data persists to the real DB through `src/db/index.ts` (survives a reload).
+- [ ] Every mutation validates input with the entity's zod schema; invalid input is rejected with a clear error.
+- [ ] UI renders loading, empty, and error states; API failures return a structured error, not a 500.
+- [ ] User-owned entities are auth-protected and query-scoped to the current user.
+- [ ] A test covers the happy path and at least one acceptance-criteria failure case.
+- [ ] **Quality Gate passes:** `npm run typecheck && npm run lint && npm run test && npm run build`, plus the smoke action confirms the acceptance criteria.
+
+---
+
 ## Handoff Contract
 
-On completion, each agent updates this file directly:
+On completion — **only after the Definition of Done above is met** — each agent updates this file directly:
 1. In **Active Feature Streams**: change `[ ] In Progress` → `[x] Complete` for the stream.
 2. In **Implemented Features**: add a row — feature name, priority, key files, stream ID.
+
+A stream that can't pass the Quality Gate stays `[ ] In Progress` and is re-queued solo — never marked Complete.
 
 `CLAUDE.md` is the shared memory across all terminals.

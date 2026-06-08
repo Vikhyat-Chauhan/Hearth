@@ -1,6 +1,6 @@
-> **Phase B · Intake** — agent at T=0. Prev ← [Setup](1-SETUP.md) · Next → [Sprints](3-ORCHESTRATION.md)
+> **Phase B · Intake** — agent at the start. Prev ← [Setup](1-SETUP.md) · Next → [Sprints](3-ORCHESTRATION.md)
 
-# Phase B — Spec Intake (T=0)
+# Phase B — Spec Intake
 
 Determine the spec source, in priority order:
 
@@ -8,21 +8,25 @@ Determine the spec source, in priority order:
 2. **Inline text provided?** → Treat it as the spec.
 3. **Nothing provided?** → Ask one question at a time:
    - Q1. App name?
-   - Q2. Problem it solves, in one sentence?
+   - Q2. Problem it solves, in one sentence? Who is it for?
    - Q3. Features by priority — P0 / P1 / P2?
    - Q4. Main entities and key fields?
    - Q5. What can the user do or see when it ships?
+   - Q6. Does it need user accounts / auth? Any roles or per-user data ownership?
 
-Extract and hold: `APP_NAME`, `DESCRIPTION`, `BACKLOG` (P0→P1→P2), `TECH_STACK` (optional override).
+Extract and hold: `APP_NAME`, `DESCRIPTION`, `BACKLOG` (P0→P1→P2), `TECH_STACK` (optional override), `AUTH_NEEDED` (yes/no + roles).
 
-Write them into `docs/SPEC.md`. **Fill the Demo Target line first** — the one sentence you'll
-point at on screen at minute 30. Anything that doesn't serve it is a candidate to cut.
+Write them into `docs/SPEC.md`. **Fill the Core Loop line first** — the one primary user journey the product must do well end-to-end (e.g. "a user creates an invoice, sends it, and gets paid"). Everything in the backlog should either *be* part of the Core Loop or directly support it.
 
-**Scope rule:** Each backlog item must be end-to-end completable in isolation.
-For every P0/P1 item ask: "Can a user navigate to this, see real (mock) data, and interact
-with it without a crash?" If not, cut scope *within* the feature — remove a column, drop a
-tab, stub a button — until the answer is yes. A smaller feature that works beats a larger
-one that doesn't.
+**Scope rule:** Each backlog item must be a complete, real vertical slice — not a façade. For every P0/P1 item ask: "When a user does this, is the result *persisted*, *validated*, *error-handled*, and *covered by a test on the happy path*?" If a feature is too big to deliver that way in one stream, **split it** into smaller features that each clear the bar — don't fake it with mock data or a dead button. A smaller feature that genuinely works beats a larger one that's hollow.
+
+**Non-functional requirements — capture explicitly:**
+For the spec as a whole, write down:
+- **Auth & ownership:** Does it need accounts? Which entities are user-owned (a user only sees their own rows)? Any roles?
+- **Validation rules:** Per entity, the constraints that must hold (required fields, formats, ranges, uniqueness, money-as-cents).
+- **Data integrity:** Relationships and cascades that matter (e.g. deleting X should/should not delete Y).
+
+These go in the **Non-Functional Requirements** section of `docs/SPEC.md` and drive the frozen validation schemas in Sprint 0.
 
 **Story extraction — no new user questions; infer from the spec:**
 For every P0 and P1 feature, fill the `## Stories` section in `docs/SPEC.md` using this reasoning:
@@ -30,17 +34,18 @@ For every P0 and P1 feature, fill the `## Stories` section in `docs/SPEC.md` usi
 - **ENTRY:** What URL does a user navigate to? (Create features → `/[plural-noun]/new` or a modal on the list page. View features → `/[plural-noun]`.)
 - **FLOW:** What are the 2–4 physical actions the user takes (navigate, fill, click, observe)?
 - **EXIT:** What does the user see — or what data row exists — the instant the feature succeeds?
+- **ACCEPTANCE CRITERIA:** The testable conditions that must hold for the feature to be done — including the unhappy paths (e.g. "submitting an empty title shows a validation error and persists nothing"; "the row is saved to the DB and survives a reload"). These become the feature's test.
 
-If the spec already contains flow details, copy them verbatim. If not, infer the obvious happy path. Do NOT ask the user clarifying questions. Fill with best inference and move on — the sub-agent refines, it doesn't invent.
+If the spec already contains flow details, copy them verbatim. If not, infer the obvious happy path and the obvious validation/error cases. Do NOT ask the user clarifying questions about flows. Fill with best inference and move on — the sub-agent refines, it doesn't invent.
 
-**DB:** Always Supabase (Postgres). Assume already provisioned; `.env.local` has the keys.
+**DB:** Always Supabase (Postgres) via Drizzle. Assume already provisioned; `.env.local` has the keys. In-scope features persist for real — never mock data that's in scope.
 
 ---
 
 **Write to CLAUDE.md (same pass — no second agent):**
 After writing `docs/SPEC.md`, populate `CLAUDE.md` in the same turn:
 1. Set `APP_NAME` in `package.json`.
-2. Fill CLAUDE.md: description, Backlog (P0→P1→P2), Tech Stack, domain rules.
-3. Copy `## Stories` from `docs/SPEC.md` into `CLAUDE.md` verbatim, immediately after `## Backlog`. P2 items have no story block — leave as one-liners.
+2. Fill CLAUDE.md: description, Backlog (P0→P1→P2), Tech Stack, domain rules, and whether auth is needed (so Sprint 0 lays down the auth scaffold).
+3. Copy `## Stories` (including Acceptance Criteria) from `docs/SPEC.md` into `CLAUDE.md` verbatim, immediately after `## Backlog`. P2 items have no story block — leave as one-liners.
 
 Then hand off to the user to start Sprint 0.

@@ -1,13 +1,15 @@
-> **Phase A · Setup** — me, before the clock. Next → [Phase B: Intake](2-INTAKE.md)
+> **Phase A · Setup** — you, once. Next → [Phase B: Intake](2-INTAKE.md)
 
-# Phase A — Before the Clock (one-time, idempotent)
+# Phase A — Setup (one-time, idempotent)
 
-Do ALL of this **before** the interview — done live it only burns minutes and shows no judgment.
+One-time project setup. Safe to re-run — every step is idempotent. Do this before Intake so the toolchain, database, deploy, and CI are all green before any feature work begins.
 
-1. Link Vercel and deploy the empty scaffold using Vercel Skill.
+1. Install dependencies: `npm install`. Confirm the toolchain runs: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build` all pass on the empty scaffold.
 
-2. Do a Production deployment using Vercel Skill and then Confirm the live URL builds **green**. Paste it into `CLAUDE.md`.
+2. Provision a Supabase project, pull env vars into `.env.local` (see `.env.example`), and confirm the keys are set. Generate and run the first Drizzle migration once a schema exists: `npm run db:generate && npm run db:migrate`.
 
-3. Pre-provision a Supabase project, pull env vars into `.env.local`, and confirm the keys are set.
+3. Link Vercel and do a Production deployment using the Vercel Skill. Confirm the live URL builds **green** and paste it into `CLAUDE.md`.
 
-Walk in with: a cloned template, dependencies installed, and a green deploy already live.
+4. Confirm CI runs: the workflow in `.github/workflows/ci.yml` should run typecheck + lint + build + test on every pull request. Push a branch and confirm the checks go green.
+
+Walk away from setup with: a cloned template, dependencies installed, a provisioned database, a green deploy live, and CI passing.
