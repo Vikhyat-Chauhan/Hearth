@@ -100,12 +100,12 @@ Keeps parallel agents off each other's files. Update as files are created.
 | P1 | Admin edits/deletes a chore | Propagates to calendar events |
 | P1 | Admin removes a member | Removes their assignments + calendar events |
 | P1 | Connect Google later | Backfills events for a member who connects after assignment |
-| P2 | Announcements / message board | SCOPE Phase 2 — out of sprint scope |
-| P2 | Shared shopping list | SCOPE Phase 2 — out of sprint scope |
-| P2 | Utilities & bills tracking | SCOPE Phase 3 — out of sprint scope |
-| P2 | Two-way calendar sync | SCOPE Phase 4 — out of sprint scope |
-| P2 | Splitwise-style expense splitting | SCOPE Phase 5 — out of sprint scope |
-| P2 | Multiple households per user | Out of sprint scope |
+| P2 | Announcements / message board | SCOPE Phase 2 — in scopre |
+| P2 | Shared shopping list | SCOPE Phase 2 — in scopre |
+| P2 | Utilities & bills tracking | SCOPE Phase 3 — in scopre |
+| P2 | Two-way calendar sync | SCOPE Phase 4 — in scopre |
+| P2 | Splitwise-style expense splitting | SCOPE Phase 5 — in scopre |
+| P2 | Multiple households per user | in scopre |
 
 ---
 
@@ -248,6 +248,7 @@ ACCEPTANCE CRITERIA:
 |---------|----------|-----------|-----------|
 | Households: create + join | P0 | `app/api/households/route.ts`, `app/api/households/join/route.ts`, `(app)/households/new`, `(app)/join`, `(app)/household`, `lib/household.ts` | feat/households |
 | Chores: create & assign + calendar sync | P0 | `app/api/chores/route.ts`, `(app)/chores/new`, `components/ChoreForm.tsx`, `lib/chore-sync.ts`, `lib/calendar.ts`, `lib/recurrence.ts` | feat/chores |
+| My Chores: view + mark done | P0 | `app/api/chore-logs/route.ts`, `(app)/chores/page.tsx`, `components/MarkDoneButton.tsx`, `lib/chores.ts` | feat/my-chores |
 
 ---
 

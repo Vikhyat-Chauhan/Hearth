@@ -24,7 +24,7 @@
 - Admin manages household: remove a member (their assignments + calendar events removed)
 - Connect Google later: a member who joined before connecting Google connects it and their existing chores backfill onto their calendar
 
-### P2 — Nice to Have (later SCOPE phases — out of sprint scope)
+### P2 — Nice to Have (later SCOPE phases — in scopre)
 - Announcements / message board (Phase 2)
 - Shared shopping list (Phase 2)
 - Utilities & bills tracking (Phase 3)
@@ -71,7 +71,7 @@
 
 ## Stories
 
-> One block per P0/P1 feature. P2 features are out of sprint scope — omitted.
+> One block per P0/P1 feature. P2 features are in scopre — omitted.
 
 ### Google sign-in
 ENTRY: user navigates to /login
