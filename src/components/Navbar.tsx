@@ -6,15 +6,16 @@ import { getUser } from "@/lib/supabase/server";
 import { listUserHouseholds, getHouseholdContext } from "@/lib/household";
 import HouseholdSwitcher from "@/components/HouseholdSwitcher";
 import MobileNav from "@/components/MobileNav";
+import SettingsMenu from "@/components/SettingsMenu";
 
+// Primary nav = day-to-day feature pages only. Household / Calendar / Logout
+// are account concerns and live in the Settings menu instead.
 const LINKS = [
   { href: "/chores", label: "My Chores", icon: "✓" },
   { href: "/announcements", label: "Board", icon: "📣" },
   { href: "/shopping", label: "Shopping", icon: "🛒" },
   { href: "/bills", label: "Bills", icon: "🧾" },
   { href: "/expenses", label: "Expenses", icon: "💸" },
-  { href: "/household", label: "Household", icon: "🏠" },
-  { href: "/settings/calendar", label: "Calendar", icon: "📅" },
 ];
 
 export default async function Navbar() {
@@ -24,6 +25,8 @@ export default async function Navbar() {
   // Multi-household: offer a switcher when the user belongs to more than one.
   let myHouseholds: { id: string; name: string; role: string }[] = [];
   let activeHouseholdId = "";
+  let householdName: string | null = null;
+  let role: string | null = null;
   if (user) {
     const [list, ctx] = await Promise.all([
       listUserHouseholds(user.id),
@@ -31,6 +34,8 @@ export default async function Navbar() {
     ]);
     myHouseholds = list;
     activeHouseholdId = ctx?.household.id ?? "";
+    householdName = ctx?.household.name ?? null;
+    role = ctx?.role ?? null;
   }
 
   return (
@@ -48,21 +53,11 @@ export default async function Navbar() {
           )}
 
           {user ? (
-            <div className="flex items-center gap-3">
-              <span className="hidden text-gray-500 sm:inline">{user.email}</span>
-              <form action="/auth/signout" method="post">
-                <button
-                  type="submit"
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Logout
-                </button>
-              </form>
-            </div>
+            <SettingsMenu userEmail={user.email ?? ""} householdName={householdName} role={role} />
           ) : (
             <Link
               href="/login"
-              className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Sign in
             </Link>
