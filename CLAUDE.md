@@ -249,6 +249,9 @@ ACCEPTANCE CRITERIA:
 | Households: create + join | P0 | `app/api/households/route.ts`, `app/api/households/join/route.ts`, `(app)/households/new`, `(app)/join`, `(app)/household`, `lib/household.ts` | feat/households |
 | Chores: create & assign + calendar sync | P0 | `app/api/chores/route.ts`, `(app)/chores/new`, `components/ChoreForm.tsx`, `lib/chore-sync.ts`, `lib/calendar.ts`, `lib/recurrence.ts` | feat/chores |
 | My Chores: view + mark done | P0 | `app/api/chore-logs/route.ts`, `(app)/chores/page.tsx`, `components/MarkDoneButton.tsx`, `lib/chores.ts` | feat/my-chores |
+| Admin edits/deletes a chore | P1 | `app/api/chores/[id]/route.ts`, `(app)/chores/[id]/edit`, `components/ChoreForm.tsx` | feat/chore-edit |
+| Admin removes a member | P1 | `app/api/households/members/route.ts`, `components/RemoveMemberButton.tsx`, `(app)/household` | feat/member-remove |
+| Connect Google later (backfill) | P1 | `app/api/calendar/backfill/route.ts`, `(app)/settings/calendar`, `components/ConnectCalendar.tsx` | feat/connect-later |
 
 ---
 

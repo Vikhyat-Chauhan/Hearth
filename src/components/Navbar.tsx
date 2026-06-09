@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/chores", label: "My Chores" },
   { href: "/chores/new", label: "New Chore" },
   { href: "/household", label: "Household" },
+  { href: "/settings/calendar", label: "Calendar" },
 ];
 
 export default async function Navbar() {
