@@ -2,7 +2,7 @@
 
 > A shared-household app for students and roommates: the main roommate creates a household, invites the others, and assigns recurring chores that show up on everyone's Google Calendar.
 
-Live URL: **(written automatically by `npm run provision:vercel`)**
+Live URL: **https://hearth-ruby-eight.vercel.app**
 
 ---
 
