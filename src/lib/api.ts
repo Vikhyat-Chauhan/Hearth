@@ -17,6 +17,10 @@ export function unauthorized(error = "Not authenticated") {
   return NextResponse.json({ error }, { status: 401 });
 }
 
+export function forbidden(error = "Not allowed") {
+  return NextResponse.json({ error }, { status: 403 });
+}
+
 export function notFound(error = "Not found") {
   return NextResponse.json({ error }, { status: 404 });
 }
