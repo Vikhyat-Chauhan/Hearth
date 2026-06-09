@@ -1,5 +1,5 @@
-// Proves the test harness works end-to-end: pure logic + React rendering.
-// Replace/extend with real feature tests; each feature ships its own.
+// Covers the shared primitives reused across features: the cn class merger,
+// parseBody validation (nonEmpty/cents), and the EmptyState UI component.
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { z } from "zod";

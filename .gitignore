@@ -10,11 +10,10 @@ out/
 # build
 dist/
 
-# env files — commit .env.example / .env.provision.example instead
+# env files
 .env
 .env.local
 .env.*.local
-.env.provision
 
 # Prisma
 prisma/migrations/*.lock
