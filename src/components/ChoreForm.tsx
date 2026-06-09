@@ -2,11 +2,20 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { parseRRule } from "@/lib/recurrence";
 
 interface Member {
   userId: string;
   name: string | null;
   email: string;
+}
+
+export interface ChoreInitial {
+  id: string;
+  title: string;
+  description: string | null;
+  rrule: string;
+  assigneeUserIds: string[];
 }
 
 const WEEKDAYS: { code: string; label: string }[] = [
@@ -18,25 +27,38 @@ const WEEKDAYS: { code: string; label: string }[] = [
   { code: "SA", label: "Sat" },
   { code: "SU", label: "Sun" },
 ];
+const WEEKDAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
 type Freq = "DAILY" | "WEEKLY" | "MONTHLY";
 
 export default function ChoreForm({
   householdId,
   members,
+  initial,
 }: {
   householdId: string;
   members: Member[];
+  initial?: ChoreInitial;
 }) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [freq, setFreq] = useState<Freq>("WEEKLY");
-  const [interval, setIntervalN] = useState(1);
-  const [byday, setByday] = useState<Set<string>>(new Set(["MO"]));
-  const [monthday, setMonthday] = useState(1);
-  const [assignees, setAssignees] = useState<Set<string>>(new Set());
+  const isEdit = !!initial;
+  const seed = useMemo(() => (initial ? parseRRule(initial.rrule) : null), [initial]);
+
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [freq, setFreq] = useState<Freq>(
+    seed && (seed.freq === "DAILY" || seed.freq === "WEEKLY" || seed.freq === "MONTHLY")
+      ? seed.freq
+      : "WEEKLY",
+  );
+  const [interval, setIntervalN] = useState(seed?.interval ?? 1);
+  const [byday, setByday] = useState<Set<string>>(
+    new Set(seed?.byday.length ? seed.byday.map((i) => WEEKDAY_CODES[i]) : ["MO"]),
+  );
+  const [monthday, setMonthday] = useState(seed?.bymonthday[0] ?? 1);
+  const [assignees, setAssignees] = useState<Set<string>>(new Set(initial?.assigneeUserIds ?? []));
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const rrule = useMemo(() => {
@@ -57,19 +79,18 @@ export default function ChoreForm({
   }
 
   const weeklyNeedsDay = freq === "WEEKLY" && byday.size === 0;
-  const canSubmit =
-    title.trim().length > 0 && assignees.size > 0 && !weeklyNeedsDay && !submitting;
+  const canSubmit = title.trim().length > 0 && assignees.size > 0 && !weeklyNeedsDay && !submitting && !deleting;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      const res = await fetch("/api/chores", {
-        method: "POST",
+      const res = await fetch(isEdit ? `/api/chores/${initial!.id}` : "/api/chores", {
+        method: isEdit ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          householdId,
+          ...(isEdit ? {} : { householdId }),
           title: title.trim(),
           description: description.trim() || null,
           rrule,
@@ -78,7 +99,7 @@ export default function ChoreForm({
       });
       const body = await res.json();
       if (!res.ok) {
-        setError(body.error ?? "Could not create the chore");
+        setError(body.error ?? "Could not save the chore");
         return;
       }
       router.push("/chores");
@@ -87,6 +108,26 @@ export default function ChoreForm({
       setError("Network error — please try again");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function onDelete() {
+    if (!initial || !confirm("Delete this chore for everyone? This removes its calendar events.")) return;
+    setError(null);
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/chores/${initial.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json();
+        setError(body.error ?? "Could not delete the chore");
+        return;
+      }
+      router.push("/chores");
+      router.refresh();
+    } catch {
+      setError("Network error — please try again");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -198,13 +239,25 @@ export default function ChoreForm({
 
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={!canSubmit}
-        className="w-full rounded-lg bg-gray-900 px-4 py-2.5 font-medium text-white transition hover:bg-gray-700 disabled:opacity-50"
-      >
-        {submitting ? "Creating…" : "Create chore"}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="flex-1 rounded-lg bg-gray-900 px-4 py-2.5 font-medium text-white transition hover:bg-gray-700 disabled:opacity-50"
+        >
+          {submitting ? "Saving…" : isEdit ? "Save changes" : "Create chore"}
+        </button>
+        {isEdit && (
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={deleting || submitting}
+            className="rounded-lg border border-red-300 px-4 py-2.5 font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+          >
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
+        )}
+      </div>
     </form>
   );
 }

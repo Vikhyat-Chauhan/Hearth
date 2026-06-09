@@ -74,7 +74,14 @@ export default async function ChoresPage() {
         <ul className="mt-6 space-y-4">
           {myChores.map((chore) => (
             <li key={chore.id} className="rounded-xl border border-gray-200 p-5">
-              <h2 className="font-semibold">{chore.title}</h2>
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="font-semibold">{chore.title}</h2>
+                {ctx.role === "admin" && (
+                  <Link href={`/chores/${chore.id}/edit`} className="shrink-0 text-sm text-gray-500 hover:text-gray-900">
+                    Edit
+                  </Link>
+                )}
+              </div>
               {chore.description && <p className="mt-1 text-sm text-gray-500">{chore.description}</p>}
 
               <ul className="mt-3 divide-y divide-gray-100">
