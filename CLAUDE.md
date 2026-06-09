@@ -247,6 +247,7 @@ ACCEPTANCE CRITERIA:
 | Feature | Priority | Key Files | Stream ID |
 |---------|----------|-----------|-----------|
 | Households: create + join | P0 | `app/api/households/route.ts`, `app/api/households/join/route.ts`, `(app)/households/new`, `(app)/join`, `(app)/household`, `lib/household.ts` | feat/households |
+| Chores: create & assign + calendar sync | P0 | `app/api/chores/route.ts`, `(app)/chores/new`, `components/ChoreForm.tsx`, `lib/chore-sync.ts`, `lib/calendar.ts`, `lib/recurrence.ts` | feat/chores |
 
 ---
 
