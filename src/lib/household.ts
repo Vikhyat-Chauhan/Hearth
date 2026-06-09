@@ -76,6 +76,17 @@ export async function listUserHouseholds(
   return rows.map((r) => ({ id: r.id, name: r.name, role: r.role as Role }));
 }
 
+/** The current user's display label (name, falling back to email). Used for
+ * the "Posting as <you>" indicator on the board and shopping forms. */
+export async function getProfileName(userId: string): Promise<string> {
+  const [p] = await db
+    .select({ name: profiles.name, email: profiles.email })
+    .from(profiles)
+    .where(eq(profiles.id, userId))
+    .limit(1);
+  return p?.name ?? p?.email ?? "you";
+}
+
 /** All members of a household, with their profile (name/email), admin first. */
 export async function listMembers(householdId: string) {
   return db

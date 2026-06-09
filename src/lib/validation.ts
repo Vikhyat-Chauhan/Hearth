@@ -137,6 +137,7 @@ export type HouseholdActive = z.infer<typeof householdActiveSchema>;
 export const announcementCreateSchema = z.object({
   householdId: z.string().uuid("A household is required"),
   body: nonEmpty("Message").pipe(z.string().max(2000, "Message must be 2000 characters or fewer")),
+  isAnonymous: z.boolean().optional().default(false),
 });
 export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>;
 

@@ -1,18 +1,15 @@
 import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext } from "@/lib/household";
+import { getMyChores } from "@/lib/chores";
+import { listAnnouncements } from "@/lib/announcements";
+import { listShoppingItems } from "@/lib/shopping";
+import { listBills } from "@/lib/bills";
+import { computeBalances } from "@/lib/expenses";
+import { formatCents, formatOccurrenceDate, formatRelativeTime } from "@/lib/utils";
 import Card from "@/components/ui/Card";
-
-// Household home hub. Greets the user, surfaces their household, and routes to
-// every feature with a consistent, icon-led card grid.
-const FEATURES = [
-  { href: "/chores", icon: "✓", title: "My chores", desc: "See what's assigned to you and mark it done." },
-  { href: "/announcements", icon: "📣", title: "Board", desc: "Share notes and updates with the house." },
-  { href: "/shopping", icon: "🛒", title: "Shopping list", desc: "Add what you need; check off what's bought." },
-  { href: "/bills", icon: "🧾", title: "Bills", desc: "Track utilities and who's paid what." },
-  { href: "/expenses", icon: "💸", title: "Expenses", desc: "Split costs and settle up, Splitwise-style." },
-  { href: "/household", icon: "🏠", title: "Household", desc: "Members, invite code, and chore assignments." },
-];
+import Badge from "@/components/ui/Badge";
+import DashboardWidget from "@/components/dashboard/DashboardWidget";
 
 export default async function Home() {
   const user = process.env.NEXT_PUBLIC_SUPABASE_URL ? await getUser() : null;
@@ -49,6 +46,31 @@ export default async function Home() {
     );
   }
 
+  // Has a household → live dashboard. All accessors are already scoped to the
+  // active household, so no extra ownership checks are needed here.
+  const [chores, announcements, shopping, bills, balances] = await Promise.all([
+    getMyChores(user!.id, 6),
+    listAnnouncements(ctx.household.id),
+    listShoppingItems(ctx.household.id),
+    listBills(ctx.household.id),
+    computeBalances(ctx.household.id),
+  ]);
+
+  // Upcoming, not-yet-done chore occurrences across all of my chores, soonest first.
+  const upcomingChores = chores
+    .flatMap((c) => c.occurrences.filter((o) => !o.done).map((o) => ({ title: c.title, date: o.date })))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 4);
+
+  const latestAnnouncements = announcements.slice(0, 3);
+  const unchecked = shopping.filter((i) => !i.checked);
+  const unpaidBills = bills.filter((b) => !b.paid);
+
+  // My net balance + a couple of other members who are non-zero.
+  const myBalance = balances.find((b) => b.userId === user!.id);
+  const others = balances.filter((b) => b.userId !== user!.id && b.netCents !== 0).slice(0, 2);
+  const hasExpenses = balances.some((b) => b.netCents !== 0);
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -61,32 +83,155 @@ export default async function Home() {
         </span>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((f) => (
-          <Link key={f.href} href={f.href} className="group">
-            <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-card-hover">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-xl" aria-hidden="true">
-                {f.icon}
-              </div>
-              <h2 className="mt-3 font-semibold text-gray-900">
-                {f.title} <span className="text-brand-600 transition group-hover:translate-x-0.5">→</span>
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">{f.desc}</p>
-            </Card>
-          </Link>
-        ))}
-      </div>
-
-      {ctx.role === "admin" && (
-        <div className="mt-6">
+      {/* Quick actions */}
+      <div className="mt-6 flex flex-wrap gap-2">
+        {ctx.role === "admin" && (
           <Link
             href="/chores/new"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-card transition hover:bg-brand-700"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card transition hover:bg-brand-700"
           >
-            <span aria-hidden="true">＋</span> Assign a new chore
+            <span aria-hidden="true">＋</span> Assign a chore
           </Link>
-        </div>
-      )}
+        )}
+        <Link
+          href="/shopping"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+        >
+          <span aria-hidden="true">🛒</span> Add shopping item
+        </Link>
+        <Link
+          href="/announcements"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+        >
+          <span aria-hidden="true">📣</span> Post to board
+        </Link>
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        {/* My chores */}
+        <DashboardWidget
+          title="My chores"
+          href="/chores"
+          icon="✓"
+          count={upcomingChores.length}
+          empty={upcomingChores.length === 0}
+          emptyText="Nothing assigned — you're all caught up."
+        >
+          <ul className="space-y-2">
+            {upcomingChores.map((c, i) => (
+              <li key={i} className="flex items-center justify-between gap-3 text-sm">
+                <span className="truncate text-gray-700">{c.title}</span>
+                <span className="shrink-0 text-gray-500">{formatOccurrenceDate(c.date)}</span>
+              </li>
+            ))}
+          </ul>
+        </DashboardWidget>
+
+        {/* Board */}
+        <DashboardWidget
+          title="Board"
+          href="/announcements"
+          icon="📣"
+          empty={latestAnnouncements.length === 0}
+          emptyText="No announcements yet."
+        >
+          <ul className="space-y-3">
+            {latestAnnouncements.map((a) => (
+              <li key={a.id} className="text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium text-gray-700">
+                    {a.isAnonymous ? "Anonymous" : a.authorName || a.authorEmail}
+                  </span>
+                  <span className="shrink-0 text-xs text-gray-400">{formatRelativeTime(a.createdAt)}</span>
+                </div>
+                <p className="mt-0.5 line-clamp-1 text-gray-500">{a.body}</p>
+              </li>
+            ))}
+          </ul>
+        </DashboardWidget>
+
+        {/* Shopping */}
+        <DashboardWidget
+          title="Shopping list"
+          href="/shopping"
+          icon="🛒"
+          count={unchecked.length}
+          empty={unchecked.length === 0}
+          emptyText="List is empty — nothing to buy."
+        >
+          <ul className="space-y-2">
+            {unchecked.slice(0, 5).map((item) => (
+              <li key={item.id} className="flex items-center gap-2 text-sm text-gray-700">
+                <span aria-hidden="true" className="text-gray-400">•</span>
+                <span className="truncate">{item.name}</span>
+              </li>
+            ))}
+          </ul>
+        </DashboardWidget>
+
+        {/* Unpaid bills */}
+        <DashboardWidget
+          title="Unpaid bills"
+          href="/bills"
+          icon="🧾"
+          count={unpaidBills.length}
+          empty={unpaidBills.length === 0}
+          emptyText="No unpaid bills. Nice."
+        >
+          <ul className="space-y-2">
+            {unpaidBills.slice(0, 3).map((b) => (
+              <li key={b.id} className="flex items-center justify-between gap-3 text-sm">
+                <span className="flex min-w-0 items-center gap-2">
+                  <Badge variant="unpaid">Unpaid</Badge>
+                  <span className="truncate text-gray-700">{b.title}</span>
+                </span>
+                <span className="shrink-0 font-medium text-gray-900">{formatCents(b.amountCents)}</span>
+              </li>
+            ))}
+          </ul>
+        </DashboardWidget>
+
+        {/* Balances */}
+        <DashboardWidget
+          title="Balances"
+          href="/expenses"
+          icon="💸"
+          empty={!hasExpenses}
+          emptyText="No shared expenses yet."
+        >
+          <div className="text-sm">
+            <p className="text-gray-700">
+              {!myBalance || myBalance.netCents === 0 ? (
+                "You're all settled up."
+              ) : myBalance.netCents > 0 ? (
+                <>
+                  You&apos;re owed{" "}
+                  <span className="font-semibold text-green-700">{formatCents(myBalance.netCents)}</span>
+                </>
+              ) : (
+                <>
+                  You owe{" "}
+                  <span className="font-semibold text-red-700">{formatCents(-myBalance.netCents)}</span>
+                </>
+              )}
+            </p>
+            {others.length > 0 && (
+              <ul className="mt-2 space-y-1 text-gray-500">
+                {others.map((o) => (
+                  <li key={o.userId} className="flex items-center justify-between gap-3">
+                    <span className="truncate">{o.name || o.email}</span>
+                    <span className="shrink-0">
+                      {o.netCents > 0
+                        ? `is owed ${formatCents(o.netCents)}`
+                        : `owes ${formatCents(-o.netCents)}`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </DashboardWidget>
+      </div>
     </main>
   );
 }

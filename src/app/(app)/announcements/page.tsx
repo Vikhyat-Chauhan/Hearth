@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
-import { getHouseholdContext } from "@/lib/household";
+import { getHouseholdContext, getProfileName } from "@/lib/household";
 import { listAnnouncements } from "@/lib/announcements";
 import { EmptyState } from "@/components/states";
 import AnnouncementForm from "@/components/AnnouncementForm";
@@ -40,7 +40,10 @@ export default async function AnnouncementsPage() {
     );
   }
 
-  const items = await listAnnouncements(ctx.household.id);
+  const [items, posterLabel] = await Promise.all([
+    listAnnouncements(ctx.household.id),
+    getProfileName(user.id),
+  ]);
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
@@ -48,7 +51,7 @@ export default async function AnnouncementsPage() {
       <p className="mt-1 text-sm text-gray-500">Messages for everyone in {ctx.household.name}.</p>
 
       <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <AnnouncementForm householdId={ctx.household.id} />
+        <AnnouncementForm householdId={ctx.household.id} posterLabel={posterLabel} />
       </div>
 
       {items.length === 0 ? (
@@ -63,7 +66,9 @@ export default async function AnnouncementsPage() {
               <li key={a.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-card">
                 <div className="flex items-start justify-between gap-3">
                   <div className="text-sm text-gray-500">
-                    <span className="font-medium text-gray-700">{a.authorName ?? a.authorEmail}</span>
+                    <span className="font-medium text-gray-700">
+                      {a.isAnonymous ? "Anonymous" : (a.authorName ?? a.authorEmail)}
+                    </span>
                     {" · "}
                     {formatWhen(a.createdAt)}
                   </div>

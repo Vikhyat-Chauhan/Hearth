@@ -13,6 +13,17 @@ describe("announcement validation", () => {
     const r = parseBody(announcementCreateSchema, { householdId: randomUUID(), body: "Hi all" });
     expect(r.success).toBe(true);
   });
+
+  it("defaults isAnonymous to false when omitted", () => {
+    const r = parseBody(announcementCreateSchema, { householdId: randomUUID(), body: "Hi" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.isAnonymous).toBe(false);
+  });
+
+  it("accepts isAnonymous true and rejects a non-boolean", () => {
+    expect(parseBody(announcementCreateSchema, { householdId: randomUUID(), body: "Hi", isAnonymous: true }).success).toBe(true);
+    expect(parseBody(announcementCreateSchema, { householdId: randomUUID(), body: "Hi", isAnonymous: "yes" }).success).toBe(false);
+  });
 });
 
 const hasDb = !!process.env.DATABASE_URL;
@@ -50,5 +61,39 @@ describe.skipIf(!hasDb)("announcements read model", () => {
     expect(list).toHaveLength(2);
     expect(list[0].body).toBe("Second post"); // newest first
     expect(list[0].authorName).toBe("Poster");
+  });
+
+  it("hides the author name for anonymous posts but keeps it for normal ones", async () => {
+    const { db, profiles, households, memberships, announcements } = await import("@/db");
+    const { generateInviteCode } = await import("@/lib/household");
+    const { listAnnouncements } = await import("@/lib/announcements");
+
+    const authorId = randomUUID();
+    profileIds.push(authorId);
+    await db.insert(profiles).values({ id: authorId, email: `anon-${authorId}@test.dev`, name: "Secret Poster" });
+
+    const [hh] = await db
+      .insert(households)
+      .values({ name: "Anon House", adminUserId: authorId, inviteCode: generateInviteCode() })
+      .returning();
+    householdIds.push(hh.id);
+    await db.insert(memberships).values({ householdId: hh.id, userId: authorId, role: "admin" });
+
+    await db.insert(announcements).values({ householdId: hh.id, authorId, body: "Signed", isAnonymous: false });
+    await db.insert(announcements).values({ householdId: hh.id, authorId, body: "Hidden", isAnonymous: true });
+
+    const list = await listAnnouncements(hh.id);
+    const anon = list.find((a) => a.body === "Hidden")!;
+    const signed = list.find((a) => a.body === "Signed")!;
+
+    // Anonymous: name/email stripped, but authorId retained for delete rights.
+    expect(anon.isAnonymous).toBe(true);
+    expect(anon.authorName).toBeNull();
+    expect(anon.authorEmail).toBe("");
+    expect(anon.authorId).toBe(authorId);
+
+    // Normal post still shows the author.
+    expect(signed.isAnonymous).toBe(false);
+    expect(signed.authorName).toBe("Secret Poster");
   });
 });

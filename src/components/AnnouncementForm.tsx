@@ -6,9 +6,16 @@ import Button from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
 import FieldError from "@/components/ui/FieldError";
 
-export default function AnnouncementForm({ householdId }: { householdId: string }) {
+export default function AnnouncementForm({
+  householdId,
+  posterLabel,
+}: {
+  householdId: string;
+  posterLabel: string;
+}) {
   const router = useRouter();
   const [body, setBody] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +28,7 @@ export default function AnnouncementForm({ householdId }: { householdId: string 
       const res = await fetch("/api/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ householdId, body }),
+        body: JSON.stringify({ householdId, body, isAnonymous: anonymous }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -29,6 +36,7 @@ export default function AnnouncementForm({ householdId }: { householdId: string 
         return;
       }
       setBody("");
+      setAnonymous(false);
       router.refresh();
     } catch {
       setError("Could not post your message");
@@ -53,7 +61,21 @@ export default function AnnouncementForm({ householdId }: { householdId: string 
         aria-describedby={error ? "announcement-error" : undefined}
       />
       <FieldError id="announcement-error">{error}</FieldError>
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={anonymous}
+              onChange={(e) => setAnonymous(e.target.checked)}
+              className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+            />
+            Post anonymously
+          </label>
+          <p className="text-xs text-gray-400">
+            {anonymous ? "Hidden from your roommates" : `Posting as ${posterLabel}`}
+          </p>
+        </div>
         <Button type="submit" disabled={busy || body.trim().length === 0}>
           {busy ? "Posting…" : "Post"}
         </Button>
