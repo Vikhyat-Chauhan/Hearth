@@ -43,8 +43,11 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  // API routes enforce auth themselves and return JSON 401 — never redirect them
+  // (a redirect would hand a fetch() HTML instead of a parseable error).
+  const isApi = pathname.startsWith("/api");
 
-  if (!user && !isPublic) {
+  if (!user && !isPublic && !isApi) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);

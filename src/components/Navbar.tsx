@@ -7,8 +7,7 @@ import { getUser } from "@/lib/supabase/server";
 const LINKS = [
   { href: "/chores", label: "My Chores" },
   { href: "/chores/new", label: "New Chore" },
-  { href: "/households/new", label: "Create Household" },
-  { href: "/join", label: "Join" },
+  { href: "/household", label: "Household" },
 ];
 
 export default async function Navbar() {

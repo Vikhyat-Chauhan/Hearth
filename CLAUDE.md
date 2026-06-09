@@ -246,7 +246,7 @@ ACCEPTANCE CRITERIA:
 
 | Feature | Priority | Key Files | Stream ID |
 |---------|----------|-----------|-----------|
-| *(none yet)* | — | — | — |
+| Households: create + join | P0 | `app/api/households/route.ts`, `app/api/households/join/route.ts`, `(app)/households/new`, `(app)/join`, `(app)/household`, `lib/household.ts` | feat/households |
 
 ---
 
