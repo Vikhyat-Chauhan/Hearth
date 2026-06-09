@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
-import { getHouseholdContext } from "@/lib/household";
+import { getHouseholdContext, getProfileName } from "@/lib/household";
 import { listShoppingItems } from "@/lib/shopping";
 import { EmptyState } from "@/components/states";
 import ShoppingForm from "@/components/ShoppingForm";
@@ -32,7 +32,10 @@ export default async function ShoppingPage() {
     );
   }
 
-  const items = await listShoppingItems(ctx.household.id);
+  const [items, posterLabel] = await Promise.all([
+    listShoppingItems(ctx.household.id),
+    getProfileName(user.id),
+  ]);
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
@@ -40,7 +43,7 @@ export default async function ShoppingPage() {
       <p className="mt-1 text-sm text-gray-500">Shared with everyone in {ctx.household.name}.</p>
 
       <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <ShoppingForm householdId={ctx.household.id} />
+        <ShoppingForm householdId={ctx.household.id} posterLabel={posterLabel} />
       </div>
 
       {items.length === 0 ? (

@@ -12,7 +12,7 @@ export const POST = withErrorHandling(async (req: Request) => {
 
   const result = parseBody(announcementCreateSchema, await req.json());
   if (!result.success) return badRequest(result.error, result.issues);
-  const { householdId, body } = result.data;
+  const { householdId, body, isAnonymous } = result.data;
 
   if (!(await isMember(user.id, householdId))) {
     return forbidden("Only household members can post announcements");
@@ -20,7 +20,7 @@ export const POST = withErrorHandling(async (req: Request) => {
 
   const [created] = await db
     .insert(announcements)
-    .values({ householdId, authorId: user.id, body })
+    .values({ householdId, authorId: user.id, body, isAnonymous })
     .returning();
 
   return ok(created, 201);

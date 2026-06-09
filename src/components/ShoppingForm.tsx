@@ -6,7 +6,13 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import FieldError from "@/components/ui/FieldError";
 
-export default function ShoppingForm({ householdId }: { householdId: string }) {
+export default function ShoppingForm({
+  householdId,
+  posterLabel,
+}: {
+  householdId: string;
+  posterLabel: string;
+}) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -57,6 +63,7 @@ export default function ShoppingForm({ householdId }: { householdId: string }) {
           {busy ? "Adding…" : "Add"}
         </Button>
       </div>
+      <p className="text-xs text-gray-400">Posting as {posterLabel}</p>
       <FieldError id="shopping-error">{error}</FieldError>
     </form>
   );

@@ -22,6 +22,13 @@
       "when": 1781032562072,
       "tag": "0002_yummy_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781045668485,
+      "tag": "0003_tranquil_marten_broadcloak",
+      "breakpoints": true
     }
   ]
 }

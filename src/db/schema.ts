@@ -148,6 +148,9 @@ export const announcements = pgTable(
       .references(() => households.id, { onDelete: "cascade" }),
     authorId: uuid("author_id").notNull(),
     body: text("body").notNull(),
+    // When true, the board shows "Anonymous" instead of the author's name.
+    // authorId is still stored so the author can delete their own post.
+    isAnonymous: boolean("is_anonymous").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({

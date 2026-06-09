@@ -88,6 +88,7 @@ export interface Announcement {
   householdId: string;
   authorId: string;
   body: string;
+  isAnonymous: boolean;
   createdAt: Date;
 }
 
