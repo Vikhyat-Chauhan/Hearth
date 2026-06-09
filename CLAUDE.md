@@ -2,7 +2,7 @@
 
 > [One-sentence description of what the app does and who it's for.]
 
-Live URL: **(paste after first deploy)**
+Live URL: **(written automatically by `npm run provision:vercel`)**
 
 ---
 

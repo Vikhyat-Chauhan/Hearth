@@ -32,7 +32,7 @@ The load-bearing mechanic: **several terminals open in this repo, each running `
 |------|-----------|-------------|
 | **Phase A** — Bootstrap | — | One-time, name-free: `degit` the template into a fresh repo, install deps, confirm the local quality gate is green. No cloud resources yet. See [1-BOOTSTRAP](docs/1-BOOTSTRAP.md). |
 | **Phase B** — Intake | 1, solo | `claude` → "Follow docs/2-INTAKE.md. Spec: \<paste\>". Fills `docs/SPEC.md` + `CLAUDE.md`, sets `APP_NAME`. Review the scope and acceptance criteria it produced. |
-| **Phase C** — Provision | — | One-time: create the GitHub repo, Supabase project (one command — `npm run provision:supabase` generates `.env.local`, never committed), and Vercel project under `APP_NAME`, deploy green, confirm CI. See [3-PROVISION](docs/3-PROVISION.md). |
+| **Phase C** — Provision | — | One-time, under `APP_NAME`: create the GitHub repo, the Supabase project (one command — `npm run provision:supabase` generates `.env.local`, never committed), and the Vercel project (one command — `npm run provision:vercel` links it, pushes env, deploys, and writes the Live URL into `CLAUDE.md`), then confirm CI. See [3-PROVISION](docs/3-PROVISION.md). |
 | **Sprint 0** — Foundation & Contracts | 1, solo | "Read CLAUDE.md. Run Sprint 0 per docs/4-ORCHESTRATION.md." Navbar + P0 stub pages + `types.ts` + `schema.ts` + validation schemas (+ auth scaffold if needed). Commit. **The contracts are now frozen.** |
 | **Sprint 1+** — parallel | orchestrator + 2–3 workers | See below. |
 

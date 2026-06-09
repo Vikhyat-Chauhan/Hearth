@@ -21,7 +21,15 @@ Now that Intake has set `APP_NAME` (in `package.json` and `CLAUDE.md`), stand up
    ```
    This script (`scripts/provision-supabase.mjs`) drives the **Supabase Management API** end-to-end with zero prompts and no new dependencies: it resolves your org (auto-picked if you have one), creates a project named `APP_NAME` (generating + saving a DB password back into `.env.provision`), polls until it is `ACTIVE_HEALTHY`, fetches the API keys and pooler connection strings, and writes this scaffold's canonical keys into `.env.local` — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` (service_role), `DATABASE_URL` (transaction pooler, 6543), `DIRECT_URL` (session pooler, 5432) — without touching local-only keys. It is idempotent: a re-run reuses the existing project. `.env.provision` is gitignored; never commit it. *(The first migration runs after Sprint 0 generates `src/db/schema.ts` — `npm run db:generate && npm run db:migrate`. There is no schema to migrate yet.)*
 
-3. **Vercel project — link under `APP_NAME` and deploy.** Using the Vercel Skill, link a **new** Vercel project named `APP_NAME` (do not reuse an agentic-scaffold project), copy the five canonical keys the provision script wrote to `.env.local` into the Vercel project's environment — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` (service_role), `DATABASE_URL`, `DIRECT_URL` — and run a Production deployment. Confirm the live URL builds **green** and paste it into `CLAUDE.md` (the `Live URL:` line).
+3. **Vercel project — provision under `APP_NAME` and deploy (fully unattended).** This step drives the **Vercel CLI**, so it must be on your `PATH` (`npm i -g vercel`). One-time prerequisite — paste a Vercel access token into the same `.env.provision`:
+   ```bash
+   # add a token from https://vercel.com/account/tokens to VERCEL_TOKEN in .env.provision
+   ```
+   Then run:
+   ```bash
+   npm run provision:vercel
+   ```
+   This script (`scripts/provision-vercel.mjs`) drives the **Vercel CLI** end-to-end with zero prompts and no new dependencies: it links (or creates) a **new** Vercel project named `APP_NAME` (do not reuse an agentic-scaffold project), pushes the five canonical keys the Supabase step wrote to `.env.local` — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` (service_role), `DATABASE_URL`, `DIRECT_URL` — into the project's Production, Preview, and Development environments, runs a Production deployment, and writes the live URL into `CLAUDE.md` (the `Live URL:` line). It is idempotent: a re-run reuses the existing project and updates env vars in place. Confirm the deploy builds **green** in the Vercel dashboard. *(Set `VERCEL_TEAM_ID` in `.env.provision` if the project should live under a team rather than your personal scope.)*
 
 4. **CI — confirm it runs.** `.github/workflows/ci.yml` runs typecheck + lint + test + build on every pull request and on push to `main`. Open a throwaway branch, push it, and confirm the checks go green on the new repo.
 
