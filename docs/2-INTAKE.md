@@ -1,4 +1,4 @@
-> **Phase B · Intake** — agent at the start. Prev ← [Setup](1-SETUP.md) · Next → [Sprints](3-ORCHESTRATION.md)
+> **Phase B · Intake** — agent at the start. Prev ← [Bootstrap](1-BOOTSTRAP.md) · Next → [Provision](3-PROVISION.md)
 
 # Phase B — Spec Intake
 
@@ -38,7 +38,7 @@ For every P0 and P1 feature, fill the `## Stories` section in `docs/SPEC.md` usi
 
 If the spec already contains flow details, copy them verbatim. If not, infer the obvious happy path and the obvious validation/error cases. Do NOT ask the user clarifying questions about flows. Fill with best inference and move on — the sub-agent refines, it doesn't invent.
 
-**DB:** Always Supabase (Postgres) via Drizzle. Assume already provisioned; `.env.local` has the keys. In-scope features persist for real — never mock data that's in scope.
+**DB:** Always Supabase (Postgres) via Drizzle. The project is provisioned in [Phase C: Provision](3-PROVISION.md) — right after this Intake — under `APP_NAME`, so `.env.local` will hold the keys before any feature work. In-scope features persist for real — never mock data that's in scope.
 
 ---
 
@@ -48,4 +48,4 @@ After writing `docs/SPEC.md`, populate `CLAUDE.md` in the same turn:
 2. Fill CLAUDE.md: description, Backlog (P0→P1→P2), Tech Stack, domain rules, and whether auth is needed (so Sprint 0 lays down the auth scaffold).
 3. Copy `## Stories` (including Acceptance Criteria) from `docs/SPEC.md` into `CLAUDE.md` verbatim, immediately after `## Backlog`. P2 items have no story block — leave as one-liners.
 
-Then hand off to the user to start Sprint 0.
+Then hand off to the user to run [Phase C: Provision](3-PROVISION.md) — which creates the GitHub repo, Supabase project, and Vercel project under `APP_NAME` — before Sprint 0.

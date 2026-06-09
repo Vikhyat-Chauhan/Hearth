@@ -1,4 +1,4 @@
-> **Phase C · Sprints** — orchestrator agent. Prev ← [Intake](2-INTAKE.md)
+> **Phase D · Sprints** — orchestrator agent. Prev ← [Provision](3-PROVISION.md)
 
 # ORCHESTRATOR
 
