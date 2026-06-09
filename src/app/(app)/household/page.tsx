@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext, listMembers } from "@/lib/household";
 import { EmptyState } from "@/components/states";
+import RemoveMemberButton from "@/components/RemoveMemberButton";
 
 export default async function HouseholdPage() {
   const user = await getUser();
@@ -60,7 +61,12 @@ export default async function HouseholdPage() {
                 <p className="font-medium">{m.name ?? m.email}</p>
                 <p className="text-sm text-gray-500">{m.email}</p>
               </div>
-              <span className="text-xs font-medium text-gray-500">{m.role}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-medium text-gray-500">{m.role}</span>
+                {role === "admin" && m.userId !== user.id && (
+                  <RemoveMemberButton householdId={household.id} userId={m.userId} name={m.name ?? m.email} />
+                )}
+              </div>
             </li>
           ))}
         </ul>
