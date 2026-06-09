@@ -32,7 +32,7 @@ The load-bearing mechanic: **several terminals open in this repo, each running `
 |------|-----------|-------------|
 | **Phase A** — Bootstrap | — | One-time, name-free: `degit` the template into a fresh repo, install deps, confirm the local quality gate is green. No cloud resources yet. See [1-BOOTSTRAP](docs/1-BOOTSTRAP.md). |
 | **Phase B** — Intake | 1, solo | `claude` → "Follow docs/2-INTAKE.md. Spec: \<paste\>". Fills `docs/SPEC.md` + `CLAUDE.md`, sets `APP_NAME`. Review the scope and acceptance criteria it produced. |
-| **Phase C** — Provision | — | One-time: create the GitHub repo, Supabase project, and Vercel project under `APP_NAME`, deploy green, confirm CI. See [3-PROVISION](docs/3-PROVISION.md). |
+| **Phase C** — Provision | — | One-time: create the GitHub repo, Supabase project (one command — `npm run provision:supabase` generates `.env.local`, never committed), and Vercel project under `APP_NAME`, deploy green, confirm CI. See [3-PROVISION](docs/3-PROVISION.md). |
 | **Sprint 0** — Foundation & Contracts | 1, solo | "Read CLAUDE.md. Run Sprint 0 per docs/4-ORCHESTRATION.md." Navbar + P0 stub pages + `types.ts` + `schema.ts` + validation schemas (+ auth scaffold if needed). Commit. **The contracts are now frozen.** |
 | **Sprint 1+** — parallel | orchestrator + 2–3 workers | See below. |
 
@@ -40,7 +40,7 @@ The load-bearing mechanic: **several terminals open in this repo, each running `
 1. **Orchestrator terminal** → "You are the orchestrator. Follow docs/4-ORCHESTRATION.md. Propose this sprint's 2–3 non-overlapping features and emit a prompt for each." Approve its picks; it registers them in `CLAUDE.md` → Active Feature Streams and prints one worker prompt per stream.
 2. **Worker terminals** (one feature each) → paste the matching emitted prompt. They run at once — no collisions, because picks share no files and the contracts in `types.ts` / `schema.ts` / validation are frozen.
 3. Each worker builds its full vertical slice (real persistence, validation, error/loading/empty states, a test for the core path), runs the **Quality Gate**, then commits and updates `CLAUDE.md` itself (stream → complete, adds Implemented Features row).
-4. **Quality Gate** → ask the orchestrator for a gate prompt per stream; paste each back into its worker terminal. It runs typecheck + lint + build + test, hits the route, confirms the acceptance criteria, reports PASS/FAIL.
+4. **Quality Gate** → ask the orchestrator for a gate prompt per stream; paste each back into its worker terminal. It runs typecheck + lint + test + build, hits the route, confirms the acceptance criteria, reports PASS/FAIL.
 5. **Repeat** for the next batch until the Core Loop and the rest of the backlog are complete.
 
 **You** are the integration point: read `CLAUDE.md`, approve picks, copy prompts between terminals, make the product calls.

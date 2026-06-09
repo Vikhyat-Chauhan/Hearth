@@ -70,7 +70,7 @@ Keeps parallel agents off each other's files. Update as files are created.
 | `src/db/schema.ts` | Drizzle schema — **frozen after Sprint 0** |
 | `src/app/error.tsx` · `loading.tsx` · `not-found.tsx` | App-level error boundary / loading / 404 |
 | `src/test/` | Test setup + cross-cutting tests (feature tests may colocate) |
-| `.github/workflows/ci.yml` | CI: typecheck + lint + build + test on every PR |
+| `.github/workflows/ci.yml` | CI: typecheck + lint + test + build on every PR and on push to `main` |
 
 ---
 

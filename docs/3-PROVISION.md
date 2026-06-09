@@ -10,10 +10,19 @@ Now that Intake has set `APP_NAME` (in `package.json` and `CLAUDE.md`), stand up
    ```
    Confirm `git remote -v` points at `…/APP_NAME.git` — **not** agentic-scaffold. From here, all commits land on the app's own repo.
 
-2. **Supabase project — provision under `APP_NAME` and pull env.** Create a new Supabase project named `APP_NAME`, then pull its keys into `.env.local` (see `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `DATABASE_URL`, `DIRECT_URL`. Confirm the keys are set. *(The first migration runs after Sprint 0 generates `src/db/schema.ts` — `npm run db:generate && npm run db:migrate`. There is no schema to migrate yet.)*
+2. **Supabase project — provision under `APP_NAME` and write env (fully unattended).** One-time prerequisite — drop in a Personal Access Token:
+   ```bash
+   cp .env.provision.example .env.provision
+   # paste a PAT from https://supabase.com/dashboard/account/tokens into SUPABASE_ACCESS_TOKEN
+   ```
+   Then run:
+   ```bash
+   npm run provision:supabase
+   ```
+   This script (`scripts/provision-supabase.mjs`) drives the **Supabase Management API** end-to-end with zero prompts and no new dependencies: it resolves your org (auto-picked if you have one), creates a project named `APP_NAME` (generating + saving a DB password back into `.env.provision`), polls until it is `ACTIVE_HEALTHY`, fetches the API keys and pooler connection strings, and writes this scaffold's canonical keys into `.env.local` — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` (service_role), `DATABASE_URL` (transaction pooler, 6543), `DIRECT_URL` (session pooler, 5432) — without touching local-only keys. It is idempotent: a re-run reuses the existing project. `.env.provision` is gitignored; never commit it. *(The first migration runs after Sprint 0 generates `src/db/schema.ts` — `npm run db:generate && npm run db:migrate`. There is no schema to migrate yet.)*
 
-3. **Vercel project — link under `APP_NAME` and deploy.** Using the Vercel Skill, link a **new** Vercel project named `APP_NAME` (do not reuse an agentic-scaffold project), set the same env vars there, and run a Production deployment. Confirm the live URL builds **green** and paste it into `CLAUDE.md` (the `Live URL:` line).
+3. **Vercel project — link under `APP_NAME` and deploy.** Using the Vercel Skill, link a **new** Vercel project named `APP_NAME` (do not reuse an agentic-scaffold project), copy the five canonical keys the provision script wrote to `.env.local` into the Vercel project's environment — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` (service_role), `DATABASE_URL`, `DIRECT_URL` — and run a Production deployment. Confirm the live URL builds **green** and paste it into `CLAUDE.md` (the `Live URL:` line).
 
-4. **CI — confirm it runs.** `.github/workflows/ci.yml` runs typecheck + lint + build + test on every pull request. Open a throwaway branch, push it, and confirm the checks go green on the new repo.
+4. **CI — confirm it runs.** `.github/workflows/ci.yml` runs typecheck + lint + test + build on every pull request and on push to `main`. Open a throwaway branch, push it, and confirm the checks go green on the new repo.
 
 Walk away from Provision with: a GitHub repo named `APP_NAME` holding your commits, a Supabase project named `APP_NAME` with keys in `.env.local`, a green Vercel Production deploy whose URL is in `CLAUDE.md`, and CI passing — all carrying the app's identity, none carrying the template's. Now start Sprint 0.
