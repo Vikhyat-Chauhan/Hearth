@@ -3,6 +3,7 @@ import { eq, and } from "drizzle-orm";
 import { db, households, memberships } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import { householdJoinSchema, parseBody } from "@/lib/validation";
+import { ACTIVE_HOUSEHOLD_COOKIE } from "@/lib/household";
 import { ok, badRequest, unauthorized, notFound, withErrorHandling } from "@/lib/api";
 
 export const POST = withErrorHandling(async (req: Request) => {
@@ -35,5 +36,13 @@ export const POST = withErrorHandling(async (req: Request) => {
     role: "member",
   });
 
-  return ok(household, 201);
+  // Make the just-joined household the active one.
+  const res = ok(household, 201);
+  res.cookies.set(ACTIVE_HOUSEHOLD_COOKIE, household.id, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  return res;
 });

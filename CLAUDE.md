@@ -252,6 +252,13 @@ ACCEPTANCE CRITERIA:
 | Admin edits/deletes a chore | P1 | `app/api/chores/[id]/route.ts`, `(app)/chores/[id]/edit`, `components/ChoreForm.tsx` | feat/chore-edit |
 | Admin removes a member | P1 | `app/api/households/members/route.ts`, `components/RemoveMemberButton.tsx`, `(app)/household` | feat/member-remove |
 | Connect Google later (backfill) | P1 | `app/api/calendar/backfill/route.ts`, `(app)/settings/calendar`, `components/ConnectCalendar.tsx` | feat/connect-later |
+| Announcements / message board | P2 | `app/api/announcements/route.ts`, `app/api/announcements/[id]/route.ts`, `(app)/announcements`, `components/AnnouncementForm.tsx`, `lib/announcements.ts` | feat/announcements |
+| Shared shopping list | P2 | `app/api/shopping/route.ts`, `app/api/shopping/[id]/route.ts`, `(app)/shopping`, `components/ShoppingForm.tsx`, `components/ShoppingToggle.tsx`, `lib/shopping.ts` | feat/shopping |
+| Utilities & bills tracking | P2 | `app/api/bills/route.ts`, `app/api/bills/[id]/route.ts`, `(app)/bills`, `components/BillForm.tsx`, `components/BillPaidToggle.tsx`, `lib/bills.ts` | feat/bills |
+| Splitwise-style expense splitting | P2 | `app/api/expenses/route.ts`, `app/api/expenses/[id]/route.ts`, `app/api/settlements/route.ts`, `(app)/expenses`, `components/ExpenseForm.tsx`, `components/SettlementForm.tsx`, `lib/expenses.ts` | feat/expenses |
+| Multiple households per user | P2 | `app/api/households/active/route.ts`, `components/HouseholdSwitcher.tsx`, `lib/household.ts` (`listUserHouseholds`, active-household cookie) | feat/multi-household |
+| Two-way Google Calendar sync | P2 | `app/api/calendar/watch/route.ts`, `app/api/calendar/webhook/route.ts`, `(app)/settings/calendar`, `components/TwoWaySync.tsx`, `lib/calendar-twoway.ts`, `lib/calendar.ts` (`watchCalendar`/`getEventStatus`) | feat/calendar-twoway |
+| Shared types/schema/validation additions | P2 | `db/schema.ts`, `lib/types.ts`, `lib/validation.ts`, `lib/utils.ts` (money helpers), `drizzle/0001_*.sql` | (shared) |
 
 ---
 

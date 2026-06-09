@@ -3,10 +3,15 @@
 
 import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
+import { listUserHouseholds, getHouseholdContext } from "@/lib/household";
+import HouseholdSwitcher from "@/components/HouseholdSwitcher";
 
 const LINKS = [
   { href: "/chores", label: "My Chores" },
-  { href: "/chores/new", label: "New Chore" },
+  { href: "/announcements", label: "Board" },
+  { href: "/shopping", label: "Shopping" },
+  { href: "/bills", label: "Bills" },
+  { href: "/expenses", label: "Expenses" },
   { href: "/household", label: "Household" },
   { href: "/settings/calendar", label: "Calendar" },
 ];
@@ -14,6 +19,18 @@ const LINKS = [
 export default async function Navbar() {
   // getUser hits Supabase; before provisioning there's no env, so guard it.
   const user = process.env.NEXT_PUBLIC_SUPABASE_URL ? await getUser() : null;
+
+  // Multi-household: offer a switcher when the user belongs to more than one.
+  let myHouseholds: { id: string; name: string; role: string }[] = [];
+  let activeHouseholdId = "";
+  if (user) {
+    const [list, ctx] = await Promise.all([
+      listUserHouseholds(user.id),
+      getHouseholdContext(user.id),
+    ]);
+    myHouseholds = list;
+    activeHouseholdId = ctx?.household.id ?? "";
+  }
 
   return (
     <header className="border-b border-gray-200">
@@ -29,6 +46,10 @@ export default async function Navbar() {
                 {l.label}
               </Link>
             ))}
+
+          {user && myHouseholds.length > 1 && (
+            <HouseholdSwitcher households={myHouseholds} activeId={activeHouseholdId} />
+          )}
 
           {user ? (
             <div className="flex items-center gap-3">

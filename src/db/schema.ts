@@ -17,6 +17,7 @@ import {
   boolean,
   date,
   timestamp,
+  integer,
   primaryKey,
   unique,
 } from "drizzle-orm/pg-core";
@@ -117,5 +118,109 @@ export const calendarLinks = pgTable(
   },
   (t) => ({
     uniqueLink: unique("calendar_links_user_chore_unique").on(t.userId, t.choreId),
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// P2 / later-SCOPE-phase features. Additive only — these tables extend the
+// schema without touching the V1 tables above. Added under the Schema Change
+// Protocol (user-authorized). Money is stored as integer cents, never floats.
+// ---------------------------------------------------------------------------
+
+// SCOPE Phase 2 — Announcements / message board. Any member may post; the
+// author or the household admin may delete.
+export const announcements = pgTable("announcements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  householdId: uuid("household_id")
+    .notNull()
+    .references(() => households.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id").notNull(),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// SCOPE Phase 2 — Shared shopping list. Any member adds/checks/deletes items.
+export const shoppingItems = pgTable("shopping_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  householdId: uuid("household_id")
+    .notNull()
+    .references(() => households.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  addedBy: uuid("added_by").notNull(),
+  checked: boolean("checked").notNull().default(false),
+  checkedBy: uuid("checked_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// SCOPE Phase 3 — Utilities & bills tracking. amountCents is integer cents.
+export const bills = pgTable("bills", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  householdId: uuid("household_id")
+    .notNull()
+    .references(() => households.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  dueDate: date("due_date"),
+  paid: boolean("paid").notNull().default(false),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// SCOPE Phase 5 — Splitwise-style expense splitting. An expense is paid by one
+// member and split into shares (one row per member who owes). amountCents must
+// equal the sum of its split shareCents.
+export const expenses = pgTable("expenses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  householdId: uuid("household_id")
+    .notNull()
+    .references(() => households.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  paidBy: uuid("paid_by").notNull(),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const expenseSplits = pgTable(
+  "expense_splits",
+  {
+    expenseId: uuid("expense_id")
+      .notNull()
+      .references(() => expenses.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").notNull(),
+    shareCents: integer("share_cents").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.expenseId, t.userId] }),
+  }),
+);
+
+// A direct payment from one member to another that reduces their balance.
+export const settlements = pgTable("settlements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  householdId: uuid("household_id")
+    .notNull()
+    .references(() => households.id, { onDelete: "cascade" }),
+  fromUserId: uuid("from_user_id").notNull(),
+  toUserId: uuid("to_user_id").notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// SCOPE Phase 4 — Two-way calendar sync. A Google Calendar watch channel
+// registered for a user so calendar changes notify our webhook. Best-effort.
+export const calendarChannels = pgTable(
+  "calendar_channels",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    channelId: text("channel_id").notNull(),
+    resourceId: text("resource_id").notNull(),
+    expiration: timestamp("expiration", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqueChannel: unique("calendar_channels_channel_unique").on(t.channelId),
   }),
 );

@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, households, memberships } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import { householdCreateSchema, parseBody } from "@/lib/validation";
-import { generateInviteCode } from "@/lib/household";
+import { generateInviteCode, ACTIVE_HOUSEHOLD_COOKIE } from "@/lib/household";
 import { ok, badRequest, unauthorized, withErrorHandling } from "@/lib/api";
 
 export const POST = withErrorHandling(async (req: Request) => {
@@ -38,5 +38,13 @@ export const POST = withErrorHandling(async (req: Request) => {
     return created;
   });
 
-  return ok(household, 201);
+  // Make the newly created household the active one.
+  const res = ok(household, 201);
+  res.cookies.set(ACTIVE_HOUSEHOLD_COOKIE, household.id, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  return res;
 });

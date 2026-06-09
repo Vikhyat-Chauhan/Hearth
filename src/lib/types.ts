@@ -79,3 +79,74 @@ export interface ChoreWithStatus extends Chore {
   assigneeUserIds: string[];
   completedOccurrences: string[];
 }
+
+// --- P2 / later-SCOPE-phase shapes (additive). Money is integer cents. ---
+
+/** SCOPE Phase 2 — a posted announcement. */
+export interface Announcement {
+  id: string;
+  householdId: string;
+  authorId: string;
+  body: string;
+  createdAt: Date;
+}
+
+/** SCOPE Phase 2 — a shared shopping-list item. */
+export interface ShoppingItem {
+  id: string;
+  householdId: string;
+  name: string;
+  addedBy: string;
+  checked: boolean;
+  checkedBy: string | null;
+  createdAt: Date;
+}
+
+/** SCOPE Phase 3 — a tracked bill. amountCents is integer cents. */
+export interface Bill {
+  id: string;
+  householdId: string;
+  title: string;
+  amountCents: number;
+  /** Optional due date (YYYY-MM-DD), or null. */
+  dueDate: string | null;
+  paid: boolean;
+  createdBy: string;
+  createdAt: Date;
+}
+
+/** SCOPE Phase 5 — a shared expense paid by one member, split into shares. */
+export interface Expense {
+  id: string;
+  householdId: string;
+  description: string;
+  amountCents: number;
+  paidBy: string;
+  createdBy: string;
+  createdAt: Date;
+}
+
+export interface ExpenseSplit {
+  expenseId: string;
+  userId: string;
+  shareCents: number;
+}
+
+/** A direct payment from one member to another that settles balances. */
+export interface Settlement {
+  id: string;
+  householdId: string;
+  fromUserId: string;
+  toUserId: string;
+  amountCents: number;
+  createdBy: string;
+  createdAt: Date;
+}
+
+/** Net balance for one member: positive = others owe them; negative = they owe. */
+export interface MemberBalance {
+  userId: string;
+  name: string | null;
+  email: string;
+  netCents: number;
+}

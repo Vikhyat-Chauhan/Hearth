@@ -74,7 +74,7 @@ function eventBody(input: ChoreEventInput) {
 
 async function callCalendar(
   accessToken: string,
-  method: "POST" | "PUT" | "DELETE",
+  method: "GET" | "POST" | "PUT" | "DELETE",
   path: string,
   body?: unknown,
 ): Promise<Response> {
@@ -126,4 +126,82 @@ export async function deleteChoreEvent(
   if (!res.ok && res.status !== 404 && res.status !== 410) {
     throw new Error(`Google Calendar delete failed (${res.status}): ${await res.text()}`);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Two-way sync (SCOPE Phase 4). Watch channels let Google push a notification
+// to our webhook when a user's calendar changes; reconciliation then reads the
+// current event state. Best-effort and skipped when Google isn't connected.
+// ---------------------------------------------------------------------------
+
+const CHANNELS_STOP_URL = "https://www.googleapis.com/calendar/v3/channels/stop";
+
+export type WatchResult =
+  | { status: "watching"; resourceId: string; expiration: number | null }
+  | { status: "skipped" };
+
+/**
+ * Register a watch channel on the user's primary calendar. Google will POST
+ * notifications to `address` (our webhook) until `expiration`. `channelId` is a
+ * caller-generated unique id we use to map a notification back to the user.
+ */
+export async function watchCalendar(
+  refreshTokenEnc: string | null,
+  opts: { channelId: string; address: string; token?: string },
+): Promise<WatchResult> {
+  if (!refreshTokenEnc || !googleConfigured()) return { status: "skipped" };
+  const accessToken = await getAccessToken(decryptToken(refreshTokenEnc));
+  const res = await callCalendar(accessToken, "POST", "/watch", {
+    id: opts.channelId,
+    type: "web_hook",
+    address: opts.address,
+    token: opts.token,
+  });
+  if (!res.ok) {
+    throw new Error(`Google Calendar watch failed (${res.status}): ${await res.text()}`);
+  }
+  const json = (await res.json()) as { resourceId?: string; expiration?: string };
+  if (!json.resourceId) throw new Error("Google Calendar watch returned no resourceId");
+  return {
+    status: "watching",
+    resourceId: json.resourceId,
+    expiration: json.expiration ? Number(json.expiration) : null,
+  };
+}
+
+/** Stop a previously-registered watch channel. Best-effort; never throws hard. */
+export async function stopChannel(
+  refreshTokenEnc: string | null,
+  channelId: string,
+  resourceId: string,
+): Promise<void> {
+  if (!refreshTokenEnc || !googleConfigured()) return;
+  const accessToken = await getAccessToken(decryptToken(refreshTokenEnc));
+  await fetch(CHANNELS_STOP_URL, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ id: channelId, resourceId }),
+  }).catch(() => undefined);
+}
+
+export type EventStatus = "active" | "missing" | "skipped";
+
+/**
+ * Read the current state of one event on the user's calendar. Returns "missing"
+ * if the user deleted/cancelled it (404, 410, or status "cancelled") — the
+ * signal two-way reconciliation uses to drop a stale CalendarLink.
+ */
+export async function getEventStatus(
+  refreshTokenEnc: string | null,
+  externalEventId: string,
+): Promise<EventStatus> {
+  if (!refreshTokenEnc || !googleConfigured()) return "skipped";
+  const accessToken = await getAccessToken(decryptToken(refreshTokenEnc));
+  const res = await callCalendar(accessToken, "GET", `/${externalEventId}`);
+  if (res.status === 404 || res.status === 410) return "missing";
+  if (!res.ok) {
+    throw new Error(`Google Calendar get failed (${res.status}): ${await res.text()}`);
+  }
+  const json = (await res.json()) as { status?: string };
+  return json.status === "cancelled" ? "missing" : "active";
 }

@@ -121,3 +121,88 @@ export const memberRemoveSchema = z.object({
   userId: z.string().uuid(),
 });
 export type MemberRemove = z.infer<typeof memberRemoveSchema>;
+
+// Multi-household: switch which household is "active" for the current user.
+export const householdActiveSchema = z.object({
+  householdId: z.string().uuid("A household is required"),
+});
+export type HouseholdActive = z.infer<typeof householdActiveSchema>;
+
+// ---------------------------------------------------------------------------
+// P2 / later-SCOPE-phase schemas (additive). Money is validated as integer
+// cents via the `cents` helper above (z.number().int().nonnegative()).
+// ---------------------------------------------------------------------------
+
+// SCOPE Phase 2 — Announcements.
+export const announcementCreateSchema = z.object({
+  householdId: z.string().uuid("A household is required"),
+  body: nonEmpty("Message").pipe(z.string().max(2000, "Message must be 2000 characters or fewer")),
+});
+export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>;
+
+// SCOPE Phase 2 — Shopping list.
+export const shoppingItemCreateSchema = z.object({
+  householdId: z.string().uuid("A household is required"),
+  name: nonEmpty("Item").pipe(z.string().max(120, "Item must be 120 characters or fewer")),
+});
+export type ShoppingItemCreate = z.infer<typeof shoppingItemCreateSchema>;
+
+export const shoppingItemUpdateSchema = z.object({
+  checked: z.boolean(),
+});
+export type ShoppingItemUpdate = z.infer<typeof shoppingItemUpdateSchema>;
+
+// SCOPE Phase 3 — Bills. amountCents must be a positive integer count of cents.
+export const billCreateSchema = z.object({
+  householdId: z.string().uuid("A household is required"),
+  title: nonEmpty("Title").pipe(z.string().max(120, "Title must be 120 characters or fewer")),
+  amountCents: cents.refine((v) => v > 0, "Amount must be greater than zero"),
+  dueDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Due date must be YYYY-MM-DD")
+    .optional()
+    .nullable(),
+});
+export type BillCreate = z.infer<typeof billCreateSchema>;
+
+export const billUpdateSchema = z.object({
+  paid: z.boolean(),
+});
+export type BillUpdate = z.infer<typeof billUpdateSchema>;
+
+// SCOPE Phase 5 — Expense splitting. Each split's shareCents must sum to amountCents.
+export const expenseCreateSchema = z
+  .object({
+    householdId: z.string().uuid("A household is required"),
+    description: nonEmpty("Description").pipe(
+      z.string().max(200, "Description must be 200 characters or fewer"),
+    ),
+    amountCents: cents.refine((v) => v > 0, "Amount must be greater than zero"),
+    paidBy: z.string().uuid("Who paid is required"),
+    splits: z
+      .array(
+        z.object({
+          userId: z.string().uuid(),
+          shareCents: cents,
+        }),
+      )
+      .min(1, "Split the expense across at least one member"),
+  })
+  .refine(
+    (e) => e.splits.reduce((sum, s) => sum + s.shareCents, 0) === e.amountCents,
+    { message: "Split shares must add up to the total amount", path: ["splits"] },
+  );
+export type ExpenseCreate = z.infer<typeof expenseCreateSchema>;
+
+export const settlementCreateSchema = z
+  .object({
+    householdId: z.string().uuid("A household is required"),
+    fromUserId: z.string().uuid(),
+    toUserId: z.string().uuid(),
+    amountCents: cents.refine((v) => v > 0, "Amount must be greater than zero"),
+  })
+  .refine((s) => s.fromUserId !== s.toUserId, {
+    message: "A settlement must be between two different members",
+    path: ["toUserId"],
+  });
+export type SettlementCreate = z.infer<typeof settlementCreateSchema>;
