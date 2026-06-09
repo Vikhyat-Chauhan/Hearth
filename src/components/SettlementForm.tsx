@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseDollarsToCents } from "@/lib/utils";
+import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
+import CurrencyInput from "@/components/ui/CurrencyInput";
+import FieldError from "@/components/ui/FieldError";
 
 type Member = { userId: string; name: string | null; email: string };
 
@@ -68,46 +72,47 @@ export default function SettlementForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-2 text-sm">
-      <select
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-wrap items-center gap-2 text-sm"
+      aria-busy={busy}
+    >
+      <Select
         value={fromUserId}
         onChange={(e) => setFromUserId(e.target.value)}
         aria-label="Payer"
-        className="rounded-lg border border-gray-300 px-2 py-2 text-gray-700 focus:border-gray-500 focus:outline-none"
+        className="w-auto"
       >
         {members.map((m) => (
           <option key={m.userId} value={m.userId}>{label(m)}</option>
         ))}
-      </select>
+      </Select>
       <span className="text-gray-400">paid</span>
-      <select
+      <Select
         value={toUserId}
         onChange={(e) => setToUserId(e.target.value)}
         aria-label="Recipient"
-        className="rounded-lg border border-gray-300 px-2 py-2 text-gray-700 focus:border-gray-500 focus:outline-none"
+        className="w-auto"
       >
         {members.map((m) => (
           <option key={m.userId} value={m.userId}>{label(m)}</option>
         ))}
-      </select>
-      <div className="relative">
-        <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-        <input
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          inputMode="decimal"
-          placeholder="0.00"
-          className="w-24 rounded-lg border border-gray-300 py-2 pl-6 pr-2 focus:border-gray-500 focus:outline-none"
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-lg bg-gray-900 px-3 py-2 font-medium text-white hover:bg-gray-700 disabled:opacity-50"
-      >
+      </Select>
+      <CurrencyInput
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        aria-label="Amount in dollars"
+        aria-describedby={error ? "settlement-error" : undefined}
+        className="w-24"
+      />
+      <Button type="submit" size="sm" disabled={busy}>
         {busy ? "Saving…" : "Record"}
-      </button>
-      {error && <p className="w-full text-sm text-red-600">{error}</p>}
+      </Button>
+      {error && (
+        <div className="w-full">
+          <FieldError id="settlement-error">{error}</FieldError>
+        </div>
+      )}
     </form>
   );
 }

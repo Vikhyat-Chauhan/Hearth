@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 /** Enables two-way sync by registering a Google watch channel for the user. */
 export default function TwoWaySync({ active }: { active: boolean }) {
@@ -44,13 +45,9 @@ export default function TwoWaySync({ active }: { active: boolean }) {
       {active ? (
         <p className="mt-3 text-sm text-green-700">✓ Two-way sync is active.</p>
       ) : (
-        <button
-          onClick={enable}
-          disabled={busy}
-          className="mt-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
-        >
+        <Button variant="secondary" onClick={enable} disabled={busy} className="mt-3">
           {busy ? "Enabling…" : "Enable two-way sync"}
-        </button>
+        </Button>
       )}
       {status && <p role="status" className="mt-3 text-sm text-gray-600">{status}</p>}
     </div>

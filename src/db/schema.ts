@@ -20,6 +20,7 @@ import {
   integer,
   primaryKey,
   unique,
+  index,
 } from "drizzle-orm/pg-core";
 
 // A member's profile. id === Supabase auth user id.
@@ -56,19 +57,25 @@ export const memberships = pgTable(
   }),
 );
 
-export const chores = pgTable("chores", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  householdId: uuid("household_id")
-    .notNull()
-    .references(() => households.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description"),
-  // RFC 5545 RRULE string, e.g. "FREQ=WEEKLY;BYDAY=MO".
-  rrule: text("rrule").notNull(),
-  createdBy: uuid("created_by").notNull(),
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const chores = pgTable(
+  "chores",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    householdId: uuid("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    // RFC 5545 RRULE string, e.g. "FREQ=WEEKLY;BYDAY=MO".
+    rrule: text("rrule").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    householdIdx: index("chores_household_idx").on(t.householdId),
+  }),
+);
 
 export const choreAssignments = pgTable(
   "chore_assignments",
@@ -80,6 +87,7 @@ export const choreAssignments = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.choreId, t.userId] }),
+    userIdx: index("chore_assignments_user_idx").on(t.userId),
   }),
 );
 
@@ -118,6 +126,8 @@ export const calendarLinks = pgTable(
   },
   (t) => ({
     uniqueLink: unique("calendar_links_user_chore_unique").on(t.userId, t.choreId),
+    userIdx: index("calendar_links_user_idx").on(t.userId),
+    choreIdx: index("calendar_links_chore_idx").on(t.choreId),
   }),
 );
 
@@ -129,57 +139,81 @@ export const calendarLinks = pgTable(
 
 // SCOPE Phase 2 — Announcements / message board. Any member may post; the
 // author or the household admin may delete.
-export const announcements = pgTable("announcements", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  householdId: uuid("household_id")
-    .notNull()
-    .references(() => households.id, { onDelete: "cascade" }),
-  authorId: uuid("author_id").notNull(),
-  body: text("body").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const announcements = pgTable(
+  "announcements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    householdId: uuid("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id").notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    householdIdx: index("announcements_household_idx").on(t.householdId),
+  }),
+);
 
 // SCOPE Phase 2 — Shared shopping list. Any member adds/checks/deletes items.
-export const shoppingItems = pgTable("shopping_items", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  householdId: uuid("household_id")
-    .notNull()
-    .references(() => households.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  addedBy: uuid("added_by").notNull(),
-  checked: boolean("checked").notNull().default(false),
-  checkedBy: uuid("checked_by"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const shoppingItems = pgTable(
+  "shopping_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    householdId: uuid("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    addedBy: uuid("added_by").notNull(),
+    checked: boolean("checked").notNull().default(false),
+    checkedBy: uuid("checked_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    householdIdx: index("shopping_items_household_idx").on(t.householdId),
+  }),
+);
 
 // SCOPE Phase 3 — Utilities & bills tracking. amountCents is integer cents.
-export const bills = pgTable("bills", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  householdId: uuid("household_id")
-    .notNull()
-    .references(() => households.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  amountCents: integer("amount_cents").notNull(),
-  dueDate: date("due_date"),
-  paid: boolean("paid").notNull().default(false),
-  createdBy: uuid("created_by").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const bills = pgTable(
+  "bills",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    householdId: uuid("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    dueDate: date("due_date"),
+    paid: boolean("paid").notNull().default(false),
+    createdBy: uuid("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    householdIdx: index("bills_household_idx").on(t.householdId),
+  }),
+);
 
 // SCOPE Phase 5 — Splitwise-style expense splitting. An expense is paid by one
 // member and split into shares (one row per member who owes). amountCents must
 // equal the sum of its split shareCents.
-export const expenses = pgTable("expenses", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  householdId: uuid("household_id")
-    .notNull()
-    .references(() => households.id, { onDelete: "cascade" }),
-  description: text("description").notNull(),
-  amountCents: integer("amount_cents").notNull(),
-  paidBy: uuid("paid_by").notNull(),
-  createdBy: uuid("created_by").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const expenses = pgTable(
+  "expenses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    householdId: uuid("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    description: text("description").notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    paidBy: uuid("paid_by").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    householdIdx: index("expenses_household_idx").on(t.householdId),
+  }),
+);
 
 export const expenseSplits = pgTable(
   "expense_splits",
@@ -196,17 +230,23 @@ export const expenseSplits = pgTable(
 );
 
 // A direct payment from one member to another that reduces their balance.
-export const settlements = pgTable("settlements", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  householdId: uuid("household_id")
-    .notNull()
-    .references(() => households.id, { onDelete: "cascade" }),
-  fromUserId: uuid("from_user_id").notNull(),
-  toUserId: uuid("to_user_id").notNull(),
-  amountCents: integer("amount_cents").notNull(),
-  createdBy: uuid("created_by").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const settlements = pgTable(
+  "settlements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    householdId: uuid("household_id")
+      .notNull()
+      .references(() => households.id, { onDelete: "cascade" }),
+    fromUserId: uuid("from_user_id").notNull(),
+    toUserId: uuid("to_user_id").notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    householdIdx: index("settlements_household_idx").on(t.householdId),
+  }),
+);
 
 // SCOPE Phase 4 — Two-way calendar sync. A Google Calendar watch channel
 // registered for a user so calendar changes notify our webhook. Best-effort.

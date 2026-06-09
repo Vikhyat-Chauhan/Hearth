@@ -18,8 +18,9 @@ export default async function NewChorePage() {
         <EmptyState
           title="No household yet"
           description="Create or join a household before assigning chores."
+          icon="🧹"
           action={
-            <Link href="/household" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
               Go to household
             </Link>
           }

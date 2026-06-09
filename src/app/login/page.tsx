@@ -31,8 +31,14 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
-        <h1 className="text-2xl font-bold">Welcome to Hearth</h1>
+      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-card">
+        <div
+          aria-hidden="true"
+          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-3xl"
+        >
+          🔥
+        </div>
+        <h1 className="font-display text-2xl font-bold text-brand-700">Welcome to Hearth</h1>
         <p className="mt-2 text-sm text-gray-500">
           Sign in with Google to manage your household chores. This also lets Hearth add
           chores to your Google Calendar.

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Button from "@/components/ui/Button";
 
 export default function ConnectCalendar({ connected }: { connected: boolean }) {
   const router = useRouter();
@@ -52,13 +53,9 @@ export default function ConnectCalendar({ connected }: { connected: boolean }) {
       {connected ? (
         <>
           <p className="text-sm text-green-700">✓ Google Calendar is connected.</p>
-          <button
-            onClick={backfill}
-            disabled={busy}
-            className="rounded-lg bg-gray-900 px-4 py-2.5 font-medium text-white transition hover:bg-gray-700 disabled:opacity-50"
-          >
+          <Button onClick={backfill} disabled={busy}>
             {busy ? "Syncing…" : "Backfill my chores to my calendar"}
-          </button>
+          </Button>
           <p className="text-xs text-gray-500">
             Re-runs the one-way sync for every chore assigned to you — useful if events are missing.
           </p>
@@ -69,13 +66,9 @@ export default function ConnectCalendar({ connected }: { connected: boolean }) {
             Your Google Calendar isn&apos;t connected yet. Connect it to have your chores appear on
             your calendar.
           </p>
-          <button
-            onClick={connect}
-            disabled={busy}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
-          >
+          <Button variant="secondary" onClick={connect} disabled={busy}>
             {busy ? "Redirecting…" : "Connect Google Calendar"}
-          </button>
+          </Button>
         </>
       )}
       {status && <p role="status" className="text-sm text-gray-600">{status}</p>}

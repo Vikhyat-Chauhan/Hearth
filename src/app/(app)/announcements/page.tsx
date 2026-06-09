@@ -29,8 +29,9 @@ export default async function AnnouncementsPage() {
         <EmptyState
           title="No household yet"
           description="Create or join a household to use the message board."
+          icon="📣"
           action={
-            <Link href="/household" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
               Go to household
             </Link>
           }
@@ -46,7 +47,7 @@ export default async function AnnouncementsPage() {
       <h1 className="text-2xl font-bold">Announcements</h1>
       <p className="mt-1 text-sm text-gray-500">Messages for everyone in {ctx.household.name}.</p>
 
-      <div className="mt-6 rounded-xl border border-gray-200 p-4">
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
         <AnnouncementForm householdId={ctx.household.id} />
       </div>
 
@@ -59,7 +60,7 @@ export default async function AnnouncementsPage() {
           {items.map((a) => {
             const canDelete = a.authorId === user.id || ctx.role === "admin";
             return (
-              <li key={a.id} className="rounded-xl border border-gray-200 p-5">
+              <li key={a.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-card">
                 <div className="flex items-start justify-between gap-3">
                   <div className="text-sm text-gray-500">
                     <span className="font-medium text-gray-700">{a.authorName ?? a.authorEmail}</span>

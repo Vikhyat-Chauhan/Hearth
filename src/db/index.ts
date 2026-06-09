@@ -26,7 +26,7 @@ function getDb(): Database {
 
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new Error("DATABASE_URL is not set — provision Supabase first (docs/3-PROVISION.md)");
+    throw new Error("DATABASE_URL is not set — add it to .env.local");
   }
 
   const client = globalForDb.client ?? postgres(connectionString, { prepare: false });

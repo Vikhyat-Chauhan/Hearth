@@ -5,15 +5,16 @@ import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { listUserHouseholds, getHouseholdContext } from "@/lib/household";
 import HouseholdSwitcher from "@/components/HouseholdSwitcher";
+import MobileNav from "@/components/MobileNav";
 
 const LINKS = [
-  { href: "/chores", label: "My Chores" },
-  { href: "/announcements", label: "Board" },
-  { href: "/shopping", label: "Shopping" },
-  { href: "/bills", label: "Bills" },
-  { href: "/expenses", label: "Expenses" },
-  { href: "/household", label: "Household" },
-  { href: "/settings/calendar", label: "Calendar" },
+  { href: "/chores", label: "My Chores", icon: "✓" },
+  { href: "/announcements", label: "Board", icon: "📣" },
+  { href: "/shopping", label: "Shopping", icon: "🛒" },
+  { href: "/bills", label: "Bills", icon: "🧾" },
+  { href: "/expenses", label: "Expenses", icon: "💸" },
+  { href: "/household", label: "Household", icon: "🏠" },
+  { href: "/settings/calendar", label: "Calendar", icon: "📅" },
 ];
 
 export default async function Navbar() {
@@ -33,19 +34,14 @@ export default async function Navbar() {
   }
 
   return (
-    <header className="border-b border-gray-200">
+    <header className="border-b border-gray-200 bg-white">
       <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="text-lg font-bold">
-          🔥 Hearth
+        <Link href="/" className="font-display text-xl font-bold text-brand-700">
+          <span aria-hidden="true">🔥</span> Hearth
         </Link>
 
         <div className="flex items-center gap-4 text-sm">
-          {user &&
-            LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className="text-gray-600 hover:text-gray-900">
-                {l.label}
-              </Link>
-            ))}
+          {user && <MobileNav links={LINKS} />}
 
           {user && myHouseholds.length > 1 && (
             <HouseholdSwitcher households={myHouseholds} activeId={activeHouseholdId} />
@@ -57,7 +53,7 @@ export default async function Navbar() {
               <form action="/auth/signout" method="post">
                 <button
                   type="submit"
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50"
+                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                   Logout
                 </button>

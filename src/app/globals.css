@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Warm, low-contrast page canvas so white cards lift off the background. */
+@layer base {
+  body {
+    @apply bg-stone-50 text-gray-900 antialiased;
+  }
+}
+
+/* App-wide keyboard focus affordance. Mouse clicks stay ring-free (focus-visible),
+   keyboard navigation gets a clear branded ring on every interactive element. */
+@layer base {
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [tabindex]:not([tabindex="-1"]) {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1;
+  }
+}

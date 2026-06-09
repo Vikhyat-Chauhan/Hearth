@@ -39,7 +39,7 @@ export default function HouseholdSwitcher({
       onChange={onChange}
       disabled={busy}
       aria-label="Active household"
-      className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-gray-700 focus:border-gray-500 focus:outline-none disabled:opacity-50"
+      className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:border-brand-500 focus:outline-none disabled:opacity-50"
     >
       {households.map((h) => (
         <option key={h.id} value={h.id}>

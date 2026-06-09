@@ -7,6 +7,7 @@ import { getHouseholdContext } from "@/lib/household";
 import { listBills } from "@/lib/bills";
 import { formatCents } from "@/lib/utils";
 import { EmptyState } from "@/components/states";
+import Badge from "@/components/ui/Badge";
 import BillForm from "@/components/BillForm";
 import BillPaidToggle from "@/components/BillPaidToggle";
 import DeleteButton from "@/components/DeleteButton";
@@ -31,8 +32,9 @@ export default async function BillsPage() {
         <EmptyState
           title="No household yet"
           description="Create or join a household to track bills."
+          icon="🧾"
           action={
-            <Link href="/household" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
               Go to household
             </Link>
           }
@@ -65,13 +67,14 @@ export default async function BillsPage() {
       ) : (
         <ul className="mt-6 space-y-3">
           {items.map((bill) => (
-            <li key={bill.id} className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3">
+            <li key={bill.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className={`font-medium ${bill.paid ? "text-gray-400 line-through" : "text-gray-800"}`}>
                     {bill.title}
                   </span>
                   <span className="text-sm text-gray-500">{formatCents(bill.amountCents)}</span>
+                  <Badge variant={bill.paid ? "paid" : "unpaid"}>{bill.paid ? "Paid" : "Unpaid"}</Badge>
                 </div>
                 {bill.dueDate && (
                   <p className="text-xs text-gray-400">Due {formatDue(bill.dueDate)}</p>

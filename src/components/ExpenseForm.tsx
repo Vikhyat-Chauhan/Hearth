@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseDollarsToCents, splitEqually } from "@/lib/utils";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import CurrencyInput from "@/components/ui/CurrencyInput";
+import FieldError from "@/components/ui/FieldError";
 
 type Member = { userId: string; name: string | null; email: string };
 
@@ -79,49 +84,58 @@ export default function ExpenseForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
-      <input
+    <form onSubmit={onSubmit} className="space-y-3" aria-busy={busy}>
+      <label htmlFor="expense-description" className="sr-only">
+        Expense description
+      </label>
+      <Input
+        id="expense-description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="What was it for? (e.g. Groceries)"
         maxLength={200}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+        required
       />
       <div className="flex gap-2">
-        <div className="relative flex-1">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
-          <input
+        <div className="flex-1">
+          <label htmlFor="expense-amount" className="sr-only">
+            Amount in dollars
+          </label>
+          <CurrencyInput
+            id="expense-amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            inputMode="decimal"
-            placeholder="0.00"
-            className="w-full rounded-lg border border-gray-300 py-2 pl-7 pr-3 text-sm focus:border-gray-500 focus:outline-none"
+            required
+            aria-describedby={error ? "expense-error" : undefined}
           />
         </div>
-        <select
+        <Select
           value={paidBy}
           onChange={(e) => setPaidBy(e.target.value)}
           aria-label="Paid by"
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-gray-500 focus:outline-none"
+          className="w-auto"
         >
           {members.map((m) => (
             <option key={m.userId} value={m.userId}>
               {m.userId === currentUserId ? "I paid" : `${label(m)} paid`}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <fieldset className="rounded-lg border border-gray-200 p-3">
         <legend className="px-1 text-xs font-medium text-gray-500">Split equally between</legend>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-1">
           {members.map((m) => (
-            <label key={m.userId} className="flex items-center gap-2 text-sm text-gray-700">
+            <label
+              key={m.userId}
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+            >
               <input
                 type="checkbox"
                 checked={sharers.has(m.userId)}
                 onChange={() => toggleSharer(m.userId)}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
               />
               {label(m)}
             </label>
@@ -129,15 +143,11 @@ export default function ExpenseForm({
         </div>
       </fieldset>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      <FieldError id="expense-error">{error}</FieldError>
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={busy || description.trim().length === 0}
-          className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
-        >
+        <Button type="submit" size="sm" disabled={busy || description.trim().length === 0}>
           {busy ? "Adding…" : "Add expense"}
-        </button>
+        </Button>
       </div>
     </form>
   );

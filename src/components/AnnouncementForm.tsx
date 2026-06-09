@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
+import Textarea from "@/components/ui/Textarea";
+import FieldError from "@/components/ui/FieldError";
 
 export default function AnnouncementForm({ householdId }: { householdId: string }) {
   const router = useRouter();
@@ -35,24 +38,25 @@ export default function AnnouncementForm({ householdId }: { householdId: string 
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-2">
-      <textarea
+    <form onSubmit={onSubmit} className="space-y-2" aria-busy={busy}>
+      <label htmlFor="announcement-body" className="sr-only">
+        Announcement
+      </label>
+      <Textarea
+        id="announcement-body"
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Share something with the household…"
         rows={3}
         maxLength={2000}
-        className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+        required
+        aria-describedby={error ? "announcement-error" : undefined}
       />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      <FieldError id="announcement-error">{error}</FieldError>
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={busy || body.trim().length === 0}
-          className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={busy || body.trim().length === 0}>
           {busy ? "Posting…" : "Post"}
-        </button>
+        </Button>
       </div>
     </form>
   );

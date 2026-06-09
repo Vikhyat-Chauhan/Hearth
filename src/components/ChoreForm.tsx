@@ -3,6 +3,13 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseRRule } from "@/lib/recurrence";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Textarea from "@/components/ui/Textarea";
+import Select from "@/components/ui/Select";
+import Label from "@/components/ui/Label";
+import FieldError from "@/components/ui/FieldError";
+import { cn } from "@/lib/utils";
 
 interface Member {
   userId: string;
@@ -132,31 +139,31 @@ export default function ChoreForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 space-y-6">
+    <form onSubmit={onSubmit} className="mt-6 space-y-6" aria-busy={submitting || deleting}>
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-        <input
+        <Label htmlFor="title">Title</Label>
+        <Input
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={120}
           placeholder="e.g. Take out the trash"
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-gray-500 focus:outline-none"
+          className="mt-1"
           autoFocus
         />
       </div>
 
       <div>
-        <label htmlFor="desc" className="block text-sm font-medium text-gray-700">
-          Description <span className="text-gray-400">(optional)</span>
-        </label>
-        <textarea
+        <Label htmlFor="desc" optional>
+          Description
+        </Label>
+        <Textarea
           id="desc"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={1000}
           rows={2}
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-gray-500 focus:outline-none"
+          className="mt-1"
         />
       </div>
 
@@ -164,23 +171,23 @@ export default function ChoreForm({
         <legend className="text-sm font-medium text-gray-700">Recurrence</legend>
         <div className="mt-2 flex items-center gap-2">
           <span className="text-sm text-gray-500">Every</span>
-          <input
+          <Input
             type="number"
             min={1}
             max={52}
             value={interval}
             onChange={(e) => setIntervalN(Math.max(1, Number(e.target.value)))}
-            className="w-16 rounded-lg border border-gray-300 px-2 py-1.5"
+            className="w-16 px-2 py-1.5"
           />
-          <select
+          <Select
             value={freq}
             onChange={(e) => setFreq(e.target.value as Freq)}
-            className="rounded-lg border border-gray-300 px-2 py-1.5"
+            className="w-auto py-1.5"
           >
             <option value="DAILY">day(s)</option>
             <option value="WEEKLY">week(s)</option>
             <option value="MONTHLY">month(s)</option>
-          </select>
+          </Select>
         </div>
 
         {freq === "WEEKLY" && (
@@ -189,12 +196,14 @@ export default function ChoreForm({
               <button
                 key={d.code}
                 type="button"
+                aria-pressed={byday.has(d.code)}
                 onClick={() => setByday((s) => toggle(s, d.code))}
-                className={`rounded-full border px-3 py-1 text-sm ${
+                className={cn(
+                  "rounded-full border px-3 py-1 text-sm transition",
                   byday.has(d.code)
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
-                }`}
+                    ? "border-brand-600 bg-brand-600 text-white"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50",
+                )}
               >
                 {d.label}
               </button>
@@ -205,13 +214,13 @@ export default function ChoreForm({
         {freq === "MONTHLY" && (
           <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
             <span>on day</span>
-            <input
+            <Input
               type="number"
               min={1}
               max={31}
               value={monthday}
               onChange={(e) => setMonthday(Math.min(31, Math.max(1, Number(e.target.value))))}
-              className="w-16 rounded-lg border border-gray-300 px-2 py-1.5"
+              className="w-16 px-2 py-1.5"
             />
             <span>of the month</span>
           </div>
@@ -224,11 +233,15 @@ export default function ChoreForm({
         <legend className="text-sm font-medium text-gray-700">Assign to</legend>
         <div className="mt-2 space-y-1">
           {members.map((m) => (
-            <label key={m.userId} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-50">
+            <label
+              key={m.userId}
+              className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-50"
+            >
               <input
                 type="checkbox"
                 checked={assignees.has(m.userId)}
                 onChange={() => setAssignees((s) => toggle(s, m.userId))}
+                className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
               />
               <span className="text-sm">{m.name ?? m.email}</span>
               <span className="text-xs text-gray-400">{m.email}</span>
@@ -237,25 +250,21 @@ export default function ChoreForm({
         </div>
       </fieldset>
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      <FieldError>{error}</FieldError>
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="flex-1 rounded-lg bg-gray-900 px-4 py-2.5 font-medium text-white transition hover:bg-gray-700 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={!canSubmit} className="flex-1">
           {submitting ? "Saving…" : isEdit ? "Save changes" : "Create chore"}
-        </button>
+        </Button>
         {isEdit && (
-          <button
+          <Button
             type="button"
+            variant="danger"
             onClick={onDelete}
             disabled={deleting || submitting}
-            className="rounded-lg border border-red-300 px-4 py-2.5 font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
           >
             {deleting ? "Deleting…" : "Delete"}
-          </button>
+          </Button>
         )}
       </div>
     </form>

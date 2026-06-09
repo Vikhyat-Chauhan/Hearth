@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseDollarsToCents } from "@/lib/utils";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import CurrencyInput from "@/components/ui/CurrencyInput";
+import FieldError from "@/components/ui/FieldError";
 
 export default function BillForm({ householdId }: { householdId: string }) {
   const router = useRouter();
@@ -52,23 +56,29 @@ export default function BillForm({ householdId }: { householdId: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
-      <input
+    <form onSubmit={onSubmit} className="space-y-3" aria-busy={busy}>
+      <label htmlFor="bill-title" className="sr-only">
+        Bill name
+      </label>
+      <Input
+        id="bill-title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="What's the bill? (e.g. Internet)"
         maxLength={120}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+        required
       />
       <div className="flex gap-2">
-        <div className="relative flex-1">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
-          <input
+        <div className="flex-1">
+          <label htmlFor="bill-amount" className="sr-only">
+            Amount in dollars
+          </label>
+          <CurrencyInput
+            id="bill-amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            inputMode="decimal"
-            placeholder="0.00"
-            className="w-full rounded-lg border border-gray-300 py-2 pl-7 pr-3 text-sm focus:border-gray-500 focus:outline-none"
+            required
+            aria-describedby={error ? "bill-error" : undefined}
           />
         </div>
         <input
@@ -76,18 +86,14 @@ export default function BillForm({ householdId }: { householdId: string }) {
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
           aria-label="Due date (optional)"
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-gray-500 focus:outline-none"
+          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none"
         />
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      <FieldError id="bill-error">{error}</FieldError>
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={busy || title.trim().length === 0}
-          className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
-        >
+        <Button type="submit" size="sm" disabled={busy || title.trim().length === 0}>
           {busy ? "Adding…" : "Add bill"}
-        </button>
+        </Button>
       </div>
     </form>
   );
