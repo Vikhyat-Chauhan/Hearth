@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import FieldError from "@/components/ui/FieldError";
 
 export default function ShoppingForm({ householdId }: { householdId: string }) {
   const router = useRouter();
@@ -35,29 +38,26 @@ export default function ShoppingForm({ householdId }: { householdId: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-2">
+    <form onSubmit={onSubmit} className="space-y-2" aria-busy={busy}>
       <div className="flex gap-2">
         <label htmlFor="shopping-item" className="sr-only">
           Item name
         </label>
-        <input
+        <Input
           id="shopping-item"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Add an item…"
           maxLength={120}
           required
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+          aria-describedby={error ? "shopping-error" : undefined}
+          className="flex-1"
         />
-        <button
-          type="submit"
-          disabled={busy || name.trim().length === 0}
-          className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={busy || name.trim().length === 0}>
           {busy ? "Adding…" : "Add"}
-        </button>
+        </Button>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      <FieldError id="shopping-error">{error}</FieldError>
     </form>
   );
 }

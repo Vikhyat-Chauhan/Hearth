@@ -29,8 +29,9 @@ export default async function ChoresPage() {
         <EmptyState
           title="No household yet"
           description="Create or join a household to start seeing your chores."
+          icon="✓"
           action={
-            <Link href="/household" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
               Go to household
             </Link>
           }
@@ -46,8 +47,8 @@ export default async function ChoresPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My chores</h1>
         {ctx.role === "admin" && (
-          <Link href="/chores/new" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
-            + New chore
+          <Link href="/chores/new" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
+            ＋ New chore
           </Link>
         )}
       </div>
@@ -61,9 +62,10 @@ export default async function ChoresPage() {
                 ? "Assign a recurring chore to yourself or a roommate to get started."
                 : "When the admin assigns you a chore, it'll show up here."
             }
+            icon="🧹"
             action={
               ctx.role === "admin" ? (
-                <Link href="/chores/new" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                <Link href="/chores/new" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
                   Assign a chore
                 </Link>
               ) : undefined
@@ -73,7 +75,7 @@ export default async function ChoresPage() {
       ) : (
         <ul className="mt-6 space-y-4">
           {myChores.map((chore) => (
-            <li key={chore.id} className="rounded-xl border border-gray-200 p-5">
+            <li key={chore.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-card">
               <div className="flex items-start justify-between gap-3">
                 <h2 className="font-semibold">{chore.title}</h2>
                 {ctx.role === "admin" && (

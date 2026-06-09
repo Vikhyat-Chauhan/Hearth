@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 export default function MarkDoneButton({
   choreId,
@@ -45,12 +46,8 @@ export default function MarkDoneButton({
   }
 
   return (
-    <button
-      onClick={mark}
-      disabled={busy}
-      className="rounded-lg border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
-    >
+    <Button variant="secondary" size="sm" onClick={mark} disabled={busy}>
       {busy ? "Marking…" : error ? "Retry" : "Mark done"}
-    </button>
+    </Button>
   );
 }

@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Label from "@/components/ui/Label";
+import FieldError from "@/components/ui/FieldError";
 
 export default function NewHouseholdPage() {
   const router = useRouter();
@@ -40,35 +44,30 @@ export default function NewHouseholdPage() {
         You&apos;ll become the admin and get an invite code to share with your roommates.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} className="mt-6 space-y-4" aria-busy={submitting}>
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Household name
-          </label>
-          <input
+          <Label htmlFor="name">Household name</Label>
+          <Input
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={80}
             placeholder="e.g. Apt 4B"
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-gray-500 focus:outline-none"
+            className="mt-1"
+            aria-describedby={error ? "household-error" : undefined}
             autoFocus
           />
         </div>
 
-        {error && (
-          <p role="alert" className="text-sm text-red-600">
-            {error}
-          </p>
-        )}
+        <FieldError id="household-error">{error}</FieldError>
 
-        <button
+        <Button
           type="submit"
           disabled={submitting || name.trim().length === 0}
-          className="w-full rounded-lg bg-gray-900 px-4 py-2.5 font-medium text-white transition hover:bg-gray-700 disabled:opacity-50"
+          className="w-full"
         >
           {submitting ? "Creating…" : "Create household"}
-        </button>
+        </Button>
       </form>
     </main>
   );

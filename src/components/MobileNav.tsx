@@ -7,7 +7,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-type NavLink = { href: string; label: string };
+type NavLink = { href: string; label: string; icon?: string };
 
 export default function MobileNav({ links }: { links: NavLink[] }) {
   const pathname = usePathname();
@@ -18,7 +18,7 @@ export default function MobileNav({ links }: { links: NavLink[] }) {
 
   function linkClass(href: string) {
     return isActive(href)
-      ? "font-medium text-gray-900"
+      ? "font-medium text-brand-700"
       : "text-gray-600 hover:text-gray-900";
   }
 
@@ -31,8 +31,9 @@ export default function MobileNav({ links }: { links: NavLink[] }) {
             key={l.href}
             href={l.href}
             aria-current={isActive(l.href) ? "page" : undefined}
-            className={linkClass(l.href)}
+            className={`inline-flex items-center gap-1.5 ${linkClass(l.href)}`}
           >
+            {l.icon && <span aria-hidden="true">{l.icon}</span>}
             {l.label}
           </Link>
         ))}
@@ -57,10 +58,11 @@ export default function MobileNav({ links }: { links: NavLink[] }) {
                 href={l.href}
                 onClick={() => setOpen(false)}
                 aria-current={isActive(l.href) ? "page" : undefined}
-                className={`px-4 py-2 hover:bg-gray-50 ${
-                  isActive(l.href) ? "font-medium text-gray-900" : "text-gray-600"
+                className={`flex items-center gap-2 px-4 py-2 hover:bg-gray-50 ${
+                  isActive(l.href) ? "font-medium text-brand-700" : "text-gray-600"
                 }`}
               >
+                {l.icon && <span aria-hidden="true">{l.icon}</span>}
                 {l.label}
               </Link>
             ))}

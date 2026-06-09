@@ -21,8 +21,9 @@ export default async function ShoppingPage() {
         <EmptyState
           title="No household yet"
           description="Create or join a household to use the shopping list."
+          icon="🛒"
           action={
-            <Link href="/household" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
               Go to household
             </Link>
           }
@@ -38,7 +39,7 @@ export default async function ShoppingPage() {
       <h1 className="text-2xl font-bold">Shopping list</h1>
       <p className="mt-1 text-sm text-gray-500">Shared with everyone in {ctx.household.name}.</p>
 
-      <div className="mt-6 rounded-xl border border-gray-200 p-4">
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
         <ShoppingForm householdId={ctx.household.id} />
       </div>
 
@@ -47,7 +48,7 @@ export default async function ShoppingPage() {
           <EmptyState title="The list is empty" description="Add the first item above." />
         </div>
       ) : (
-        <ul className="mt-6 divide-y divide-gray-100 rounded-xl border border-gray-200">
+        <ul className="mt-6 divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-card">
           {items.map((item) => (
             <li key={item.id} className="flex items-center gap-3 px-4 py-3">
               <ShoppingToggle itemId={item.id} checked={item.checked} />

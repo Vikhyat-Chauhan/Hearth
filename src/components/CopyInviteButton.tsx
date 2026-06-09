@@ -2,6 +2,7 @@
 
 // Copies the household invite code to the clipboard with transient feedback.
 import { useState } from "react";
+import Button from "@/components/ui/Button";
 
 export default function CopyInviteButton({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
@@ -19,13 +20,8 @@ export default function CopyInviteButton({ code }: { code: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={onCopy}
-      aria-label="Copy invite code"
-      className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-    >
+    <Button type="button" variant="secondary" size="sm" onClick={onCopy} aria-label="Copy invite code">
       {copied ? "Copied!" : failed ? "Copy failed" : "Copy"}
-    </button>
+    </Button>
   );
 }
