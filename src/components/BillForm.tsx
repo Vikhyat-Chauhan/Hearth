@@ -53,21 +53,31 @@ export default function BillForm({ householdId }: { householdId: string }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
+      <label htmlFor="bill-title" className="sr-only">
+        Bill name
+      </label>
       <input
+        id="bill-title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="What's the bill? (e.g. Internet)"
         maxLength={120}
+        required
         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
       />
       <div className="flex gap-2">
         <div className="relative flex-1">
+          <label htmlFor="bill-amount" className="sr-only">
+            Amount in dollars
+          </label>
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
           <input
+            id="bill-amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             inputMode="decimal"
             placeholder="0.00"
+            required
             className="w-full rounded-lg border border-gray-300 py-2 pl-7 pr-3 text-sm focus:border-gray-500 focus:outline-none"
           />
         </div>

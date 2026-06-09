@@ -36,12 +36,17 @@ export default function AnnouncementForm({ householdId }: { householdId: string 
 
   return (
     <form onSubmit={onSubmit} className="space-y-2">
+      <label htmlFor="announcement-body" className="sr-only">
+        Announcement
+      </label>
       <textarea
+        id="announcement-body"
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Share something with the household…"
         rows={3}
         maxLength={2000}
+        required
         className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
       />
       {error && <p className="text-sm text-red-600">{error}</p>}

@@ -37,11 +37,16 @@ export default function ShoppingForm({ householdId }: { householdId: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-2">
       <div className="flex gap-2">
+        <label htmlFor="shopping-item" className="sr-only">
+          Item name
+        </label>
         <input
+          id="shopping-item"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Add an item…"
           maxLength={120}
+          required
           className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
         />
         <button

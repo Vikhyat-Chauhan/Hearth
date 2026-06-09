@@ -15,6 +15,13 @@
       "when": 1781026897273,
       "tag": "0001_elite_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781032562072,
+      "tag": "0002_yummy_supernaut",
+      "breakpoints": true
     }
   ]
 }

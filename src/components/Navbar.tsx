@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { listUserHouseholds, getHouseholdContext } from "@/lib/household";
 import HouseholdSwitcher from "@/components/HouseholdSwitcher";
+import MobileNav from "@/components/MobileNav";
 
 const LINKS = [
   { href: "/chores", label: "My Chores" },
@@ -40,12 +41,7 @@ export default async function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4 text-sm">
-          {user &&
-            LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className="text-gray-600 hover:text-gray-900">
-                {l.label}
-              </Link>
-            ))}
+          {user && <MobileNav links={LINKS} />}
 
           {user && myHouseholds.length > 1 && (
             <HouseholdSwitcher households={myHouseholds} activeId={activeHouseholdId} />

@@ -72,6 +72,15 @@ export default async function BillsPage() {
                     {bill.title}
                   </span>
                   <span className="text-sm text-gray-500">{formatCents(bill.amountCents)}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      bill.paid
+                        ? "bg-green-50 text-green-700"
+                        : "bg-amber-50 text-amber-700"
+                    }`}
+                  >
+                    {bill.paid ? "✓ Paid" : "Unpaid"}
+                  </span>
                 </div>
                 {bill.dueDate && (
                   <p className="text-xs text-gray-400">Due {formatDue(bill.dueDate)}</p>

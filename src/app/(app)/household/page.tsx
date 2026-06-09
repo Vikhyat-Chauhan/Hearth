@@ -5,6 +5,7 @@ import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext, listMembers } from "@/lib/household";
 import { EmptyState } from "@/components/states";
 import RemoveMemberButton from "@/components/RemoveMemberButton";
+import CopyInviteButton from "@/components/CopyInviteButton";
 
 export default async function HouseholdPage() {
   const user = await getUser();
@@ -47,7 +48,10 @@ export default async function HouseholdPage() {
       <section className="mt-6 rounded-xl border border-gray-200 p-5">
         <h2 className="text-sm font-semibold text-gray-700">Invite code</h2>
         <p className="mt-1 text-sm text-gray-500">Share this so roommates can join.</p>
-        <p className="mt-3 font-mono text-2xl tracking-widest">{household.inviteCode}</p>
+        <div className="mt-3 flex items-center gap-3">
+          <p className="font-mono text-2xl tracking-widest">{household.inviteCode}</p>
+          <CopyInviteButton code={household.inviteCode} />
+        </div>
       </section>
 
       <section className="mt-6">
