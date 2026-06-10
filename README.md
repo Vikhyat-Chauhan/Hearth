@@ -18,8 +18,6 @@ bills tracking, and Splitwise-style expense splitting.
 
 **Live:** https://hearth-ruby-eight.vercel.app
 
-![Hearth sign-in](./hearth-login.png)
-
 ## Features
 
 - **Google sign-in** — one consent grants both login and Google Calendar access.
