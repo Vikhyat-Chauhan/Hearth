@@ -1,7 +1,8 @@
 // Route protection: redirect unauthenticated requests to /login, and refresh the
 // Supabase session cookie on every request.
 //
-// Public paths: /login and the OAuth callback. Everything else requires a session.
+// Public paths: the marketing landing (exactly "/"), /login, and the OAuth
+// callback. Everything else requires a session.
 // Dev convenience: before provisioning writes .env.local, NEXT_PUBLIC_SUPABASE_URL
 // is unset — we let requests through so the app still boots locally.
 
@@ -42,7 +43,9 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  // Root "/" is public (the landing decides what to show by session); match it
+  // exactly so we don't accidentally treat every path as public.
+  const isPublic = pathname === "/" || PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   // API routes enforce auth themselves and return JSON 401 — never redirect them
   // (a redirect would hand a fetch() HTML instead of a parseable error).
   const isApi = pathname.startsWith("/api");

@@ -6,6 +6,7 @@ import { db, profiles, calendarChannels } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import ConnectCalendar from "@/components/ConnectCalendar";
 import TwoWaySync from "@/components/TwoWaySync";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default async function CalendarSettingsPage() {
   const user = await getUser();
@@ -29,11 +30,16 @@ export default async function CalendarSettingsPage() {
 
   return (
     <main className="mx-auto max-w-lg px-4 py-12">
-      <h1 className="text-2xl font-bold">Calendar</h1>
-      <p className="mt-2 text-sm text-gray-500">
-        Hearth writes your chores to your Google Calendar. Manage the connection here.
-      </p>
-      <ConnectCalendar connected={connected} />
+      <PageHeader
+        eyebrow="Stay in sync"
+        icon="📅"
+        accent="accent"
+        title="Calendar"
+        subtitle="Hearth writes your chores to your Google Calendar. Manage the connection here."
+      />
+      <div className="mt-6">
+        <ConnectCalendar connected={connected} />
+      </div>
       {connected && <TwoWaySync active={twoWayActive} />}
     </main>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 
 export default function MarkDoneButton({
   choreId,
@@ -14,6 +15,7 @@ export default function MarkDoneButton({
   done: boolean;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [isDone, setIsDone] = useState(done);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -30,12 +32,15 @@ export default function MarkDoneButton({
       });
       if (!res.ok) {
         setError(true);
+        toast("Couldn't mark it done", "error");
         return;
       }
       setIsDone(true);
+      toast("Nice — marked done");
       router.refresh();
     } catch {
       setError(true);
+      toast("Couldn't mark it done", "error");
     } finally {
       setBusy(false);
     }

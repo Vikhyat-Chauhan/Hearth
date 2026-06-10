@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import FieldError from "@/components/ui/FieldError";
+import { useToast } from "@/components/ui/Toast";
 
 type Member = { userId: string; name: string | null; email: string };
 
@@ -20,6 +21,7 @@ export default function SettlementForm({
   currentUserId: string;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const others = members.filter((m) => m.userId !== currentUserId);
   const [fromUserId, setFromUserId] = useState(currentUserId);
   const [toUserId, setToUserId] = useState(others[0]?.userId ?? "");
@@ -59,6 +61,7 @@ export default function SettlementForm({
         return;
       }
       setAmount("");
+      toast("Payment recorded");
       router.refresh();
     } catch {
       setError("Could not record the payment");
@@ -103,7 +106,7 @@ export default function SettlementForm({
         onChange={(e) => setAmount(e.target.value)}
         aria-label="Amount in dollars"
         aria-describedby={error ? "settlement-error" : undefined}
-        className="w-24"
+        className="w-28"
       />
       <Button type="submit" size="sm" disabled={busy}>
         {busy ? "Saving…" : "Record"}

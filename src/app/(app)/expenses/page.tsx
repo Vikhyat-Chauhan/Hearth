@@ -1,13 +1,14 @@
 // Expenses (server component): Splitwise-style shared expenses with per-member
 // balances. Any member can add an expense, record a settlement, or delete an
 // expense. Money is integer cents; balances are zero-sum.
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext, listMembers } from "@/lib/household";
 import { listExpenses, computeBalances } from "@/lib/expenses";
 import { formatCents } from "@/lib/utils";
 import { EmptyState } from "@/components/states";
+import PageHeader from "@/components/ui/PageHeader";
+import LinkButton from "@/components/ui/LinkButton";
 import ExpenseForm from "@/components/ExpenseForm";
 import SettlementForm from "@/components/SettlementForm";
 import DeleteButton from "@/components/DeleteButton";
@@ -19,16 +20,12 @@ export default async function ExpensesPage() {
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12">
+      <main className="mx-auto max-w-3xl px-4 py-12">
         <EmptyState
           title="No household yet"
           description="Create or join a household to split expenses."
           icon="💸"
-          action={
-            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-              Go to household
-            </Link>
-          }
+          action={<LinkButton href="/household">Go to household</LinkButton>}
         />
       </main>
     );
@@ -46,13 +43,18 @@ export default async function ExpensesPage() {
   };
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-2xl font-bold">Expenses</h1>
-      <p className="mt-1 text-sm text-gray-500">Shared spending and balances for {ctx.household.name}.</p>
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader
+        eyebrow="Square it up"
+        icon="💸"
+        accent="green"
+        title="Expenses"
+        subtitle={`Shared spending and balances for ${ctx.household.name}.`}
+      />
 
       {/* Balances */}
       <section className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <h2 className="text-sm font-semibold text-gray-700">Balances</h2>
+        <h2 className="font-display text-base font-semibold text-gray-900">Balances</h2>
         <ul className="mt-3 space-y-1">
           {balances.map((b) => (
             <li key={b.userId} className="flex items-center justify-between text-sm">
@@ -64,8 +66,16 @@ export default async function ExpensesPage() {
                   b.netCents > 0 ? "font-medium text-green-600" : b.netCents < 0 ? "font-medium text-red-600" : "text-gray-400"
                 }
               >
-                {b.netCents > 0 && `is owed ${formatCents(b.netCents)}`}
-                {b.netCents < 0 && `owes ${formatCents(-b.netCents)}`}
+                {b.netCents > 0 && (
+                  <>
+                    <span aria-hidden="true">▲ </span>is owed {formatCents(b.netCents)}
+                  </>
+                )}
+                {b.netCents < 0 && (
+                  <>
+                    <span aria-hidden="true">▼ </span>owes {formatCents(-b.netCents)}
+                  </>
+                )}
                 {b.netCents === 0 && "settled up"}
               </span>
             </li>
@@ -79,7 +89,7 @@ export default async function ExpensesPage() {
 
       {/* Add expense */}
       <section className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">Add an expense</h2>
+        <h2 className="mb-3 font-display text-base font-semibold text-gray-900">Add an expense</h2>
         <ExpenseForm householdId={householdId} members={members} currentUserId={user.id} />
       </section>
 
@@ -91,7 +101,10 @@ export default async function ExpensesPage() {
       ) : (
         <ul className="mt-6 space-y-3">
           {expenseList.map((e) => (
-            <li key={e.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card">
+            <li
+              key={e.id}
+              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-gray-800">{e.description}</span>

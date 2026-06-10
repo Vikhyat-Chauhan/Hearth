@@ -6,9 +6,12 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Label from "@/components/ui/Label";
 import FieldError from "@/components/ui/FieldError";
+import PageHeader from "@/components/ui/PageHeader";
+import { useToast } from "@/components/ui/Toast";
 
 export default function JoinPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +31,7 @@ export default function JoinPage() {
         setError(body.error ?? "Could not join the household");
         return;
       }
+      toast("Joined the household");
       router.push("/household");
       router.refresh();
     } catch {
@@ -39,10 +43,10 @@ export default function JoinPage() {
 
   return (
     <main className="mx-auto max-w-md px-4 py-12">
-      <h1 className="text-2xl font-bold">Join a household</h1>
-      <p className="mt-2 text-sm text-gray-500">
-        Enter the invite code your main roommate shared with you.
-      </p>
+      <PageHeader
+        title="Join a household"
+        subtitle="Enter the invite code your main roommate shared with you."
+      />
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4" aria-busy={submitting}>
         <div>

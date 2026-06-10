@@ -9,13 +9,20 @@ import { computeBalances } from "@/lib/expenses";
 import { formatCents, formatOccurrenceDate, formatRelativeTime } from "@/lib/utils";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import LinkButton from "@/components/ui/LinkButton";
 import DashboardWidget from "@/components/dashboard/DashboardWidget";
+import LandingPage from "@/components/LandingPage";
 
 export default async function Home() {
   const user = process.env.NEXT_PUBLIC_SUPABASE_URL ? await getUser() : null;
   const ctx = user ? await getHouseholdContext(user.id) : null;
 
-  // No household yet → onboarding.
+  // Logged-out visitor → marketing landing page.
+  if (!user) {
+    return <LandingPage />;
+  }
+
+  // Signed in but no household yet → onboarding.
   if (!ctx) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16">
@@ -71,40 +78,45 @@ export default async function Home() {
   const others = balances.filter((b) => b.userId !== user!.id && b.netCents !== 0).slice(0, 2);
   const hasExpenses = balances.some((b) => b.netCents !== 0);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm text-gray-500">Welcome home to</p>
-          <h1 className="font-display text-3xl font-bold text-brand-700">{ctx.household.name}</h1>
+      <div className="relative isolate">
+        {/* Soft ember glow behind the greeting — warmth without a heavy hero band. */}
+        <div
+          aria-hidden="true"
+          className="animate-ember pointer-events-none absolute -left-10 -top-12 -z-10 h-44 w-44 rounded-full bg-brand-200/40 blur-3xl"
+        />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+              {greeting} · Welcome home to
+            </p>
+            <h1 className="mt-1 font-display text-3xl font-semibold text-brand-700 sm:text-4xl">
+              {ctx.household.name}
+            </h1>
+          </div>
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium capitalize text-brand-700 ring-1 ring-inset ring-brand-100">
+            {ctx.role}
+          </span>
         </div>
-        <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium capitalize text-brand-700">
-          {ctx.role}
-        </span>
       </div>
 
       {/* Quick actions */}
       <div className="mt-6 flex flex-wrap gap-2">
         {ctx.role === "admin" && (
-          <Link
-            href="/chores/new"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card transition hover:bg-brand-700"
-          >
+          <LinkButton href="/chores/new">
             <span aria-hidden="true">＋</span> Assign a chore
-          </Link>
+          </LinkButton>
         )}
-        <Link
-          href="/shopping"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-        >
+        <LinkButton href="/shopping" variant="secondary">
           <span aria-hidden="true">🛒</span> Add shopping item
-        </Link>
-        <Link
-          href="/announcements"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-        >
+        </LinkButton>
+        <LinkButton href="/announcements" variant="secondary">
           <span aria-hidden="true">📣</span> Post to board
-        </Link>
+        </LinkButton>
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -113,6 +125,7 @@ export default async function Home() {
           title="My chores"
           href="/chores"
           icon="✓"
+          accent="brand"
           count={upcomingChores.length}
           empty={upcomingChores.length === 0}
           emptyText="Nothing assigned — you're all caught up."
@@ -132,6 +145,7 @@ export default async function Home() {
           title="Board"
           href="/announcements"
           icon="📣"
+          accent="accent"
           empty={latestAnnouncements.length === 0}
           emptyText="No announcements yet."
         >
@@ -155,6 +169,7 @@ export default async function Home() {
           title="Shopping list"
           href="/shopping"
           icon="🛒"
+          accent="brand"
           count={unchecked.length}
           empty={unchecked.length === 0}
           emptyText="List is empty — nothing to buy."
@@ -174,6 +189,7 @@ export default async function Home() {
           title="Unpaid bills"
           href="/bills"
           icon="🧾"
+          accent="amber"
           count={unpaidBills.length}
           empty={unpaidBills.length === 0}
           emptyText="No unpaid bills. Nice."
@@ -196,6 +212,7 @@ export default async function Home() {
           title="Balances"
           href="/expenses"
           icon="💸"
+          accent="green"
           empty={!hasExpenses}
           emptyText="No shared expenses yet."
         >
@@ -206,12 +223,18 @@ export default async function Home() {
               ) : myBalance.netCents > 0 ? (
                 <>
                   You&apos;re owed{" "}
-                  <span className="font-semibold text-green-700">{formatCents(myBalance.netCents)}</span>
+                  <span className="font-semibold text-green-700">
+                    <span aria-hidden="true">▲ </span>
+                    {formatCents(myBalance.netCents)}
+                  </span>
                 </>
               ) : (
                 <>
                   You owe{" "}
-                  <span className="font-semibold text-red-700">{formatCents(-myBalance.netCents)}</span>
+                  <span className="font-semibold text-red-700">
+                    <span aria-hidden="true">▼ </span>
+                    {formatCents(-myBalance.netCents)}
+                  </span>
                 </>
               )}
             </p>

@@ -7,9 +7,11 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import FieldError from "@/components/ui/FieldError";
+import { useToast } from "@/components/ui/Toast";
 
 export default function BillForm({ householdId }: { householdId: string }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -47,6 +49,7 @@ export default function BillForm({ householdId }: { householdId: string }) {
       setTitle("");
       setAmount("");
       setDueDate("");
+      toast("Bill added");
       router.refresh();
     } catch {
       setError("Could not add the bill");

@@ -31,7 +31,7 @@ export function EmptyState({
     <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
       <div
         aria-hidden="true"
-        className="mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-2xl"
+        className="mb-1 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-50 to-accent-50 text-2xl ring-1 ring-inset ring-brand-100"
       >
         {icon}
       </div>

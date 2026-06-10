@@ -8,6 +8,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import FieldError from "@/components/ui/FieldError";
+import { useToast } from "@/components/ui/Toast";
 
 type Member = { userId: string; name: string | null; email: string };
 
@@ -21,6 +22,7 @@ export default function ExpenseForm({
   currentUserId: string;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [paidBy, setPaidBy] = useState(currentUserId);
@@ -75,6 +77,7 @@ export default function ExpenseForm({
       }
       setDescription("");
       setAmount("");
+      toast("Expense added");
       router.refresh();
     } catch {
       setError("Could not add the expense");

@@ -1,12 +1,13 @@
 // Bills (server component): shared utilities/bills tracking. Any member can add,
 // mark paid/unpaid, or remove. Amounts are stored and summed as integer cents.
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext } from "@/lib/household";
 import { listBills } from "@/lib/bills";
 import { formatCents } from "@/lib/utils";
 import { EmptyState } from "@/components/states";
+import PageHeader from "@/components/ui/PageHeader";
+import LinkButton from "@/components/ui/LinkButton";
 import Badge from "@/components/ui/Badge";
 import BillForm from "@/components/BillForm";
 import BillPaidToggle from "@/components/BillPaidToggle";
@@ -28,16 +29,12 @@ export default async function BillsPage() {
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12">
+      <main className="mx-auto max-w-3xl px-4 py-12">
         <EmptyState
           title="No household yet"
           description="Create or join a household to track bills."
           icon="🧾"
-          action={
-            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-              Go to household
-            </Link>
-          }
+          action={<LinkButton href="/household">Go to household</LinkButton>}
         />
       </main>
     );
@@ -47,14 +44,20 @@ export default async function BillsPage() {
   const outstandingCents = items.filter((b) => !b.paid).reduce((sum, b) => sum + b.amountCents, 0);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold">Bills</h1>
-        <span className="text-sm text-gray-500">
-          Outstanding: <span className="font-semibold text-gray-800">{formatCents(outstandingCents)}</span>
-        </span>
-      </div>
-      <p className="mt-1 text-sm text-gray-500">Shared utilities and bills for {ctx.household.name}.</p>
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader
+        eyebrow="Keeping the lights on"
+        icon="🧾"
+        accent="amber"
+        title="Bills"
+        subtitle={`Shared utilities and bills for ${ctx.household.name}.`}
+        action={
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-100">
+            Outstanding
+            <span className="font-semibold">{formatCents(outstandingCents)}</span>
+          </span>
+        }
+      />
 
       <div className="mt-6 rounded-xl border border-gray-200 p-4">
         <BillForm householdId={ctx.household.id} />
@@ -67,7 +70,10 @@ export default async function BillsPage() {
       ) : (
         <ul className="mt-6 space-y-3">
           {items.map((bill) => (
-            <li key={bill.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card">
+            <li
+              key={bill.id}
+              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className={`font-medium ${bill.paid ? "text-gray-400 line-through" : "text-gray-800"}`}>
