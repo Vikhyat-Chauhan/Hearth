@@ -22,6 +22,11 @@ function getKey(): Buffer {
   return key;
 }
 
+/** Throws if TOKEN_ENC_KEY is missing or doesn't decode to a 32-byte key. */
+export function assertTokenEncKey(): void {
+  getKey();
+}
+
 /** Encrypt a plaintext token → "iv:tag:ciphertext" (all base64). */
 export function encryptToken(plaintext: string): string {
   const iv = randomBytes(12);

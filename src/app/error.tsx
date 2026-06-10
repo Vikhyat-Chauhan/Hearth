@@ -17,11 +17,17 @@ export default function Error({
     console.error(error);
   }, [error]);
 
+  // Don't surface raw error text to users in production — it can leak internals.
+  const description =
+    process.env.NODE_ENV === "production"
+      ? "An unexpected error occurred. Please try again."
+      : error.message || "An unexpected error occurred.";
+
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
       <ErrorState
         title="Something went wrong"
-        description={error.message || "An unexpected error occurred."}
+        description={description}
         action={
           <button
             onClick={reset}

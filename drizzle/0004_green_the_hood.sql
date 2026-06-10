@@ -1,0 +1,1 @@
+ALTER TABLE "calendar_channels" ADD COLUMN "token" text;

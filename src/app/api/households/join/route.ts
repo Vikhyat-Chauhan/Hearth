@@ -4,11 +4,17 @@ import { db, households, memberships } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import { householdJoinSchema, parseBody } from "@/lib/validation";
 import { ACTIVE_HOUSEHOLD_COOKIE } from "@/lib/household";
-import { ok, badRequest, unauthorized, notFound, withErrorHandling } from "@/lib/api";
+import { ok, badRequest, unauthorized, notFound, tooManyRequests, withErrorHandling } from "@/lib/api";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const POST = withErrorHandling(async (req: Request) => {
   const user = await getUser();
   if (!user) return unauthorized();
+
+  // Throttle invite-code attempts to blunt brute-force enumeration. Keyed per
+  // user so one account can't grind codes; the Vercel WAF rule covers per-IP.
+  const limited = rateLimit(`join:${user.id}`, 10, 60_000);
+  if (!limited.success) return tooManyRequests(limited.retryAfter);
 
   const result = parseBody(householdJoinSchema, await req.json());
   if (!result.success) return badRequest(result.error, result.issues);
