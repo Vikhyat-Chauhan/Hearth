@@ -21,3 +21,51 @@
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1;
   }
 }
+
+/* Marketing landing: warm atmosphere + a single orchestrated page-load reveal.
+   Staggered with inline animation-delay on each element. */
+@layer utilities {
+  @keyframes hearth-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-rise {
+    animation: hearth-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Slow, breathing ember glow behind the hero. */
+  @keyframes hearth-ember {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.08);
+    }
+  }
+  .animate-ember {
+    animation: hearth-ember 8s ease-in-out infinite;
+  }
+
+  /* Faint warm dotted texture for hero/section backdrops. */
+  .bg-hearth-grain {
+    background-image: radial-gradient(rgba(194, 65, 12, 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+}
+
+/* Respect users who prefer reduced motion — drop the entrance/ambient motion. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-ember {
+    animation: none;
+  }
+}

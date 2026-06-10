@@ -11,12 +11,18 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import LinkButton from "@/components/ui/LinkButton";
 import DashboardWidget from "@/components/dashboard/DashboardWidget";
+import LandingPage from "@/components/LandingPage";
 
 export default async function Home() {
   const user = process.env.NEXT_PUBLIC_SUPABASE_URL ? await getUser() : null;
   const ctx = user ? await getHouseholdContext(user.id) : null;
 
-  // No household yet → onboarding.
+  // Logged-out visitor → marketing landing page.
+  if (!user) {
+    return <LandingPage />;
+  }
+
+  // Signed in but no household yet → onboarding.
   if (!ctx) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16">
