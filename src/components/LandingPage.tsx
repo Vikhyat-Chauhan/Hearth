@@ -4,36 +4,116 @@
 // primary CTA points at /login, which starts the Google sign-in + Calendar flow.
 import Link from "next/link";
 
-const FEATURES = [
-  {
-    icon: "✓",
-    title: "Recurring chores",
-    body: "Assign dish duty, trash, and the bathroom on a repeat. Hearth keeps the rotation so nobody has to nag.",
+// A small accent vocabulary mirroring src/lib/ui.ts (FEATURE_ACCENT). Class
+// strings stay literal so Tailwind's content scan keeps them.
+const ACCENT = {
+  brand: {
+    eyebrow: "text-brand-700",
+    chip: "bg-brand-50 text-brand-700",
+    glyph: "text-brand-600",
+    band: "bg-brand-50/40 border-brand-100",
   },
+  accent: {
+    eyebrow: "text-accent-700",
+    chip: "bg-accent-50 text-accent-700",
+    glyph: "text-accent-600",
+    band: "bg-accent-50/40 border-accent-100",
+  },
+  amber: {
+    eyebrow: "text-amber-700",
+    chip: "bg-amber-50 text-amber-700",
+    glyph: "text-amber-600",
+    band: "bg-amber-50/40 border-amber-100",
+  },
+  green: {
+    eyebrow: "text-green-700",
+    chip: "bg-green-50 text-green-700",
+    glyph: "text-green-600",
+    band: "bg-green-50/40 border-green-100",
+  },
+} as const;
+
+type AccentKey = keyof typeof ACCENT;
+type MockupKind = "chores" | "shopping" | "bills" | "expenses" | "board";
+
+type Showcase = {
+  icon: string;
+  eyebrow: string;
+  accent: AccentKey;
+  title: string;
+  body: string;
+  points: string[];
+  mockup: MockupKind;
+};
+
+// The five core "life improvement" features, each explained in full. Copy is
+// kept accurate to what's actually built (recurrence, any-one-marks-it,
+// anonymous posts, custom splits, paid/unpaid bills).
+const SHOWCASE: Showcase[] = [
   {
     icon: "📅",
-    title: "On everyone's calendar",
-    body: "Every chore lands on each roommate's own Google Calendar — one-way, automatic, no extra app to check.",
+    eyebrow: "Chores · Google Calendar",
+    accent: "brand",
+    title: "Recurring chores, on everyone's calendar",
+    body: "Set a chore to repeat — dishes every night, trash on Tuesdays — and assign it to one roommate or share it across several. It lands on each person's own Google Calendar automatically. Any one of them marking it done marks it done for the whole house.",
+    points: [
+      "Recurring schedules, from nightly to every-other-week",
+      "Shared chores: whoever does it first checks it off for everyone",
+      "Edits and deletes sync to every assignee's calendar",
+    ],
+    mockup: "chores",
   },
   {
     icon: "🛒",
-    title: "Shared shopping list",
-    body: "Anyone adds, anyone checks off. The whole house sees what's needed and what's already in the cart.",
+    eyebrow: "Shared shopping list",
+    accent: "accent",
+    title: "One shopping list the whole house shares",
+    body: "Anyone adds, anyone checks off, and you can always see who added what. Unchecked items float to the top so it's instantly clear what's still needed — no more three people buying the same carton of milk.",
+    points: [
+      "Live and shared — not a list per person",
+      "Check items off as you shop; they don't disappear",
+      "See who added each item at a glance",
+    ],
+    mockup: "shopping",
   },
   {
     icon: "🧾",
-    title: "Bills & utilities",
-    body: "Track what's due and what's paid, so the internet never quietly gets shut off mid-month.",
+    eyebrow: "Bills & utilities",
+    accent: "amber",
+    title: "Never get surprised by a shared bill again",
+    body: "Track every shared bill in one place — rent, internet, power — each with a due date and a paid or unpaid status. The outstanding total sits right at the top, so the lights never quietly go out mid-month.",
+    points: [
+      "Due dates, with the soonest surfaced first",
+      "Mark paid without losing the history",
+      "A running outstanding total up top",
+    ],
+    mockup: "bills",
   },
   {
     icon: "💸",
-    title: "Expenses, split fair",
-    body: "Splitwise-style balances show who owes who at a glance — then settle up without the spreadsheet.",
+    eyebrow: "Expenses, split fair",
+    accent: "green",
+    title: "Split shared spending without the spreadsheet",
+    body: "Someone covers groceries; split it evenly or by custom shares. Hearth keeps the running who-owes-who balance and lets you record a settlement when you pay each other back. Money is tracked to the cent — no rounding drama.",
+    points: [
+      "Even or custom splits per person",
+      "Automatic, always-balanced who-owes-who",
+      "Record a settlement to square up",
+    ],
+    mockup: "expenses",
   },
   {
     icon: "📣",
-    title: "House board",
-    body: "Post announcements (or go anonymous) for the whole house. Far fewer awkward group texts.",
+    eyebrow: "House board",
+    accent: "accent",
+    title: "House-wide notes, minus the awkward group text",
+    body: "Post what the house needs to know — a package is coming, guests this weekend, the sink is leaking. Go anonymous when you need to raise something without the friction. Only you and the admin can take a post down.",
+    points: [
+      "Announcements everyone in the house sees",
+      "Optional anonymous posting",
+      "Author or admin can delete",
+    ],
+    mockup: "board",
   },
 ];
 
@@ -75,6 +155,185 @@ function GoogleCTA({
       </span>
       {children}
     </Link>
+  );
+}
+
+// Decorative, data-free product previews — one per showcase feature. Reuse the
+// hero card vocabulary (rounded-2xl white surface, stone list rows, brand check
+// tiles). Purely illustrative, so the whole thing is aria-hidden.
+function FeatureMockup({ kind }: { kind: MockupKind }) {
+  const shell =
+    "w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-5 shadow-card-hover";
+
+  if (kind === "chores") {
+    return (
+      <div aria-hidden="true" className={`${shell} rotate-1`}>
+        <div className="flex items-center justify-between">
+          <p className="font-display text-lg font-semibold text-gray-900">This week</p>
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
+            Apt 4B
+          </span>
+        </div>
+        <ul className="mt-4 space-y-2.5">
+          {[
+            { t: "Take out the trash", who: "You", day: "Today", done: false },
+            { t: "Kitchen deep clean", who: "Sam", day: "Today", done: true },
+            { t: "Vacuum living room", who: "Priya", day: "Tue", done: false },
+          ].map((c) => (
+            <li
+              key={c.t}
+              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+            >
+              <span
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs ${
+                  c.done
+                    ? "bg-brand-600 text-white"
+                    : "border border-gray-300 bg-white text-transparent"
+                }`}
+              >
+                ✓
+              </span>
+              <span
+                className={`flex-1 text-sm ${
+                  c.done ? "text-gray-400 line-through" : "text-gray-800"
+                }`}
+              >
+                {c.t}
+              </span>
+              <span className="text-xs text-gray-400">{c.who}</span>
+              <span className="rounded-md bg-white px-1.5 py-0.5 text-xs font-medium text-gray-500 shadow-card">
+                {c.day}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  if (kind === "shopping") {
+    return (
+      <div aria-hidden="true" className={`${shell} -rotate-1`}>
+        <p className="font-display text-lg font-semibold text-gray-900">Shopping list</p>
+        <ul className="mt-4 space-y-2.5">
+          {[
+            { t: "Oat milk", who: "Priya", done: false },
+            { t: "Dish soap", who: "You", done: false },
+            { t: "Paper towels", who: "Sam", done: true },
+            { t: "Coffee beans", who: "Alex", done: true },
+          ].map((c) => (
+            <li
+              key={c.t}
+              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+            >
+              <span
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs ${
+                  c.done
+                    ? "bg-accent-600 text-white"
+                    : "border border-gray-300 bg-white text-transparent"
+                }`}
+              >
+                ✓
+              </span>
+              <span
+                className={`flex-1 text-sm ${
+                  c.done ? "text-gray-400 line-through" : "text-gray-800"
+                }`}
+              >
+                {c.t}
+              </span>
+              <span className="text-xs text-gray-400">Added by {c.who}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  if (kind === "bills") {
+    return (
+      <div aria-hidden="true" className={`${shell} rotate-1`}>
+        <div className="flex items-center justify-between rounded-xl bg-amber-50 px-3.5 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-amber-700">
+            Outstanding
+          </p>
+          <p className="font-display text-lg font-semibold text-amber-700">$128.40</p>
+        </div>
+        <ul className="mt-4 space-y-2.5">
+          {[
+            { t: "Internet", due: "Jun 15", amt: "$60.00", paid: false },
+            { t: "Electricity", due: "Jun 18", amt: "$68.40", paid: false },
+            { t: "Water", due: "Jun 2", amt: "$24.00", paid: true },
+          ].map((b) => (
+            <li
+              key={b.t}
+              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+            >
+              <span className="flex-1 text-sm text-gray-800">{b.t}</span>
+              <span className="text-xs text-gray-400">Due {b.due}</span>
+              <span className="text-sm font-medium text-gray-700">{b.amt}</span>
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-xs font-medium ${
+                  b.paid ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {b.paid ? "Paid" : "Unpaid"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  if (kind === "expenses") {
+    return (
+      <div aria-hidden="true" className={`${shell} -rotate-1`}>
+        <p className="font-display text-lg font-semibold text-gray-900">Balances</p>
+        <ul className="mt-4 space-y-2.5">
+          {[
+            { who: "Priya owes you", amt: "+$18.00", tone: "text-green-700" },
+            { who: "Sam owes you", amt: "+$11.50", tone: "text-green-700" },
+            { who: "You owe Alex", amt: "−$6.00", tone: "text-gray-500" },
+          ].map((r) => (
+            <li
+              key={r.who}
+              className="flex items-center justify-between rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+            >
+              <span className="text-sm text-gray-800">{r.who}</span>
+              <span className={`font-display text-sm font-semibold ${r.tone}`}>{r.amt}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3 flex justify-end">
+          <span className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white">
+            Settle up
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // board
+  return (
+    <div aria-hidden="true" className={`${shell} rotate-1`}>
+      <p className="font-display text-lg font-semibold text-gray-900">House board</p>
+      <ul className="mt-4 space-y-3">
+        <li className="rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-3">
+          <p className="text-sm text-gray-800">📦 Package for the house arrives Thursday.</p>
+          <p className="mt-1.5 text-xs text-gray-400">Sam · 2h ago</p>
+        </li>
+        <li className="rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-3">
+          <p className="text-sm text-gray-800">Can we agree on a quiet-hours rule? 🙏</p>
+          <p className="mt-1.5 text-xs text-gray-400">
+            <span className="rounded bg-gray-200 px-1.5 py-0.5 font-medium text-gray-600">
+              Anonymous
+            </span>{" "}
+            · 5h ago
+          </p>
+        </li>
+      </ul>
+    </div>
   );
 }
 
@@ -222,10 +481,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Features ─────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:py-24">
-        <div className="max-w-2xl">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+      {/* ─── Features intro + index ───────────────────────────────────────── */}
+      <section className="mx-auto max-w-6xl px-4 pt-20 sm:pt-24">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-medium uppercase tracking-wide text-brand-700">
+            Five fewer things to argue about
+          </p>
+          <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
             Everything a shared home needs
           </h2>
           <p className="mt-4 text-lg text-gray-600">
@@ -234,23 +496,79 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-card transition hover:-translate-y-1 hover:shadow-card-hover"
-            >
-              <div
-                aria-hidden="true"
-                className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-xl transition group-hover:bg-brand-100"
+        {/* Quick index — scannable overview that bridges into the detail rows. */}
+        <div className="mt-12 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {SHOWCASE.map((f) => {
+            const a = ACCENT[f.accent];
+            return (
+              <a
+                key={f.eyebrow}
+                href={`#feat-${f.mockup}`}
+                className="group flex flex-col items-center gap-2 rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-card transition hover:-translate-y-1 hover:shadow-card-hover"
               >
-                {f.icon}
-              </div>
-              <h3 className="mt-4 font-display text-lg font-semibold text-gray-900">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-gray-600">{f.body}</p>
-            </div>
-          ))}
+                <span
+                  aria-hidden="true"
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl text-xl ${a.chip}`}
+                >
+                  {f.icon}
+                </span>
+                <span className="text-sm font-medium text-gray-800">{f.eyebrow}</span>
+              </a>
+            );
+          })}
         </div>
+      </section>
+
+      {/* ─── Feature showcase — alternating detail rows ───────────────────── */}
+      <section className="mt-12">
+        {SHOWCASE.map((f, i) => {
+          const a = ACCENT[f.accent];
+          const banded = i % 2 === 1;
+          return (
+            <div
+              key={f.eyebrow}
+              id={`feat-${f.mockup}`}
+              className={`scroll-mt-20 ${
+                banded ? `relative border-y ${a.band}` : ""
+              }`}
+            >
+              {banded && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-hearth-grain opacity-40"
+                />
+              )}
+              <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:gap-16 lg:py-20">
+                {/* Copy */}
+                <div className={banded ? "lg:order-last" : ""}>
+                  <p
+                    className={`inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wide ${a.eyebrow}`}
+                  >
+                    <span aria-hidden="true">{f.icon}</span> {f.eyebrow}
+                  </p>
+                  <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
+                    {f.title}
+                  </h3>
+                  <p className="mt-4 max-w-xl text-lg leading-relaxed text-gray-600">{f.body}</p>
+                  <ul className="mt-6 space-y-2.5">
+                    {f.points.map((p) => (
+                      <li key={p} className="flex items-start gap-2.5 text-gray-700">
+                        <span aria-hidden="true" className={`mt-0.5 shrink-0 ${a.glyph}`}>
+                          ✦
+                        </span>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {/* Mockup */}
+                <div className="flex justify-center">
+                  <FeatureMockup kind={f.mockup} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </section>
 
       {/* ─── How it works ─────────────────────────────────────────────────── */}
