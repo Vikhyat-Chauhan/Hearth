@@ -25,6 +25,10 @@ export function notFound(error = "Not found") {
   return NextResponse.json({ error }, { status: 404 });
 }
 
+export function tooManyRequests(retryAfter: number, error = "Too many requests — try again shortly") {
+  return NextResponse.json({ error }, { status: 429, headers: { "Retry-After": String(retryAfter) } });
+}
+
 export function serverError(error = "Something went wrong") {
   return NextResponse.json({ error }, { status: 500 });
 }

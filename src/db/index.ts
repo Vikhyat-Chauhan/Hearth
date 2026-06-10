@@ -29,11 +29,23 @@ function getDb(): Database {
     throw new Error("DATABASE_URL is not set — add it to .env.local");
   }
 
-  const client = globalForDb.client ?? postgres(connectionString, { prepare: false });
-  if (process.env.NODE_ENV !== "production") globalForDb.client = client;
+  // Cache the client/db on global scope in ALL environments. Module/global scope
+  // is reused across requests on the same Fluid Compute instance, so without this
+  // the lazy proxy would open a brand-new pool on every query and exhaust the
+  // Supabase transaction pooler under load. `prepare: false` is required for the
+  // transaction pooler (port 6543); the limits keep each instance's footprint small.
+  const client =
+    globalForDb.client ??
+    postgres(connectionString, {
+      prepare: false,
+      max: 5,
+      idle_timeout: 20,
+      connect_timeout: 10,
+    });
+  globalForDb.client = client;
 
   const database = drizzle(client, { schema });
-  if (process.env.NODE_ENV !== "production") globalForDb.db = database;
+  globalForDb.db = database;
   return database;
 }
 
