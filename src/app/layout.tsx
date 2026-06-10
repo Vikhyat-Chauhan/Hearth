@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import ToastProvider from "@/components/ui/Toast";
+import ConfirmProvider from "@/components/ui/ConfirmDialog";
 
 // Inter for UI text; Fraunces (a warm display serif) for the brand wordmark
 // and headings — gives Hearth a homey feel without a new npm dependency.
@@ -26,8 +28,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${display.variable}`}>
       <body className="font-sans">
-        <Navbar />
-        {children}
+        <a
+          href="#main-content"
+          className="sr-only rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50"
+        >
+          Skip to content
+        </a>
+        <ConfirmProvider>
+          <ToastProvider>
+            <Navbar />
+            <div id="main-content" tabIndex={-1} className="outline-none">
+              {children}
+            </div>
+          </ToastProvider>
+        </ConfirmProvider>
       </body>
     </html>
   );

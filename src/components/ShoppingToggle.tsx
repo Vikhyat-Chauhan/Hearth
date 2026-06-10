@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ShoppingToggle({
   itemId,
@@ -11,6 +12,7 @@ export default function ShoppingToggle({
   checked: boolean;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [isChecked, setIsChecked] = useState(checked);
   const [busy, setBusy] = useState(false);
 
@@ -27,11 +29,13 @@ export default function ShoppingToggle({
       });
       if (!res.ok) {
         setIsChecked(!next); // revert
+        toast("Couldn't update the item", "error");
         return;
       }
       router.refresh();
     } catch {
       setIsChecked(!next);
+      toast("Couldn't update the item", "error");
     } finally {
       setBusy(false);
     }

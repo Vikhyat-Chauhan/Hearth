@@ -26,6 +26,15 @@ describe("parseBody", () => {
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("Title is required");
   });
+
+  it("maps each invalid field to its first message in fieldErrors", () => {
+    const result = parseBody(schema, { title: "", priceCents: -1 });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.fieldErrors.title).toContain("Title is required");
+      expect(result.fieldErrors.priceCents).toBeTruthy();
+    }
+  });
 });
 
 describe("EmptyState", () => {

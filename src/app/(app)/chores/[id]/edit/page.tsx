@@ -8,6 +8,8 @@ import { getUser } from "@/lib/supabase/server";
 import { isAdmin, listMembers } from "@/lib/household";
 import ChoreForm from "@/components/ChoreForm";
 import { EmptyState } from "@/components/states";
+import PageHeader from "@/components/ui/PageHeader";
+import LinkButton from "@/components/ui/LinkButton";
 
 export default async function EditChorePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,9 +26,9 @@ export default async function EditChorePage({ params }: { params: Promise<{ id: 
           title="Admins only"
           description="Only the household admin can edit chores."
           action={
-            <Link href="/chores" className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <LinkButton href="/chores" variant="secondary">
               Back to chores
-            </Link>
+            </LinkButton>
           }
         />
       </main>
@@ -40,8 +42,12 @@ export default async function EditChorePage({ params }: { params: Promise<{ id: 
 
   return (
     <main className="mx-auto max-w-lg px-4 py-12">
-      <h1 className="text-2xl font-bold">Edit chore</h1>
-      <p className="mt-2 text-sm text-gray-500">Update the details, reassign, or delete the chore.</p>
+      <Link href="/chores" className="text-sm text-gray-500 transition hover:text-gray-900">
+        <span aria-hidden="true">←</span> Back to chores
+      </Link>
+      <div className="mt-2">
+        <PageHeader title="Edit chore" subtitle="Update the details, reassign, or delete the chore." />
+      </div>
       <ChoreForm
         householdId={chore.householdId}
         members={members.map((m) => ({ userId: m.userId, name: m.name, email: m.email }))}

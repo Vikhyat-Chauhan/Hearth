@@ -1,12 +1,13 @@
 // Bills (server component): shared utilities/bills tracking. Any member can add,
 // mark paid/unpaid, or remove. Amounts are stored and summed as integer cents.
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext } from "@/lib/household";
 import { listBills } from "@/lib/bills";
 import { formatCents } from "@/lib/utils";
 import { EmptyState } from "@/components/states";
+import PageHeader from "@/components/ui/PageHeader";
+import LinkButton from "@/components/ui/LinkButton";
 import Badge from "@/components/ui/Badge";
 import BillForm from "@/components/BillForm";
 import BillPaidToggle from "@/components/BillPaidToggle";
@@ -28,16 +29,12 @@ export default async function BillsPage() {
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12">
+      <main className="mx-auto max-w-3xl px-4 py-12">
         <EmptyState
           title="No household yet"
           description="Create or join a household to track bills."
           icon="🧾"
-          action={
-            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-              Go to household
-            </Link>
-          }
+          action={<LinkButton href="/household">Go to household</LinkButton>}
         />
       </main>
     );
@@ -47,14 +44,17 @@ export default async function BillsPage() {
   const outstandingCents = items.filter((b) => !b.paid).reduce((sum, b) => sum + b.amountCents, 0);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold">Bills</h1>
-        <span className="text-sm text-gray-500">
-          Outstanding: <span className="font-semibold text-gray-800">{formatCents(outstandingCents)}</span>
-        </span>
-      </div>
-      <p className="mt-1 text-sm text-gray-500">Shared utilities and bills for {ctx.household.name}.</p>
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader
+        title="Bills"
+        subtitle={`Shared utilities and bills for ${ctx.household.name}.`}
+        action={
+          <span className="text-sm text-gray-500">
+            Outstanding:{" "}
+            <span className="font-semibold text-gray-800">{formatCents(outstandingCents)}</span>
+          </span>
+        }
+      />
 
       <div className="mt-6 rounded-xl border border-gray-200 p-4">
         <BillForm householdId={ctx.household.id} />

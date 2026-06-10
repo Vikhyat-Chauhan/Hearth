@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 
 export default function BillPaidToggle({
   billId,
@@ -11,6 +12,7 @@ export default function BillPaidToggle({
   paid: boolean;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [isPaid, setIsPaid] = useState(paid);
   const [busy, setBusy] = useState(false);
 
@@ -27,11 +29,13 @@ export default function BillPaidToggle({
       });
       if (!res.ok) {
         setIsPaid(!next);
+        toast("Couldn't update the bill", "error");
         return;
       }
       router.refresh();
     } catch {
       setIsPaid(!next);
+      toast("Couldn't update the bill", "error");
     } finally {
       setBusy(false);
     }

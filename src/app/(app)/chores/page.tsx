@@ -6,6 +6,8 @@ import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext } from "@/lib/household";
 import { getMyChores } from "@/lib/chores";
 import { EmptyState } from "@/components/states";
+import PageHeader from "@/components/ui/PageHeader";
+import LinkButton from "@/components/ui/LinkButton";
 import MarkDoneButton from "@/components/MarkDoneButton";
 
 function formatDate(iso: string): string {
@@ -25,16 +27,12 @@ export default async function ChoresPage() {
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12">
+      <main className="mx-auto max-w-3xl px-4 py-12">
         <EmptyState
           title="No household yet"
           description="Create or join a household to start seeing your chores."
           icon="✓"
-          action={
-            <Link href="/household" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-              Go to household
-            </Link>
-          }
+          action={<LinkButton href="/household">Go to household</LinkButton>}
         />
       </main>
     );
@@ -43,15 +41,18 @@ export default async function ChoresPage() {
   const myChores = await getMyChores(user.id);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My chores</h1>
-        {ctx.role === "admin" && (
-          <Link href="/chores/new" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-            ＋ New chore
-          </Link>
-        )}
-      </div>
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader
+        title="My chores"
+        action={
+          ctx.role === "admin" ? (
+            <LinkButton href="/chores/new" size="sm">
+              <span aria-hidden="true">＋</span> New chore
+            </LinkButton>
+          ) : undefined
+        }
+      />
+
 
       {myChores.length === 0 ? (
         <div className="mt-6">
@@ -65,9 +66,7 @@ export default async function ChoresPage() {
             icon="🧹"
             action={
               ctx.role === "admin" ? (
-                <Link href="/chores/new" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-                  Assign a chore
-                </Link>
+                <LinkButton href="/chores/new">Assign a chore</LinkButton>
               ) : undefined
             }
           />

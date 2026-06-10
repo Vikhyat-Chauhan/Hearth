@@ -9,6 +9,7 @@ import { computeBalances } from "@/lib/expenses";
 import { formatCents, formatOccurrenceDate, formatRelativeTime } from "@/lib/utils";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import LinkButton from "@/components/ui/LinkButton";
 import DashboardWidget from "@/components/dashboard/DashboardWidget";
 
 export default async function Home() {
@@ -86,25 +87,16 @@ export default async function Home() {
       {/* Quick actions */}
       <div className="mt-6 flex flex-wrap gap-2">
         {ctx.role === "admin" && (
-          <Link
-            href="/chores/new"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card transition hover:bg-brand-700"
-          >
+          <LinkButton href="/chores/new">
             <span aria-hidden="true">＋</span> Assign a chore
-          </Link>
+          </LinkButton>
         )}
-        <Link
-          href="/shopping"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-        >
+        <LinkButton href="/shopping" variant="secondary">
           <span aria-hidden="true">🛒</span> Add shopping item
-        </Link>
-        <Link
-          href="/announcements"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-        >
+        </LinkButton>
+        <LinkButton href="/announcements" variant="secondary">
           <span aria-hidden="true">📣</span> Post to board
-        </Link>
+        </LinkButton>
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -206,12 +198,18 @@ export default async function Home() {
               ) : myBalance.netCents > 0 ? (
                 <>
                   You&apos;re owed{" "}
-                  <span className="font-semibold text-green-700">{formatCents(myBalance.netCents)}</span>
+                  <span className="font-semibold text-green-700">
+                    <span aria-hidden="true">▲ </span>
+                    {formatCents(myBalance.netCents)}
+                  </span>
                 </>
               ) : (
                 <>
                   You owe{" "}
-                  <span className="font-semibold text-red-700">{formatCents(-myBalance.netCents)}</span>
+                  <span className="font-semibold text-red-700">
+                    <span aria-hidden="true">▼ </span>
+                    {formatCents(-myBalance.netCents)}
+                  </span>
                 </>
               )}
             </p>

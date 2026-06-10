@@ -1,9 +1,10 @@
 // Household overview (server component): name, invite code to share, and members.
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext, listMembers } from "@/lib/household";
 import { EmptyState } from "@/components/states";
+import PageHeader from "@/components/ui/PageHeader";
+import LinkButton from "@/components/ui/LinkButton";
 import RemoveMemberButton from "@/components/RemoveMemberButton";
 import CopyInviteButton from "@/components/CopyInviteButton";
 
@@ -14,19 +15,17 @@ export default async function HouseholdPage() {
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12">
+      <main className="mx-auto max-w-3xl px-4 py-12">
         <EmptyState
           title="You're not in a household yet"
           description="Create one to become the admin, or join an existing household with an invite code."
           icon="🏠"
           action={
             <div className="flex gap-3">
-              <Link href="/households/new" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-                Create a household
-              </Link>
-              <Link href="/join" className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <LinkButton href="/households/new">Create a household</LinkButton>
+              <LinkButton href="/join" variant="secondary">
                 Join with a code
-              </Link>
+              </LinkButton>
             </div>
           }
         />
@@ -38,13 +37,15 @@ export default async function HouseholdPage() {
   const members = await listMembers(household.id);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{household.name}</h1>
-        <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium capitalize text-brand-700">
-          You are {role}
-        </span>
-      </div>
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <PageHeader
+        title={household.name}
+        action={
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium capitalize text-brand-700">
+            You are {role}
+          </span>
+        }
+      />
 
       <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
         <h2 className="text-sm font-semibold text-gray-700">Invite code</h2>
@@ -79,9 +80,9 @@ export default async function HouseholdPage() {
 
       {role === "admin" && (
         <div className="mt-6">
-          <Link href="/chores/new" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-card hover:bg-brand-700">
-            ＋ Assign a chore
-          </Link>
+          <LinkButton href="/chores/new">
+            <span aria-hidden="true">＋</span> Assign a chore
+          </LinkButton>
         </div>
       )}
     </main>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
 import FieldError from "@/components/ui/FieldError";
+import { useToast } from "@/components/ui/Toast";
 
 export default function AnnouncementForm({
   householdId,
@@ -14,6 +15,7 @@ export default function AnnouncementForm({
   posterLabel: string;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [body, setBody] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -37,6 +39,7 @@ export default function AnnouncementForm({
       }
       setBody("");
       setAnonymous(false);
+      toast("Posted to the board");
       router.refresh();
     } catch {
       setError("Could not post your message");

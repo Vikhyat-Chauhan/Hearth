@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import FieldError from "@/components/ui/FieldError";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ShoppingForm({
   householdId,
@@ -14,6 +15,7 @@ export default function ShoppingForm({
   posterLabel: string;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +37,7 @@ export default function ShoppingForm({
         return;
       }
       setName("");
+      toast("Item added");
       router.refresh();
     } catch {
       setError("Could not add the item");

@@ -9,6 +9,8 @@ import Textarea from "@/components/ui/Textarea";
 import Select from "@/components/ui/Select";
 import Label from "@/components/ui/Label";
 import FieldError from "@/components/ui/FieldError";
+import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { cn } from "@/lib/utils";
 
 interface Member {
@@ -48,6 +50,8 @@ export default function ChoreForm({
   initial?: ChoreInitial;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const isEdit = !!initial;
   const seed = useMemo(() => (initial ? parseRRule(initial.rrule) : null), [initial]);
 
@@ -109,6 +113,7 @@ export default function ChoreForm({
         setError(body.error ?? "Could not save the chore");
         return;
       }
+      toast(isEdit ? "Chore updated" : "Chore created");
       router.push("/chores");
       router.refresh();
     } catch {
@@ -119,7 +124,14 @@ export default function ChoreForm({
   }
 
   async function onDelete() {
-    if (!initial || !confirm("Delete this chore for everyone? This removes its calendar events.")) return;
+    if (!initial) return;
+    const confirmed = await confirm({
+      title: "Delete chore?",
+      message: "This deletes the chore for everyone and removes its calendar events.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!confirmed) return;
     setError(null);
     setDeleting(true);
     try {
@@ -129,6 +141,7 @@ export default function ChoreForm({
         setError(body.error ?? "Could not delete the chore");
         return;
       }
+      toast("Chore deleted");
       router.push("/chores");
       router.refresh();
     } catch {
@@ -177,7 +190,7 @@ export default function ChoreForm({
             max={52}
             value={interval}
             onChange={(e) => setIntervalN(Math.max(1, Number(e.target.value)))}
-            className="w-16 px-2 py-1.5"
+            className="w-20 px-2 py-1.5"
           />
           <Select
             value={freq}
@@ -220,7 +233,7 @@ export default function ChoreForm({
               max={31}
               value={monthday}
               onChange={(e) => setMonthday(Math.min(31, Math.max(1, Number(e.target.value))))}
-              className="w-16 px-2 py-1.5"
+              className="w-20 px-2 py-1.5"
             />
             <span>of the month</span>
           </div>

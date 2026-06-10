@@ -21,19 +21,29 @@ import { z } from "zod";
 /**
  * Validate an unknown payload against a schema. Returns a discriminated result
  * so callers handle the failure path explicitly (never throw past the route).
+ *
+ * `fieldErrors` maps each invalid field's path (e.g. "title", "splits") to its
+ * first message, so forms can surface errors inline per-field. `error` keeps the
+ * combined single-string form for callers that just want one message.
  */
 export function parseBody<T extends z.ZodTypeAny>(
   schema: T,
   payload: unknown,
 ):
   | { success: true; data: z.infer<T> }
-  | { success: false; error: string; issues: z.ZodIssue[] } {
+  | { success: false; error: string; issues: z.ZodIssue[]; fieldErrors: Record<string, string> } {
   const result = schema.safeParse(payload);
   if (result.success) return { success: true, data: result.data };
+  const fieldErrors: Record<string, string> = {};
+  for (const issue of result.error.issues) {
+    const key = issue.path.join(".") || "_";
+    if (!(key in fieldErrors)) fieldErrors[key] = issue.message;
+  }
   return {
     success: false,
     error: result.error.issues.map((i) => i.message).join("; "),
     issues: result.error.issues,
+    fieldErrors,
   };
 }
 
