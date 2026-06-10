@@ -4,7 +4,16 @@
 
 **Core Loop:** The admin creates a household, invites roommates by code, and assigns a recurring chore to one or more members → the chore is written to each assignee's Google Calendar → members view their chores and mark each occurrence done (honor system).
 
-> **Build boundary (V1 / SCOPE Phase 1).** This sprint delivers Phase 1 only: Google sign-in, household + invite, admin chore creation/assignment with recurrence, member view + mark-done, and **full one-way Google Calendar sync** (app → calendar). SCOPE Phases 2–5 (announcements, shopping list, bills, two-way sync, expense splitting) are P2/out of scope. Decisions locked during intake: **(a)** full Google OAuth + calendar sync in V1; **(b)** a shared chore occurrence is complete when **any one** assignee marks it done.
+> **Build boundary (historical).** Phase 1 was the original V1 cut: Google sign-in,
+> household + invite, admin chore creation/assignment with recurrence, member view +
+> mark-done, and **one-way Google Calendar sync** (app → calendar). Decisions locked
+> during intake: **(a)** full Google OAuth + calendar sync in V1; **(b)** a shared chore
+> occurrence is complete when **any one** assignee marks it done.
+>
+> **Current status:** SCOPE Phases 2–5 (announcements, shopping list, bills, two-way
+> calendar sync, expense splitting) and multiple-households-per-user have since shipped.
+> This spec is retained as the originating product spec; for the live architecture and
+> data model see [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ---
 
@@ -24,7 +33,7 @@
 - Admin manages household: remove a member (their assignments + calendar events removed)
 - Connect Google later: a member who joined before connecting Google connects it and their existing chores backfill onto their calendar
 
-### P2 — Nice to Have (later SCOPE phases — in scopre)
+### P2 — Shipped (post-V1 SCOPE phases)
 - Announcements / message board (Phase 2)
 - Shared shopping list (Phase 2)
 - Utilities & bills tracking (Phase 3)
@@ -71,10 +80,11 @@
 
 ## Stories
 
-> One block per P0/P1 feature. P2 features are in scopre — omitted.
+> One block per P0/P1 feature. P2 features shipped later and are omitted here; see
+> [`ARCHITECTURE.md`](ARCHITECTURE.md) for their data model.
 
 ### Google sign-in
-ENTRY: user navigates to /login
+ENTRY: user opens the landing page (/) and clicks a "Sign in with Google" CTA
 FLOW:
   1. Click "Sign in with Google"
   2. Grant Google consent (incl. calendar scope)
@@ -82,7 +92,7 @@ FLOW:
 EXIT: User lands on / authenticated; a profile row exists and the encrypted Google refresh token is stored.
 ACCEPTANCE CRITERIA:
   - Happy path: a session is created and survives a reload; a profile row is persisted with the encrypted refresh token.
-  - Failure path: declined consent or auth error returns the user to /login with a clear message and no session.
+  - Failure path: declined consent or auth error returns the user to the landing (/) with a clear message and no session.
   - Ownership: after login the user sees only households they belong to.
 
 ### Create household

@@ -5,7 +5,7 @@
 // Best-effort: every Google failure is caught so a webhook never 500s and a
 // failed watch never blocks anything.
 
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db, profiles, calendarLinks, calendarChannels } from "@/db";
 import { watchCalendar, getEventStatus } from "@/lib/calendar";
@@ -36,12 +36,16 @@ export async function registerWatch(
   if (!tokenEnc) return { status: "skipped" };
 
   const channelId = randomUUID();
-  const res = await watchCalendar(tokenEnc, { channelId, address: webhookAddress, token: userId });
+  // Per-channel secret. Google echoes it back as X-Goog-Channel-Token on every
+  // notification; the webhook verifies it so a forged POST can't drive reconcile.
+  const channelToken = randomBytes(24).toString("base64url");
+  const res = await watchCalendar(tokenEnc, { channelId, address: webhookAddress, token: channelToken });
   if (res.status !== "watching") return { status: "skipped" };
 
   await db.insert(calendarChannels).values({
     userId,
     channelId,
+    token: channelToken,
     resourceId: res.resourceId,
     expiration: res.expiration ? new Date(res.expiration) : null,
   });
@@ -57,6 +61,27 @@ export async function channelOwner(channelId: string): Promise<string | null> {
     .where(eq(calendarChannels.channelId, channelId))
     .limit(1);
   return row?.userId ?? null;
+}
+
+/**
+ * Resolve the user owning a webhook notification, verifying its channel token.
+ * Returns the userId only when the channel exists AND the token Google echoed back
+ * matches the stored secret. Legacy channels with no stored token are accepted
+ * (channel-id only) — they pick up a token on their next watch refresh. Returns
+ * null on an unknown channel or a token mismatch (a forged or stale notification).
+ */
+export async function verifiedChannelOwner(
+  channelId: string,
+  headerToken: string | null,
+): Promise<string | null> {
+  const [row] = await db
+    .select({ userId: calendarChannels.userId, token: calendarChannels.token })
+    .from(calendarChannels)
+    .where(eq(calendarChannels.channelId, channelId))
+    .limit(1);
+  if (!row) return null;
+  if (row.token && row.token !== headerToken) return null;
+  return row.userId;
 }
 
 /**

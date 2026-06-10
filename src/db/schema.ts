@@ -259,6 +259,10 @@ export const calendarChannels = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     userId: uuid("user_id").notNull(),
     channelId: text("channel_id").notNull(),
+    // Secret echoed back by Google as X-Goog-Channel-Token; the webhook requires
+    // it to match before reconciling, so a forged notification can't trigger work.
+    // Nullable for legacy rows registered before this column existed.
+    token: text("token"),
     resourceId: text("resource_id").notNull(),
     expiration: timestamp("expiration", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

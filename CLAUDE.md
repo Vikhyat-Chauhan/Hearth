@@ -14,7 +14,7 @@ Live URL: **https://hearth-ruby-eight.vercel.app**
 | Frontend   | React + Tailwind CSS                              |
 | Database   | Supabase + Drizzle ORM                                    |
 | Auth       | Google OAuth via Supabase Auth ("Sign in with Google" + Google Calendar scope) |
-| Calendar   | Google Calendar API — one-way sync (app → each assignee's calendar)             |
+| Calendar   | Google Calendar API — two-way sync (app ↔ each assignee's calendar)             |
 | Deployment | Vercel (`vercel --prod`)                          |
 
 ---
@@ -35,12 +35,12 @@ Live URL: **https://hearth-ruby-eight.vercel.app**
 - All DB access through `src/db/index.ts` only — never import the Drizzle client elsewhere.
 - Protected API routes (user-owned entities): `createClient()` + `getUser()` → return 401 if no session; scope every query to the current user.
 
-- **Navbar auth contract (Google OAuth variant — Hearth uses Google, NOT email/password):**
-  1. Create `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server) if they don't exist — wrappers around `@supabase/ssr`.
-  2. Create `src/app/login/page.tsx` — a **"Sign in with Google"** button (no email/password form). It calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { scopes: 'https://www.googleapis.com/auth/calendar', queryParams: { access_type: 'offline', prompt: 'consent' }, redirectTo: <origin>/auth/callback } })`. `access_type=offline` + `prompt=consent` are required to receive a `provider_refresh_token`.
-  3. Create `src/app/auth/callback/route.ts` — exchanges the auth code for a session AND captures `session.provider_refresh_token`; encrypts it (see Calendar rules) and upserts it onto the user's profile row. On success → redirect to `/`.
-  4. Add `src/middleware.ts` that redirects unauthenticated requests on `/(app)/*` to `/login`.
-  5. `Navbar.tsx` is a server component: reads session via server client. Renders a "Sign in with Google" link (`/login`) when no session; renders user avatar + email + Logout dropdown when session exists. Logout calls `supabase.auth.signOut()` and redirects to `/login`.
+- **Auth contract (Google OAuth variant — Hearth uses Google, NOT email/password; no `/login` page):**
+  1. `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server) are wrappers around `@supabase/ssr`.
+  2. There is **no `/login` page**. The marketing landing (`src/app/page.tsx`) is the sign-in surface: its CTAs render `src/components/GoogleSignIn.tsx`, which calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { scopes: 'https://www.googleapis.com/auth/calendar', queryParams: { access_type: 'offline', prompt: 'consent' }, redirectTo: <origin>/auth/callback } })`. `access_type=offline` + `prompt=consent` are required to receive a `provider_refresh_token`.
+  3. `src/app/auth/callback/route.ts` — exchanges the auth code for a session AND captures `session.provider_refresh_token`; encrypts it (see Calendar rules) and upserts it onto the user's profile row. On success → redirect to `/`.
+  4. `src/middleware.ts` keeps `/` and `/auth/callback` public and redirects every other unauthenticated request to `/`. API routes enforce auth themselves and return JSON `401` rather than redirecting.
+  5. `Navbar.tsx` is a server component: reads session via server client. Logged-out visitors see the landing's "Sign in with Google" CTAs; logged-in users get the avatar + email + a Settings dropdown with Logout. Logout calls `supabase.auth.signOut()` and redirects to `/`.
   6. `@supabase/ssr` is already in `package.json`.
   7. The Google provider must be enabled in the Supabase project with the Google Cloud OAuth client ID/secret, and the Calendar API enabled on that Google Cloud project (provisioning step — see docs/SPEC.md "External services").
 
@@ -64,7 +64,8 @@ Keeps parallel agents off each other's files. Update as files are created.
 |------|---------|
 | `src/app/(app)/` | App pages |
 | `src/app/api/` | API route handlers |
-| `src/app/login/` | "Sign in with Google" page |
+| `src/app/page.tsx` | Marketing landing — also the sign-in surface (CTAs launch Google directly; no `/login` page) |
+| `src/components/GoogleSignIn.tsx` | "Sign in with Google" CTA — calls `signInWithOAuth` |
 | `src/app/auth/callback/` | OAuth callback — exchanges code, captures + encrypts the Google refresh token |
 | `src/lib/calendar.ts` | **Only** module that calls the Google Calendar API (create/update/delete events) — **frozen contract after Sprint 0** |
 | `src/lib/crypto.ts` | Encrypt/decrypt the Google refresh token at rest (`TOKEN_ENC_KEY`) |
@@ -75,7 +76,7 @@ Keeps parallel agents off each other's files. Update as files are created.
 | `src/lib/api.ts` | Consistent JSON response + error-handling helpers for routes |
 | `src/lib/utils.ts` | Shared utilities |
 | `src/lib/supabase/` | Supabase client helpers (client.ts + server.ts) |
-| `src/middleware.ts` | Route protection — redirects unauthed users to /login |
+| `src/middleware.ts` | Route protection — redirects unauthed users to `/` (landing) |
 | `src/db/index.ts` | DB client + table exports — single entry point |
 | `src/db/schema.ts` | Drizzle schema — **frozen after Sprint 0** |
 | `src/app/error.tsx` · `loading.tsx` · `not-found.tsx` | App-level error boundary / loading / 404 |
@@ -100,12 +101,12 @@ Keeps parallel agents off each other's files. Update as files are created.
 | P1 | Admin edits/deletes a chore | Propagates to calendar events |
 | P1 | Admin removes a member | Removes their assignments + calendar events |
 | P1 | Connect Google later | Backfills events for a member who connects after assignment |
-| P2 | Announcements / message board | SCOPE Phase 2 — in scopre |
-| P2 | Shared shopping list | SCOPE Phase 2 — in scopre |
-| P2 | Utilities & bills tracking | SCOPE Phase 3 — in scopre |
-| P2 | Two-way calendar sync | SCOPE Phase 4 — in scopre |
-| P2 | Splitwise-style expense splitting | SCOPE Phase 5 — in scopre |
-| P2 | Multiple households per user | in scopre |
+| P2 | Announcements / message board | SCOPE Phase 2 — **shipped** |
+| P2 | Shared shopping list | SCOPE Phase 2 — **shipped** |
+| P2 | Utilities & bills tracking | SCOPE Phase 3 — **shipped** |
+| P2 | Two-way calendar sync | SCOPE Phase 4 — **shipped** |
+| P2 | Splitwise-style expense splitting | SCOPE Phase 5 — **shipped** |
+| P2 | Multiple households per user | **shipped** |
 
 ---
 
@@ -114,7 +115,7 @@ Keeps parallel agents off each other's files. Update as files are created.
 *(Copied verbatim from docs/SPEC.md. One block per P0/P1 feature.)*
 
 ### Google sign-in
-ENTRY: user navigates to /login
+ENTRY: user opens the landing page (/) and clicks a "Sign in with Google" CTA
 FLOW:
   1. Click "Sign in with Google"
   2. Grant Google consent (incl. calendar scope)
@@ -122,7 +123,7 @@ FLOW:
 EXIT: User lands on / authenticated; a profile row exists and the encrypted Google refresh token is stored.
 ACCEPTANCE CRITERIA:
   - Happy path: a session is created and survives a reload; a profile row is persisted with the encrypted refresh token.
-  - Failure path: declined consent or auth error returns the user to /login with a clear message and no session.
+  - Failure path: declined consent or auth error returns the user to the landing (/) with a clear message and no session.
   - Ownership: after login the user sees only households they belong to.
 
 ### Create household

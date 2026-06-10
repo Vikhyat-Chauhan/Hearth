@@ -20,6 +20,21 @@ import { decryptToken } from "@/lib/crypto";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CAL_BASE = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
 
+// Hard ceiling on any single Google call. A hung request must never tie up a
+// serverless function — it aborts and surfaces as a (retryable) error instead.
+const GOOGLE_TIMEOUT_MS = 10_000;
+
+/** `fetch` with an AbortController timeout. Rejects if Google doesn't answer in time. */
+async function fetchWithTimeout(input: string, init: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), GOOGLE_TIMEOUT_MS);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export interface ChoreEventInput {
   title: string;
   description: string | null;
@@ -39,7 +54,7 @@ function googleConfigured(): boolean {
 
 /** Exchange a refresh token for a short-lived access token. Throws on failure. */
 async function getAccessToken(refreshToken: string): Promise<string> {
-  const res = await fetch(TOKEN_URL, {
+  const res = await fetchWithTimeout(TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -78,7 +93,7 @@ async function callCalendar(
   path: string,
   body?: unknown,
 ): Promise<Response> {
-  return fetch(`${CAL_BASE}${path}`, {
+  return fetchWithTimeout(`${CAL_BASE}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -177,7 +192,7 @@ export async function stopChannel(
 ): Promise<void> {
   if (!refreshTokenEnc || !googleConfigured()) return;
   const accessToken = await getAccessToken(decryptToken(refreshTokenEnc));
-  await fetch(CHANNELS_STOP_URL, {
+  await fetchWithTimeout(CHANNELS_STOP_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     body: JSON.stringify({ id: channelId, resourceId }),
