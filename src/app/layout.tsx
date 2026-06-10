@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import ToastProvider from "@/components/ui/Toast";
 import ConfirmProvider from "@/components/ui/ConfirmDialog";
+import { Analytics } from "@vercel/analytics/next";
 
 // Inter for UI text; Fraunces (a warm display serif) for the brand wordmark
 // and headings — gives Hearth a homey feel without a new npm dependency.
@@ -50,6 +51,7 @@ export default function RootLayout({
             </div>
           </ToastProvider>
         </ConfirmProvider>
+        <Analytics />
       </body>
     </html>
   );
