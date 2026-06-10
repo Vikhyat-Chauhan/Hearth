@@ -16,7 +16,7 @@ invites the others by code, and assigns recurring chores that show up on everyon
 Calendar. Hearth also covers an announcements board, a shared shopping list, utilities &
 bills tracking, and Splitwise-style expense splitting.
 
-**Live:** https://hearth-ruby-eight.vercel.app
+**Live:** https://hearth.tnmlabs.com
 
 ## Features
 
