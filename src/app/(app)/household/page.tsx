@@ -7,6 +7,9 @@ import PageHeader from "@/components/ui/PageHeader";
 import LinkButton from "@/components/ui/LinkButton";
 import RemoveMemberButton from "@/components/RemoveMemberButton";
 import CopyInviteButton from "@/components/CopyInviteButton";
+import LeaveHouseholdButton from "@/components/LeaveHouseholdButton";
+import DeleteHouseholdButton from "@/components/DeleteHouseholdButton";
+import TransferAdminControl from "@/components/TransferAdminControl";
 
 export default async function HouseholdPage() {
   const user = await getUser();
@@ -35,6 +38,9 @@ export default async function HouseholdPage() {
 
   const { household, role } = ctx;
   const members = await listMembers(household.id);
+  const otherMembers = members
+    .filter((m) => m.userId !== user.id)
+    .map((m) => ({ userId: m.userId, label: m.name ?? m.email }));
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -88,6 +94,48 @@ export default async function HouseholdPage() {
           </LinkButton>
         </div>
       )}
+
+      {/* Danger zone — leaving (members) / transferring + deleting (admin). */}
+      <section className="mt-10 rounded-xl border border-red-200 bg-white p-5 shadow-card">
+        <h2 className="font-display text-base font-semibold text-red-700">Danger zone</h2>
+
+        {role === "member" ? (
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-gray-600">
+              Leave this household. Your chore assignments and calendar events will be removed.
+            </p>
+            <LeaveHouseholdButton householdId={household.id} householdName={household.name} />
+          </div>
+        ) : (
+          <div className="mt-3 space-y-5">
+            {otherMembers.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-gray-700">Hand off the household</p>
+                <p className="mt-1 text-sm text-gray-600">
+                  Make another member the admin and leave. The household and its data stay.
+                </p>
+                <div className="mt-3">
+                  <TransferAdminControl householdId={household.id} members={otherMembers} />
+                </div>
+              </div>
+            )}
+
+            <div className="border-t border-gray-100 pt-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-gray-600">
+                  Delete this household for everyone. This removes all chores, shopping, bills,
+                  expenses, and board posts. This can&apos;t be undone.
+                </p>
+                <DeleteHouseholdButton
+                  householdId={household.id}
+                  householdName={household.name}
+                  memberCount={members.length}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
     </main>
   );
 }
