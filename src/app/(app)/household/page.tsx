@@ -39,16 +39,19 @@ export default async function HouseholdPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <PageHeader
+        eyebrow="Your household"
+        icon="🏠"
+        accent="accent"
         title={household.name}
         action={
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium capitalize text-brand-700">
+          <span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-medium capitalize text-accent-700 ring-1 ring-inset ring-accent-100">
             You are {role}
           </span>
         }
       />
 
       <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
-        <h2 className="text-sm font-semibold text-gray-700">Invite code</h2>
+        <h2 className="font-display text-base font-semibold text-gray-900">Invite code</h2>
         <p className="mt-1 text-sm text-gray-500">Share this so roommates can join.</p>
         <div className="mt-3 flex items-center gap-3">
           <p className="font-mono text-2xl tracking-widest">{household.inviteCode}</p>
@@ -57,12 +60,12 @@ export default async function HouseholdPage() {
       </section>
 
       <section className="mt-6">
-        <h2 className="text-sm font-semibold text-gray-700">
+        <h2 className="font-display text-base font-semibold text-gray-900">
           Members ({members.length})
         </h2>
         <ul className="mt-3 divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-card">
           {members.map((m) => (
-            <li key={m.userId} className="flex items-center justify-between px-4 py-3">
+            <li key={m.userId} className="flex items-center justify-between px-4 py-3 transition hover:bg-stone-50">
               <div>
                 <p className="font-medium">{m.name ?? m.email}</p>
                 <p className="text-sm text-gray-500">{m.email}</p>

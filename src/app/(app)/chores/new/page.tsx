@@ -47,6 +47,9 @@ export default async function NewChorePage() {
   return (
     <main className="mx-auto max-w-lg px-4 py-12">
       <PageHeader
+        eyebrow="Assign a chore"
+        icon="✓"
+        accent="brand"
         title="New chore"
         subtitle={`Assign a recurring chore to one or more members of ${ctx.household.name}. It will appear on each connected member's Google Calendar.`}
       />

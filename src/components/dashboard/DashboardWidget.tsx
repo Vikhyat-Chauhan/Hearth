@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
+import { cn } from "@/lib/utils";
+import { ACCENTS, type AccentKey } from "@/lib/ui";
 
 // One panel on the home dashboard: an icon-led title, a "View all →" link into
 // the feature page, and a body of recent items — or a compact inline empty
 // message so every widget stays the same calm, uniform shape whether full or empty.
+// `accent` tints the icon chip + count pill so the grid reads warm, not flat.
 export default function DashboardWidget({
   title,
   href,
   icon,
   count,
+  accent = "brand",
   empty = false,
   emptyText = "Nothing here yet.",
   children,
@@ -18,23 +22,25 @@ export default function DashboardWidget({
   href: string;
   icon: ReactNode;
   count?: number;
+  accent?: AccentKey;
   empty?: boolean;
   emptyText?: string;
   children?: ReactNode;
 }) {
+  const a = ACCENTS[accent];
   return (
-    <Card className="flex h-full flex-col">
+    <Card accent={accent} interactive className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 font-semibold text-gray-900">
+        <h2 className="flex items-center gap-2 font-display text-base font-semibold text-gray-900">
           <span
             aria-hidden="true"
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-base"
+            className={cn("flex h-9 w-9 items-center justify-center rounded-xl text-base", a.chip)}
           >
             {icon}
           </span>
           {title}
           {typeof count === "number" && count > 0 && (
-            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+            <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", a.badge)}>
               {count}
             </span>
           )}

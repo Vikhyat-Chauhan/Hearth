@@ -36,7 +36,13 @@ export default async function ShoppingPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
-      <PageHeader title="Shopping list" subtitle={`Shared with everyone in ${ctx.household.name}.`} />
+      <PageHeader
+        eyebrow="The house list"
+        icon="🛒"
+        accent="brand"
+        title="Shopping list"
+        subtitle={`Shared with everyone in ${ctx.household.name}.`}
+      />
 
       <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
         <ShoppingForm householdId={ctx.household.id} posterLabel={posterLabel} />
@@ -49,7 +55,7 @@ export default async function ShoppingPage() {
       ) : (
         <ul className="mt-6 divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-card">
           {items.map((item) => (
-            <li key={item.id} className="flex items-center gap-3 px-4 py-3">
+            <li key={item.id} className="flex items-center gap-3 px-4 py-3 transition hover:bg-stone-50">
               <ShoppingToggle itemId={item.id} checked={item.checked} />
               <div className="min-w-0 flex-1">
                 <span className={`text-sm ${item.checked ? "text-gray-400 line-through" : "text-gray-800"}`}>

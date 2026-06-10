@@ -44,7 +44,13 @@ export default async function AnnouncementsPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
-      <PageHeader title="Announcements" subtitle={`Messages for everyone in ${ctx.household.name}.`} />
+      <PageHeader
+        eyebrow="House board"
+        icon="📣"
+        accent="accent"
+        title="Announcements"
+        subtitle={`Messages for everyone in ${ctx.household.name}.`}
+      />
 
       <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
         <AnnouncementForm householdId={ctx.household.id} posterLabel={posterLabel} />
@@ -59,7 +65,11 @@ export default async function AnnouncementsPage() {
           {items.map((a) => {
             const canDelete = a.authorId === user.id || ctx.role === "admin";
             return (
-              <li key={a.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-card">
+              <li
+                key={a.id}
+                className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+              >
+                <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-accent-400" />
                 <div className="flex items-start justify-between gap-3">
                   <div className="text-sm text-gray-500">
                     <span className="font-medium text-gray-700">

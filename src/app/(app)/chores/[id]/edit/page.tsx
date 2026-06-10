@@ -46,7 +46,13 @@ export default async function EditChorePage({ params }: { params: Promise<{ id: 
         <span aria-hidden="true">←</span> Back to chores
       </Link>
       <div className="mt-2">
-        <PageHeader title="Edit chore" subtitle="Update the details, reassign, or delete the chore." />
+        <PageHeader
+          eyebrow="Edit"
+          icon="✓"
+          accent="brand"
+          title="Edit chore"
+          subtitle="Update the details, reassign, or delete the chore."
+        />
       </div>
       <ChoreForm
         householdId={chore.householdId}

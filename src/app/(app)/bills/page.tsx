@@ -46,12 +46,15 @@ export default async function BillsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <PageHeader
+        eyebrow="Keeping the lights on"
+        icon="🧾"
+        accent="amber"
         title="Bills"
         subtitle={`Shared utilities and bills for ${ctx.household.name}.`}
         action={
-          <span className="text-sm text-gray-500">
-            Outstanding:{" "}
-            <span className="font-semibold text-gray-800">{formatCents(outstandingCents)}</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-100">
+            Outstanding
+            <span className="font-semibold">{formatCents(outstandingCents)}</span>
           </span>
         }
       />
@@ -67,7 +70,10 @@ export default async function BillsPage() {
       ) : (
         <ul className="mt-6 space-y-3">
           {items.map((bill) => (
-            <li key={bill.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card">
+            <li
+              key={bill.id}
+              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className={`font-medium ${bill.paid ? "text-gray-400 line-through" : "text-gray-800"}`}>

@@ -37,7 +37,15 @@ export default function RootLayout({
         <ConfirmProvider>
           <ToastProvider>
             <Navbar />
-            <div id="main-content" tabIndex={-1} className="outline-none">
+            <div id="main-content" tabIndex={-1} className="relative outline-none">
+              {/* Warm top wash so every interior page lifts off the canvas the
+                  way the landing does — a fading ember gradient + faint grain. */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-gradient-to-b from-brand-50 via-stone-50 to-transparent"
+              >
+                <div className="absolute inset-0 bg-hearth-grain opacity-60" />
+              </div>
               {children}
             </div>
           </ToastProvider>

@@ -44,11 +44,17 @@ export default async function ExpensesPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
-      <PageHeader title="Expenses" subtitle={`Shared spending and balances for ${ctx.household.name}.`} />
+      <PageHeader
+        eyebrow="Square it up"
+        icon="💸"
+        accent="green"
+        title="Expenses"
+        subtitle={`Shared spending and balances for ${ctx.household.name}.`}
+      />
 
       {/* Balances */}
       <section className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <h2 className="text-sm font-semibold text-gray-700">Balances</h2>
+        <h2 className="font-display text-base font-semibold text-gray-900">Balances</h2>
         <ul className="mt-3 space-y-1">
           {balances.map((b) => (
             <li key={b.userId} className="flex items-center justify-between text-sm">
@@ -83,7 +89,7 @@ export default async function ExpensesPage() {
 
       {/* Add expense */}
       <section className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">Add an expense</h2>
+        <h2 className="mb-3 font-display text-base font-semibold text-gray-900">Add an expense</h2>
         <ExpenseForm householdId={householdId} members={members} currentUserId={user.id} />
       </section>
 
@@ -95,7 +101,10 @@ export default async function ExpensesPage() {
       ) : (
         <ul className="mt-6 space-y-3">
           {expenseList.map((e) => (
-            <li key={e.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card">
+            <li
+              key={e.id}
+              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-gray-800">{e.description}</span>

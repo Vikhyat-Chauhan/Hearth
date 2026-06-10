@@ -31,6 +31,9 @@ export default async function CalendarSettingsPage() {
   return (
     <main className="mx-auto max-w-lg px-4 py-12">
       <PageHeader
+        eyebrow="Stay in sync"
+        icon="📅"
+        accent="accent"
         title="Calendar"
         subtitle="Hearth writes your chores to your Google Calendar. Manage the connection here."
       />
