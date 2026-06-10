@@ -22,7 +22,7 @@ function formatDate(iso: string): string {
 
 export default async function ChoresPage() {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {

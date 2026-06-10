@@ -10,7 +10,7 @@ import CopyInviteButton from "@/components/CopyInviteButton";
 
 export default async function HouseholdPage() {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {

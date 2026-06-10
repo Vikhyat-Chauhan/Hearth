@@ -21,7 +21,7 @@ function formatWhen(d: Date): string {
 
 export default async function AnnouncementsPage() {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {

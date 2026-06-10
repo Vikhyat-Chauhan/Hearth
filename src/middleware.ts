@@ -1,15 +1,16 @@
-// Route protection: redirect unauthenticated requests to /login, and refresh the
-// Supabase session cookie on every request.
+// Route protection: redirect unauthenticated requests to the landing ("/"), and
+// refresh the Supabase session cookie on every request.
 //
-// Public paths: the marketing landing (exactly "/"), /login, and the OAuth
-// callback. Everything else requires a session.
+// Public paths: the marketing landing (exactly "/") and the OAuth callback. The
+// landing doubles as the sign-in surface (its CTAs launch Google directly), so
+// there's no separate /login page. Everything else requires a session.
 // Dev convenience: before provisioning writes .env.local, NEXT_PUBLIC_SUPABASE_URL
 // is unset — we let requests through so the app still boots locally.
 
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = ["/auth/callback"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -51,13 +52,6 @@ export async function middleware(request: NextRequest) {
   const isApi = pathname.startsWith("/api");
 
   if (!user && !isPublic && !isApi) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Already signed in and on /login → send to the dashboard.
-  if (user && pathname === "/login") {
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = "/";
     return NextResponse.redirect(homeUrl);

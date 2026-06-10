@@ -1,9 +1,12 @@
 // OAuth callback: exchange the Google auth code for a Supabase session, then
 // capture the Google refresh token (encrypted) and upsert the user's profile.
 //
-// access_type=offline + prompt=consent (set on the login button) make Google
-// return a provider_refresh_token here. We only overwrite the stored token when
-// a fresh one is present, so re-logins without consent don't wipe it.
+// access_type=offline + prompt=consent (set on the GoogleSignIn button) make
+// Google return a provider_refresh_token here. We only overwrite the stored
+// token when a fresh one is present, so re-logins without consent don't wipe it.
+//
+// On failure we bounce back to the landing ("/") with an ?error= code, which the
+// landing surfaces as a banner (there's no separate /login page anymore).
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -16,14 +19,14 @@ export async function GET(request: Request) {
   const origin = url.origin;
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=missing_code`);
+    return NextResponse.redirect(`${origin}/?error=missing_code`);
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data.session?.user) {
-    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+    return NextResponse.redirect(`${origin}/?error=auth_failed`);
   }
 
   const user = data.session.user;
@@ -50,7 +53,7 @@ export async function GET(request: Request) {
       });
   } catch (err) {
     console.error("[auth/callback] profile upsert failed:", err);
-    return NextResponse.redirect(`${origin}/login?error=profile_failed`);
+    return NextResponse.redirect(`${origin}/?error=profile_failed`);
   }
 
   return NextResponse.redirect(`${origin}/`);

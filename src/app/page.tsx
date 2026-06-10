@@ -13,13 +13,26 @@ import LinkButton from "@/components/ui/LinkButton";
 import DashboardWidget from "@/components/dashboard/DashboardWidget";
 import LandingPage from "@/components/LandingPage";
 
-export default async function Home() {
+// A failed/declined sign-in lands back here with ?error=<code> (set by
+// /auth/callback). Map the codes to a clear, human message for the landing.
+const SIGN_IN_ERRORS: Record<string, string> = {
+  missing_code: "Sign-in was cancelled. Please try again.",
+  auth_failed: "We couldn't sign you in with Google. Please try again.",
+  profile_failed: "Sign-in succeeded but your profile couldn't be saved. Please try again.",
+};
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = process.env.NEXT_PUBLIC_SUPABASE_URL ? await getUser() : null;
   const ctx = user ? await getHouseholdContext(user.id) : null;
 
-  // Logged-out visitor → marketing landing page.
+  // Logged-out visitor → marketing landing page (also the sign-in surface).
   if (!user) {
-    return <LandingPage />;
+    const { error } = await searchParams;
+    return <LandingPage error={error ? SIGN_IN_ERRORS[error] ?? null : null} />;
   }
 
   // Signed in but no household yet → onboarding.

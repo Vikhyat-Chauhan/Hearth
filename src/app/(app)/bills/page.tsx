@@ -24,7 +24,7 @@ function formatDue(iso: string): string {
 
 export default async function BillsPage() {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {

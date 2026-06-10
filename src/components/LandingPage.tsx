@@ -1,8 +1,10 @@
 // Marketing landing shown to logged-out visitors at "/". Warm, editorial take on
 // the Hearth brand (Fraunces display + ember terracotta). Server-rendered; the
 // page-load reveal is a CSS-only staggered animation (see globals.css). The
-// primary CTA points at /login, which starts the Google sign-in + Calendar flow.
+// primary CTA is a GoogleSignIn button that launches the Google sign-in +
+// Calendar flow directly (no intermediate /login page).
 import Link from "next/link";
+import GoogleSignIn from "@/components/GoogleSignIn";
 
 // A small accent vocabulary mirroring src/lib/ui.ts (FEATURE_ACCENT). Class
 // strings stay literal so Tailwind's content scan keeps them.
@@ -143,8 +145,7 @@ function GoogleCTA({
   className?: string;
 }) {
   return (
-    <Link
-      href="/login"
+    <GoogleSignIn
       className={`inline-flex items-center justify-center gap-2.5 rounded-xl bg-brand-600 px-6 py-3.5 text-base font-medium text-white shadow-card transition hover:bg-brand-700 hover:shadow-card-hover ${className}`}
     >
       <span
@@ -154,7 +155,7 @@ function GoogleCTA({
         G
       </span>
       {children}
-    </Link>
+    </GoogleSignIn>
   );
 }
 
@@ -337,9 +338,21 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
   );
 }
 
-export default function LandingPage() {
+export default function LandingPage({ error = null }: { error?: string | null }) {
   return (
     <main className="overflow-x-hidden">
+      {/* A bounced-back sign-in failure (from /auth/callback) surfaces here. */}
+      {error && (
+        <div className="mx-auto max-w-6xl px-4 pt-4">
+          <p
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {error}
+          </p>
+        </div>
+      )}
+
       {/* ─── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative isolate">
         {/* Warm ambient glow + grain */}
@@ -611,10 +624,7 @@ export default function LandingPage() {
             Free to start, syncs with the calendar you already use. Your house will run itself.
           </p>
           <div className="mt-9 flex justify-center">
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-white px-7 py-3.5 text-base font-semibold text-brand-700 shadow-card transition hover:bg-brand-50"
-            >
+            <GoogleSignIn className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-white px-7 py-3.5 text-base font-semibold text-brand-700 shadow-card transition hover:bg-brand-50">
               <span
                 aria-hidden="true"
                 className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white"
@@ -622,7 +632,7 @@ export default function LandingPage() {
                 G
               </span>
               Get started with Google
-            </Link>
+            </GoogleSignIn>
           </div>
         </div>
       </section>
@@ -634,9 +644,12 @@ export default function LandingPage() {
             <span aria-hidden="true">🔥</span> Hearth
           </p>
           <p>Shared-home harmony for students &amp; roommates.</p>
-          <Link href="/login" className="font-medium text-gray-700 hover:text-brand-700">
+          <GoogleSignIn
+            showError={false}
+            className="font-medium text-gray-700 hover:text-brand-700"
+          >
             Sign in →
-          </Link>
+          </GoogleSignIn>
         </div>
       </footer>
     </main>
