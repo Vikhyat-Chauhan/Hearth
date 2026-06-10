@@ -1,5 +1,16 @@
 # Hearth
 
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-149ECA?logo=react&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)
+![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-C5F74F?logo=drizzle&logoColor=black)
+![Google Calendar API](https://img.shields.io/badge/Google_Calendar_API-4285F4?logo=googlecalendar&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A shared-household app for students and roommates. The main roommate creates a household,
 invites the others by code, and assigns recurring chores that show up on everyone's Google
 Calendar. Hearth also covers an announcements board, a shared shopping list, utilities &
@@ -82,14 +93,18 @@ docs/             SPEC, ARCHITECTURE, OPERATIONS
 
 ## Architecture
 
-Pages and API routes run on the Next.js App Router. Protected routes authenticate with
-the Supabase server client, validate input with the entity's zod schema
-(`src/lib/validation.ts`), persist through the single DB entry point (`src/db/index.ts`),
-and return structured JSON via `src/lib/api.ts`. Every query is scoped to the household
-the current user belongs to. All Google Calendar access is funneled through one
-server-only module (`src/lib/calendar.ts`); sync is best-effort and never blocks a
-mutation. See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the directory map,
-data model, and request lifecycle.
+**Pattern:** authenticate with Supabase Auth → scope every query to the caller's household
+→ validate the mutation with zod (`src/lib/validation.ts`) → persist through a single
+Drizzle entry point (`src/db/index.ts`) → fan out best-effort recurring events to each
+connected assignee's Google Calendar (`src/lib/calendar.ts`) → reconcile inbound calendar
+edits over a token-authenticated webhook (`/api/calendar/webhook`).
+
+This is the standard Next.js App Router shape — **auth → validate → persist → integrate** —
+applied uniformly across every route: failures come back as structured JSON via
+`src/lib/api.ts` (never a raw 500), all Google Calendar access is funneled through one
+server-only module, and calendar sync is best-effort so a failed write never blocks a chore
+from saving. See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the directory map,
+data model, and full request lifecycle.
 
 ## Testing
 
