@@ -132,6 +132,24 @@ export const memberRemoveSchema = z.object({
 });
 export type MemberRemove = z.infer<typeof memberRemoveSchema>;
 
+// Household exit flows: admin deletes the house, a member leaves it, or the
+// admin hands it to another member and leaves.
+export const householdDeleteSchema = z.object({
+  householdId: z.string().uuid(),
+});
+export type HouseholdDelete = z.infer<typeof householdDeleteSchema>;
+
+export const householdLeaveSchema = z.object({
+  householdId: z.string().uuid(),
+});
+export type HouseholdLeave = z.infer<typeof householdLeaveSchema>;
+
+export const householdTransferSchema = z.object({
+  householdId: z.string().uuid(),
+  newAdminUserId: z.string().uuid(),
+});
+export type HouseholdTransfer = z.infer<typeof householdTransferSchema>;
+
 // Multi-household: switch which household is "active" for the current user.
 export const householdActiveSchema = z.object({
   householdId: z.string().uuid("A household is required"),

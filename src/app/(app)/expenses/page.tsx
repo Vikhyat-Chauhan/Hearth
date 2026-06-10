@@ -15,7 +15,7 @@ import DeleteButton from "@/components/DeleteButton";
 
 export default async function ExpensesPage() {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {

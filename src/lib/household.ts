@@ -6,8 +6,9 @@
 // valid cookie we fall back to their most recent membership.
 
 import { randomBytes } from "node:crypto";
-import { eq, and, desc } from "drizzle-orm";
-import { db, households, memberships, profiles } from "@/db";
+import { eq, and, desc, inArray } from "drizzle-orm";
+import { db, households, memberships, profiles, chores, choreAssignments } from "@/db";
+import { unsyncChore } from "@/lib/chore-sync";
 import type { Role } from "@/lib/types";
 
 /** Cookie holding the user's currently-selected household id. */
@@ -111,6 +112,32 @@ export async function isAdmin(userId: string, householdId: string): Promise<bool
     .where(and(eq(memberships.userId, userId), eq(memberships.householdId, householdId)))
     .limit(1);
   return rows[0]?.role === "admin";
+}
+
+/**
+ * Remove one user from a household: delete their calendar events + chore
+ * assignments for this household's chores, then their membership. Mirrors the
+ * cleanup the admin member-removal route does, and is shared by the leave and
+ * transfer-and-leave flows. Chore completion logs are kept as history.
+ */
+export async function purgeMemberFromHousehold(userId: string, householdId: string): Promise<void> {
+  const householdChores = await db
+    .select({ id: chores.id })
+    .from(chores)
+    .where(eq(chores.householdId, householdId));
+  const choreIds = householdChores.map((c) => c.id);
+
+  for (const choreId of choreIds) {
+    await unsyncChore(choreId, [userId]); // deletes their event + CalendarLink
+  }
+  if (choreIds.length) {
+    await db
+      .delete(choreAssignments)
+      .where(and(inArray(choreAssignments.choreId, choreIds), eq(choreAssignments.userId, userId)));
+  }
+  await db
+    .delete(memberships)
+    .where(and(eq(memberships.householdId, householdId), eq(memberships.userId, userId)));
 }
 
 /** Is this user a member (any role) of this household? Authorizes shared features. */

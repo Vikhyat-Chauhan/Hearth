@@ -10,7 +10,7 @@ import PageHeader from "@/components/ui/PageHeader";
 
 export default async function CalendarSettingsPage() {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const [profile] = await db
     .select({ tok: profiles.googleRefreshTokenEnc })

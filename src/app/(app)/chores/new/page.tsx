@@ -10,7 +10,7 @@ import LinkButton from "@/components/ui/LinkButton";
 
 export default async function NewChorePage() {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const ctx = await getHouseholdContext(user.id);
   if (!ctx) {

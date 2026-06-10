@@ -14,7 +14,7 @@ import LinkButton from "@/components/ui/LinkButton";
 export default async function EditChorePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   const [chore] = await db.select().from(chores).where(eq(chores.id, id)).limit(1);
   if (!chore) notFound();

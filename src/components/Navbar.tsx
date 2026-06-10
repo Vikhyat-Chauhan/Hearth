@@ -7,6 +7,7 @@ import { listUserHouseholds, getHouseholdContext } from "@/lib/household";
 import HouseholdSwitcher from "@/components/HouseholdSwitcher";
 import MobileNav from "@/components/MobileNav";
 import SettingsMenu from "@/components/SettingsMenu";
+import GoogleSignIn from "@/components/GoogleSignIn";
 
 // Primary nav = day-to-day feature pages only. Household / Calendar / Logout
 // are account concerns and live in the Settings menu instead.
@@ -55,12 +56,12 @@ export default async function Navbar() {
           {user ? (
             <SettingsMenu userEmail={user.email ?? ""} householdName={householdName} role={role} />
           ) : (
-            <Link
-              href="/login"
+            <GoogleSignIn
+              showError={false}
               className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Sign in
-            </Link>
+            </GoogleSignIn>
           )}
         </div>
       </nav>
