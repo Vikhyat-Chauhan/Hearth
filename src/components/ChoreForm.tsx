@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { parseRRule } from "@/lib/recurrence";
+import { parseRRule, buildRRule, nextOccurrences } from "@/lib/recurrence";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
@@ -11,7 +11,7 @@ import Label from "@/components/ui/Label";
 import FieldError from "@/components/ui/FieldError";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
-import { cn } from "@/lib/utils";
+import { cn, formatOccurrenceDate } from "@/lib/utils";
 
 interface Member {
   userId: string;
@@ -36,9 +36,40 @@ const WEEKDAYS: { code: string; label: string }[] = [
   { code: "SA", label: "Sat" },
   { code: "SU", label: "Sun" },
 ];
+// Index 0=SU..6=SA, matching ByDay.day from parseRRule.
 const WEEKDAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+const WEEKDAY_NAMES: Record<string, string> = {
+  MO: "Mon", TU: "Tue", WE: "Wed", TH: "Thu", FR: "Fri", SA: "Sat", SU: "Sun",
+};
 
-type Freq = "DAILY" | "WEEKLY" | "MONTHLY";
+type Mode = "DAILY" | "WEEKLY" | "MONTHLY";
+const MODES: { value: Mode; label: string; unit: string }[] = [
+  { value: "DAILY", label: "Every day", unit: "day" },
+  { value: "WEEKLY", label: "Every week", unit: "week" },
+  { value: "MONTHLY", label: "Every month", unit: "month" },
+];
+
+const ORDINALS: { value: string; label: string }[] = [
+  { value: "1", label: "1st" },
+  { value: "2", label: "2nd" },
+  { value: "3", label: "3rd" },
+  { value: "4", label: "4th" },
+  { value: "-1", label: "last" },
+  { value: "every", label: "Every week" },
+];
+
+/** Local calendar date as YYYY-MM-DD (chores anchor to the day they're created). */
+function todayISO(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+    now.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+/** Weekday codes the user picked, returned in Mon→Sun display order. */
+function orderedDays(days: Set<string>): string[] {
+  return WEEKDAYS.filter((d) => days.has(d.code)).map((d) => d.code);
+}
 
 export default function ChoreForm({
   householdId,
@@ -53,34 +84,69 @@ export default function ChoreForm({
   const { toast } = useToast();
   const confirm = useConfirm();
   const isEdit = !!initial;
+  const today = useMemo(() => todayISO(), []);
   const seed = useMemo(() => (initial ? parseRRule(initial.rrule) : null), [initial]);
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [freq, setFreq] = useState<Freq>(
+  const [mode, setMode] = useState<Mode>(
     seed && (seed.freq === "DAILY" || seed.freq === "WEEKLY" || seed.freq === "MONTHLY")
       ? seed.freq
       : "WEEKLY",
   );
   const [interval, setIntervalN] = useState(seed?.interval ?? 1);
-  const [byday, setByday] = useState<Set<string>>(
-    new Set(seed?.byday.length ? seed.byday.map((i) => WEEKDAY_CODES[i]) : ["MO"]),
+  const [weekdays, setWeekdays] = useState<Set<string>>(
+    new Set(seed?.byday.length ? seed.byday.map((b) => WEEKDAY_CODES[b.day]) : ["MO"]),
   );
-  const [monthday, setMonthday] = useState(seed?.bymonthday[0] ?? 1);
+  const [ordinal, setOrdinal] = useState<string>(() => {
+    if (!seed || seed.freq !== "MONTHLY" || !seed.byday.length) return "1";
+    const withOrd = seed.byday.find((b) => b.ordinal !== null);
+    return withOrd ? String(withOrd.ordinal) : "every"; // ordinal-less BYDAY = every week
+  });
+  const [endDate, setEndDate] = useState<string>(seed?.until ?? "");
   const [assignees, setAssignees] = useState<Set<string>>(new Set(initial?.assigneeUserIds ?? []));
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const days = useMemo(() => orderedDays(weekdays), [weekdays]);
+
   const rrule = useMemo(() => {
-    const parts = [`FREQ=${freq}`];
-    if (interval > 1) parts.push(`INTERVAL=${interval}`);
-    if (freq === "WEEKLY" && byday.size > 0) {
-      parts.push(`BYDAY=${WEEKDAYS.filter((d) => byday.has(d.code)).map((d) => d.code).join(",")}`);
+    const until = endDate || undefined;
+    if (mode === "DAILY") return buildRRule({ freq: "DAILY", interval, until });
+    if (mode === "WEEKLY") return buildRRule({ freq: "WEEKLY", interval, byday: days, until });
+    return buildRRule({
+      freq: "MONTHLY",
+      interval,
+      byday: ordinal === "every" ? days : days.map((c) => `${ordinal}${c}`),
+      until,
+    });
+  }, [mode, interval, days, ordinal, endDate]);
+
+  // Human-readable cadence, e.g. "Every 2nd Mon, Wed, until Sun, Aug 30".
+  const summary = useMemo(() => {
+    const every = interval > 1 ? `Every ${interval} ` : "Every ";
+    const dayList = days.map((c) => WEEKDAY_NAMES[c]).join(", ");
+    let base: string;
+    if (mode === "DAILY") base = interval > 1 ? `${every}days` : "Every day";
+    else if (mode === "WEEKLY")
+      base = `${every}${interval > 1 ? "weeks" : "week"}${dayList ? ` on ${dayList}` : ""}`;
+    else {
+      const ord = ORDINALS.find((o) => o.value === ordinal)!.label;
+      const phrase = !dayList
+        ? ""
+        : ordinal === "every"
+          ? ` on every ${dayList}`
+          : ` on the ${ord} ${dayList}`;
+      base = `${every}${interval > 1 ? "months" : "month"}${phrase}`;
     }
-    if (freq === "MONTHLY") parts.push(`BYMONTHDAY=${monthday}`);
-    return parts.join(";");
-  }, [freq, interval, byday, monthday]);
+    return endDate ? `${base}, until ${formatOccurrenceDate(endDate)}` : base;
+  }, [mode, interval, days, ordinal, endDate]);
+
+  const preview = useMemo(() => {
+    if (!endDate) return [];
+    return nextOccurrences(rrule, today, { from: today, count: 4 });
+  }, [rrule, today, endDate]);
 
   function toggle(set: Set<string>, value: string): Set<string> {
     const next = new Set(set);
@@ -89,8 +155,16 @@ export default function ChoreForm({
     return next;
   }
 
-  const weeklyNeedsDay = freq === "WEEKLY" && byday.size === 0;
-  const canSubmit = title.trim().length > 0 && assignees.size > 0 && !weeklyNeedsDay && !submitting && !deleting;
+  const needsDays = mode === "WEEKLY" || mode === "MONTHLY";
+  const missingDays = needsDays && weekdays.size === 0;
+  const missingEnd = !endDate || endDate < today;
+  const canSubmit =
+    title.trim().length > 0 &&
+    assignees.size > 0 &&
+    !missingDays &&
+    !missingEnd &&
+    !submitting &&
+    !deleting;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -153,114 +227,199 @@ export default function ChoreForm({
 
   return (
     <form onSubmit={onSubmit} className="mt-6 space-y-6" aria-busy={submitting || deleting}>
-      <div>
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          maxLength={120}
-          placeholder="e.g. Take out the trash"
-          className="mt-1"
-          autoFocus
-        />
-      </div>
+      {/* 1 — How often? Pick the cadence first. */}
+      <fieldset className="rounded-2xl border border-gray-200 bg-white p-4 shadow-card">
+        <legend className="px-1 text-sm font-medium text-gray-700">How often?</legend>
 
-      <div>
-        <Label htmlFor="desc" optional>
-          Description
-        </Label>
-        <Textarea
-          id="desc"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          maxLength={1000}
-          rows={2}
-          className="mt-1"
-        />
-      </div>
+        <p className="text-xs text-gray-400">
+          Starts <span className="font-medium text-gray-600">today</span> · lands on each connected
+          housemate&apos;s Google Calendar.
+        </p>
 
-      <fieldset>
-        <legend className="text-sm font-medium text-gray-700">Recurrence</legend>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-sm text-gray-500">Every</span>
+        {/* Repetition mode */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {MODES.map((m) => (
+            <button
+              key={m.value}
+              type="button"
+              aria-pressed={mode === m.value}
+              onClick={() => setMode(m.value)}
+              className={cn(
+                "rounded-full border px-3.5 py-1.5 text-sm font-medium transition",
+                mode === m.value
+                  ? "border-brand-600 bg-brand-600 text-white"
+                  : "border-gray-300 text-gray-600 hover:bg-gray-50",
+              )}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Interval */}
+        <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+          <span>Repeat every</span>
           <Input
             type="number"
             min={1}
             max={52}
             value={interval}
-            onChange={(e) => setIntervalN(Math.max(1, Number(e.target.value)))}
+            onChange={(e) => setIntervalN(Math.max(1, Math.min(52, Number(e.target.value) || 1)))}
             className="w-20 px-2 py-1.5"
+            aria-label="Interval"
           />
-          <Select
-            value={freq}
-            onChange={(e) => setFreq(e.target.value as Freq)}
-            className="w-auto py-1.5"
-          >
-            <option value="DAILY">day(s)</option>
-            <option value="WEEKLY">week(s)</option>
-            <option value="MONTHLY">month(s)</option>
-          </Select>
+          <span>
+            {MODES.find((m) => m.value === mode)!.unit}
+            {interval > 1 ? "s" : ""}
+          </span>
         </div>
 
-        {freq === "WEEKLY" && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {WEEKDAYS.map((d) => (
-              <button
-                key={d.code}
-                type="button"
-                aria-pressed={byday.has(d.code)}
-                onClick={() => setByday((s) => toggle(s, d.code))}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-sm transition",
-                  byday.has(d.code)
-                    ? "border-brand-600 bg-brand-600 text-white"
-                    : "border-gray-300 text-gray-600 hover:bg-gray-50",
-                )}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {freq === "MONTHLY" && (
+        {/* Monthly ordinal */}
+        {mode === "MONTHLY" && (
           <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
-            <span>on day</span>
-            <Input
-              type="number"
-              min={1}
-              max={31}
-              value={monthday}
-              onChange={(e) => setMonthday(Math.min(31, Math.max(1, Number(e.target.value))))}
-              className="w-20 px-2 py-1.5"
-            />
-            <span>of the month</span>
+            <span>Which week of the month?</span>
+            <Select
+              value={ordinal}
+              onChange={(e) => setOrdinal(e.target.value)}
+              className="w-auto py-1.5"
+              aria-label="Which week of the month"
+            >
+              {ORDINALS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
           </div>
         )}
 
-        <p className="mt-2 font-mono text-xs text-gray-400">{rrule}</p>
+        {/* Weekday chips (weekly + monthly) */}
+        {needsDays && (
+          <div className="mt-3">
+            <span className="text-sm text-gray-600">{mode === "MONTHLY" ? "Weekday" : "On"}</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {WEEKDAYS.map((d) => (
+                <button
+                  key={d.code}
+                  type="button"
+                  aria-pressed={weekdays.has(d.code)}
+                  onClick={() => setWeekdays((s) => toggle(s, d.code))}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-sm transition",
+                    weekdays.has(d.code)
+                      ? "border-brand-600 bg-brand-600 text-white"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-50",
+                  )}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+            {missingDays && (
+              <p className="mt-1.5 text-xs text-amber-600">Pick at least one day.</p>
+            )}
+          </div>
+        )}
+
+        {/* End date (required) */}
+        <div className="mt-4">
+          <Label htmlFor="end">Ends on</Label>
+          <Input
+            id="end"
+            type="date"
+            min={today}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="mt-1"
+          />
+          {endDate && endDate < today && (
+            <p className="mt-1.5 text-xs text-amber-600">End date can&apos;t be before today.</p>
+          )}
+        </div>
+
+        {/* Summary + preview */}
+        <div className="mt-4 rounded-xl bg-stone-50 p-3">
+          <p className="text-sm font-medium text-gray-700">{summary}</p>
+          {preview.length > 0 && (
+            <p className="mt-1 text-xs text-gray-500">
+              Next: {preview.map((d) => formatOccurrenceDate(d)).join(" · ")}
+            </p>
+          )}
+          <p className="mt-2 font-mono text-[11px] text-gray-300">{rrule}</p>
+        </div>
       </fieldset>
 
+      {/* 2 — What is the chore? */}
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700">Assign to</legend>
-        <div className="mt-2 space-y-1">
-          {members.map((m) => (
-            <label
-              key={m.userId}
-              className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-50"
-            >
-              <input
-                type="checkbox"
-                checked={assignees.has(m.userId)}
-                onChange={() => setAssignees((s) => toggle(s, m.userId))}
-                className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-              />
-              <span className="text-sm">{m.name ?? m.email}</span>
-              <span className="text-xs text-gray-400">{m.email}</span>
-            </label>
-          ))}
+        <legend className="text-sm font-medium text-gray-700">What&apos;s the chore?</legend>
+        <div className="mt-2">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={120}
+            placeholder="e.g. Take out the trash"
+            className="mt-1"
+          />
         </div>
+        <div className="mt-4">
+          <Label htmlFor="desc" optional>
+            Description
+          </Label>
+          <Textarea
+            id="desc"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={1000}
+            rows={2}
+            className="mt-1"
+          />
+        </div>
+      </fieldset>
+
+      {/* 3 — Who's on it? One by default; add others to share. */}
+      <fieldset>
+        <legend className="text-sm font-medium text-gray-700">Who&apos;s on it?</legend>
+        <p className="mt-0.5 text-xs text-gray-400">
+          Assign it to one housemate — add others to share the load. Anyone assigned can complete it
+          for everyone.
+        </p>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          {members.map((m) => {
+            const on = assignees.has(m.userId);
+            return (
+              <label
+                key={m.userId}
+                className={cn(
+                  "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition",
+                  on
+                    ? "border-brand-500 bg-brand-50 shadow-glow"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={on}
+                  onChange={() => setAssignees((s) => toggle(s, m.userId))}
+                  className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                />
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-gray-800">
+                    {m.name ?? m.email}
+                  </span>
+                  <span className="block truncate text-xs text-gray-400">{m.email}</span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+        {assignees.size > 1 && (
+          <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-medium text-accent-700">
+            <span aria-hidden="true">👥</span>
+            Shared — anyone assigned can clear it, on everyone&apos;s calendar.
+          </p>
+        )}
       </fieldset>
 
       <FieldError>{error}</FieldError>

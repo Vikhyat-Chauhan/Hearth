@@ -68,6 +68,11 @@ export const chores = pgTable(
     description: text("description"),
     // RFC 5545 RRULE string, e.g. "FREQ=WEEKLY;BYDAY=MO".
     rrule: text("rrule").notNull(),
+    // Effective schedule anchor (YYYY-MM-DD): the date the recurrence is counted
+    // from. Set to the creation date on create, and moved to the edit date when
+    // the recurrence changes, so edits apply from then on and never touch the
+    // past. Null on legacy rows → callers fall back to created_at.
+    scheduleFrom: date("schedule_from"),
     createdBy: uuid("created_by").notNull(),
     active: boolean("active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

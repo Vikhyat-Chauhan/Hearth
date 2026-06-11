@@ -7,6 +7,7 @@ import { getUser } from "@/lib/supabase/server";
 import { choreUpdateSchema, parseBody } from "@/lib/validation";
 import { isAdmin } from "@/lib/household";
 import { syncChoreToAssignees, unsyncChore } from "@/lib/chore-sync";
+import { toISODate, nextAnchorOnEdit } from "@/lib/recurrence";
 import { ok, badRequest, unauthorized, forbidden, notFound, withErrorHandling } from "@/lib/api";
 
 async function loadChore(choreId: string) {
@@ -48,10 +49,15 @@ export const PATCH = withErrorHandling(async (req: Request) => {
   const toAdd = assigneeUserIds.filter((id) => !currentIds.has(id));
   const toRemove = [...currentIds].filter((id) => !nextIds.has(id));
 
+  // Re-anchor the schedule to today ONLY when the recurrence actually changes,
+  // so the edit applies from now on (past occurrences untouched) without a
+  // trivial title/description edit reshuffling the cadence.
+  const scheduleFrom = nextAnchorOnEdit(chore.rrule, chore.scheduleFrom, rrule, toISODate(new Date()));
+
   const updated = await db.transaction(async (tx) => {
     const [row] = await tx
       .update(chores)
-      .set({ title, description: description ?? null, rrule })
+      .set({ title, description: description ?? null, rrule, scheduleFrom })
       .where(eq(chores.id, choreId))
       .returning();
     if (toRemove.length) {

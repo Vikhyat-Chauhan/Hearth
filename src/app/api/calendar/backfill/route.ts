@@ -27,6 +27,7 @@ export const POST = withErrorHandling(async (req: Request) => {
       title: chores.title,
       description: chores.description,
       rrule: chores.rrule,
+      scheduleFrom: chores.scheduleFrom,
       createdAt: chores.createdAt,
     })
     .from(chores)

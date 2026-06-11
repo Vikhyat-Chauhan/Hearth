@@ -20,6 +20,12 @@ function formatDate(iso: string): string {
   });
 }
 
+/** Join names naturally: ["A"]→"A", ["A","B"]→"A and B", ["A","B","C"]→"A, B and C". */
+function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
 export default async function ChoresPage() {
   const user = await getUser();
   if (!user) redirect("/");
@@ -91,6 +97,17 @@ export default async function ChoresPage() {
                 )}
               </div>
               {chore.description && <p className="mt-1 text-sm text-gray-500">{chore.description}</p>}
+
+              {(() => {
+                const others = chore.assignees.filter((a) => !a.isSelf);
+                if (others.length === 0) return null;
+                return (
+                  <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-medium text-accent-700">
+                    <span aria-hidden="true">👥</span>
+                    Shared with {joinNames(others.map((a) => a.name ?? a.email))}
+                  </p>
+                );
+              })()}
 
               <ul className="mt-3 divide-y divide-gray-100">
                 {chore.occurrences.length === 0 ? (

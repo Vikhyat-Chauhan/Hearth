@@ -4,15 +4,24 @@
 // "upcoming occurrences" view and for picking a chore's first occurrence.
 //
 // Supports the subset Hearth uses: FREQ=DAILY|WEEKLY|MONTHLY with INTERVAL,
-// BYDAY (weekly), BYMONTHDAY (monthly), COUNT, and UNTIL. All dates are handled
-// as UTC calendar dates (YYYY-MM-DD); chores are all-day, so time-of-day is moot.
+// BYDAY (weekly, and monthly-by-weekday e.g. "2MO" / "-1FR"), BYMONTHDAY
+// (monthly-by-date), COUNT, and UNTIL. All dates are handled as UTC calendar
+// dates (YYYY-MM-DD); chores are all-day, so time-of-day is moot.
 
 const WEEKDAYS = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+
+/** A single BYDAY entry: a weekday, optionally with a monthly ordinal. */
+export interface ByDay {
+  /** Ordinal position within the month: 2 = "2nd", -1 = "last", null = every. */
+  ordinal: number | null;
+  /** Weekday index, 0=SU..6=SA. */
+  day: number;
+}
 
 interface ParsedRule {
   freq: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | "OTHER";
   interval: number;
-  byday: number[]; // 0=SU..6=SA
+  byday: ByDay[];
   bymonthday: number[];
   count: number | null;
   until: string | null; // YYYY-MM-DD
@@ -30,11 +39,48 @@ export function parseRRule(rrule: string): ParsedRule {
   return {
     freq,
     interval: parts.INTERVAL ? Math.max(1, parseInt(parts.INTERVAL, 10)) : 1,
-    byday: parts.BYDAY ? parts.BYDAY.split(",").map((d) => WEEKDAYS.indexOf(d)).filter((i) => i >= 0) : [],
+    byday: parts.BYDAY ? parseByDay(parts.BYDAY) : [],
     bymonthday: parts.BYMONTHDAY ? parts.BYMONTHDAY.split(",").map((d) => parseInt(d, 10)).filter(Number.isFinite) : [],
     count: parts.COUNT ? parseInt(parts.COUNT, 10) : null,
     until: parts.UNTIL ? toISODate(parseUntil(parts.UNTIL)) : null,
   };
+}
+
+/** Parse "MO,2WE,-1FR" into ByDay entries; tokens that aren't valid weekdays are dropped. */
+function parseByDay(value: string): ByDay[] {
+  const out: ByDay[] = [];
+  for (const tok of value.split(",")) {
+    const m = tok.match(/^(-?\d+)?([A-Z]{2})$/);
+    if (!m) continue;
+    const day = WEEKDAYS.indexOf(m[2]);
+    if (day < 0) continue;
+    out.push({ ordinal: m[1] ? parseInt(m[1], 10) : null, day });
+  }
+  return out;
+}
+
+/** Options for {@link buildRRule}. */
+export interface RRuleParts {
+  freq: "DAILY" | "WEEKLY" | "MONTHLY";
+  /** Repeat every N units; INTERVAL is omitted when 1. */
+  interval: number;
+  /** BYDAY tokens, already ordinal-prefixed where needed: ["MO","WE"] or ["2MO"]. */
+  byday?: string[];
+  /** End date "YYYY-MM-DD"; emitted as UNTIL=YYYYMMDD. */
+  until?: string;
+}
+
+/**
+ * Compose an RRULE string from form state — the inverse of {@link parseRRule}.
+ * e.g. { freq: "WEEKLY", interval: 2, byday: ["MO","WE"], until: "2026-08-30" }
+ *      -> "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE;UNTIL=20260830"
+ */
+export function buildRRule(p: RRuleParts): string {
+  const parts = [`FREQ=${p.freq}`];
+  if (p.interval > 1) parts.push(`INTERVAL=${p.interval}`);
+  if (p.byday && p.byday.length) parts.push(`BYDAY=${p.byday.join(",")}`);
+  if (p.until) parts.push(`UNTIL=${p.until.replace(/-/g, "")}`);
+  return parts.join(";");
 }
 
 function parseUntil(v: string): Date {
@@ -101,16 +147,28 @@ function matches(rule: ParsedRule, anchor: Date, day: Date): boolean {
     case "DAILY":
       return dayDiff % rule.interval === 0;
     case "WEEKLY": {
-      const byday = rule.byday.length ? rule.byday : [anchor.getUTCDay()];
-      if (!byday.includes(day.getUTCDay())) return false;
+      const days = rule.byday.length ? rule.byday.map((b) => b.day) : [anchor.getUTCDay()];
+      if (!days.includes(day.getUTCDay())) return false;
       // Week index relative to the anchor's week (Sunday-based).
       const weekDiff = Math.floor((dayDiff + anchor.getUTCDay()) / 7);
       return weekDiff % rule.interval === 0;
     }
     case "MONTHLY": {
+      if (monthsBetween(anchor, day) % rule.interval !== 0) return false;
+      // BYDAY (ordinal weekday, e.g. "2nd Monday") takes precedence over BYMONTHDAY.
+      if (rule.byday.length) {
+        const date = day.getUTCDate();
+        const ordinalInMonth = Math.floor((date - 1) / 7) + 1;
+        const daysInMonth = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth() + 1, 0)).getUTCDate();
+        const isLast = date + 7 > daysInMonth;
+        return rule.byday.some(
+          (b) =>
+            b.day === day.getUTCDay() &&
+            (b.ordinal === null || b.ordinal === ordinalInMonth || (b.ordinal === -1 && isLast)),
+        );
+      }
       const bymd = rule.bymonthday.length ? rule.bymonthday : [anchor.getUTCDate()];
-      if (!bymd.includes(day.getUTCDate())) return false;
-      return monthsBetween(anchor, day) % rule.interval === 0;
+      return bymd.includes(day.getUTCDate());
     }
     case "YEARLY":
       return (
@@ -128,4 +186,19 @@ function matches(rule: ParsedRule, anchor: Date, day: Date): boolean {
 export function firstOccurrence(rrule: string, anchorISO: string): string {
   const next = nextOccurrences(rrule, anchorISO, { from: anchorISO, count: 1 });
   return next[0] ?? anchorISO;
+}
+
+/**
+ * The schedule anchor after an edit. When the recurrence changes, move it to
+ * `todayISO` so the edit applies from then on (past occurrences are untouched);
+ * otherwise keep the previous anchor so a trivial title/description edit doesn't
+ * reshuffle the cadence.
+ */
+export function nextAnchorOnEdit(
+  prevRrule: string,
+  prevAnchor: string | null,
+  newRrule: string,
+  todayISO: string,
+): string | null {
+  return newRrule !== prevRrule ? todayISO : prevAnchor;
 }

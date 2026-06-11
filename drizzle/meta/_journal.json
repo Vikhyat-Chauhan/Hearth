@@ -43,6 +43,13 @@
       "when": 1781200000000,
       "tag": "0005_household_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781156664382,
+      "tag": "0006_mature_strong_guy",
+      "breakpoints": true
     }
   ]
 }

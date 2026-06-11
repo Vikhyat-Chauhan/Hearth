@@ -6,6 +6,7 @@ import { getUser } from "@/lib/supabase/server";
 import { choreCreateSchema, parseBody } from "@/lib/validation";
 import { isAdmin } from "@/lib/household";
 import { syncChoreToAssignees } from "@/lib/chore-sync";
+import { toISODate } from "@/lib/recurrence";
 import { ok, badRequest, unauthorized, forbidden, withErrorHandling } from "@/lib/api";
 
 export const POST = withErrorHandling(async (req: Request) => {
@@ -34,7 +35,15 @@ export const POST = withErrorHandling(async (req: Request) => {
   const chore = await db.transaction(async (tx) => {
     const [created] = await tx
       .insert(chores)
-      .values({ householdId, title, description: description ?? null, rrule, createdBy: user.id })
+      .values({
+        householdId,
+        title,
+        description: description ?? null,
+        rrule,
+        // Anchor the recurrence at the creation date; edits move it forward.
+        scheduleFrom: toISODate(new Date()),
+        createdBy: user.id,
+      })
       .returning();
     await tx.insert(choreAssignments).values(
       assigneeUserIds.map((userId) => ({ choreId: created.id, userId })),
