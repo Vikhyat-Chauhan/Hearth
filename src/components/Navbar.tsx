@@ -12,7 +12,7 @@ import GoogleSignIn from "@/components/GoogleSignIn";
 // Primary nav = day-to-day feature pages only. Household / Calendar / Logout
 // are account concerns and live in the Settings menu instead.
 const LINKS = [
-  { href: "/chores", label: "My Chores", icon: "✓" },
+  { href: "/chores", label: "Chores", icon: "✓" },
   { href: "/announcements", label: "Board", icon: "📣" },
   { href: "/shopping", label: "Shopping", icon: "🛒" },
   { href: "/bills", label: "Bills", icon: "🧾" },
