@@ -5,6 +5,7 @@ import { db, choreLogs } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import { choreLogCreateSchema, parseBody } from "@/lib/validation";
 import { isAssignee } from "@/lib/chores";
+import { cancelOccurrenceOnCalendars } from "@/lib/chore-sync";
 import { ok, badRequest, unauthorized, forbidden, withErrorHandling } from "@/lib/api";
 
 export const POST = withErrorHandling(async (req: Request) => {
@@ -20,11 +21,22 @@ export const POST = withErrorHandling(async (req: Request) => {
   }
 
   // Idempotent: unique (chore_id, occurrence_date). If already marked by anyone,
-  // do nothing and still report success.
-  await db
+  // the insert no-ops and returns no row — so a repeat mark skips the calendar work.
+  const inserted = await db
     .insert(choreLogs)
     .values({ choreId, userId: user.id, occurrenceDate })
-    .onConflictDoNothing();
+    .onConflictDoNothing()
+    .returning({ id: choreLogs.id });
+
+  if (inserted.length > 0) {
+    // First time this occurrence is cleared: drop that instance from every
+    // assignee's calendar. Best-effort — a Google failure never fails the mark.
+    try {
+      await cancelOccurrenceOnCalendars(choreId, occurrenceDate);
+    } catch (err) {
+      console.error(`[chore-logs] calendar clear failed for chore ${choreId} @ ${occurrenceDate}:`, err);
+    }
+  }
 
   return ok({ choreId, occurrenceDate, done: true });
 });

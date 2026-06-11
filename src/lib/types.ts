@@ -44,6 +44,8 @@ export interface Chore {
   description: string | null;
   /** RFC 5545 RRULE string, e.g. "FREQ=WEEKLY;BYDAY=MO". Drives both the in-app schedule and the calendar event. */
   rrule: string;
+  /** Effective schedule anchor (YYYY-MM-DD): the date the recurrence counts from. Moves to the edit date when the recurrence changes. Null on legacy rows → fall back to createdAt. */
+  scheduleFrom: string | null;
   createdBy: string;
   active: boolean;
   createdAt: Date;

@@ -5,7 +5,7 @@
 
 import { eq, and } from "drizzle-orm";
 import { db, profiles, calendarLinks } from "@/db";
-import { syncChoreEvent, deleteChoreEvent } from "@/lib/calendar";
+import { syncChoreEvent, deleteChoreEvent, cancelChoreInstance } from "@/lib/calendar";
 import { firstOccurrence, toISODate } from "@/lib/recurrence";
 import type { Chore } from "@/lib/types";
 
@@ -24,10 +24,13 @@ async function refreshTokenFor(userId: string): Promise<string | null> {
  * haven't connected Google are simply skipped.
  */
 export async function syncChoreToAssignees(
-  chore: Pick<Chore, "id" | "title" | "description" | "rrule" | "createdAt">,
+  chore: Pick<Chore, "id" | "title" | "description" | "rrule" | "createdAt" | "scheduleFrom">,
   assigneeIds: string[],
 ): Promise<void> {
-  const startDate = firstOccurrence(chore.rrule, toISODate(new Date(chore.createdAt)));
+  // Count the recurrence from the chore's effective schedule anchor (moves to the
+  // edit date when the recurrence changes); fall back to the creation date.
+  const anchor = chore.scheduleFrom ?? toISODate(new Date(chore.createdAt));
+  const startDate = firstOccurrence(chore.rrule, anchor);
 
   for (const userId of assigneeIds) {
     try {
@@ -81,6 +84,30 @@ export async function unsyncChore(choreId: string, userIds?: string[]): Promise<
       console.error(`[chore-sync] event delete failed for user ${link.userId}, chore ${choreId}:`, err);
     } finally {
       await db.delete(calendarLinks).where(eq(calendarLinks.id, link.id));
+    }
+  }
+}
+
+/**
+ * Cancel a single occurrence on every assignee's calendar — called when an
+ * assignee marks that occurrence done (shared completion). The recurring event
+ * and its CalendarLink stay; only that one instance is removed. Best-effort:
+ * each per-assignee failure is caught and logged, never thrown.
+ */
+export async function cancelOccurrenceOnCalendars(
+  choreId: string,
+  occurrenceDate: string,
+): Promise<void> {
+  const links = await db.select().from(calendarLinks).where(eq(calendarLinks.choreId, choreId));
+  for (const link of links) {
+    try {
+      const tokenEnc = await refreshTokenFor(link.userId);
+      await cancelChoreInstance(tokenEnc, link.externalEventId, occurrenceDate);
+    } catch (err) {
+      console.error(
+        `[chore-sync] instance cancel failed for user ${link.userId}, chore ${choreId} @ ${occurrenceDate}:`,
+        err,
+      );
     }
   }
 }

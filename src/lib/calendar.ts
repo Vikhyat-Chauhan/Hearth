@@ -143,6 +143,26 @@ export async function deleteChoreEvent(
   }
 }
 
+/**
+ * Cancel a SINGLE occurrence of a chore's recurring event (the rest of the
+ * series stays). Used when an assignee marks that occurrence done. Our chore
+ * events are all-day, so the instance id is `${eventId}_${YYYYMMDD}`. No-op if
+ * the member isn't connected; 404/410 (already cancelled/gone) are success.
+ */
+export async function cancelChoreInstance(
+  refreshTokenEnc: string | null,
+  externalEventId: string,
+  occurrenceDate: string,
+): Promise<void> {
+  if (!refreshTokenEnc || !googleConfigured()) return;
+  const accessToken = await getAccessToken(decryptToken(refreshTokenEnc));
+  const instanceId = `${externalEventId}_${occurrenceDate.replace(/-/g, "")}`;
+  const res = await callCalendar(accessToken, "DELETE", `/${instanceId}`);
+  if (!res.ok && res.status !== 404 && res.status !== 410) {
+    throw new Error(`Google Calendar instance cancel failed (${res.status}): ${await res.text()}`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Two-way sync (SCOPE Phase 4). Watch channels let Google push a notification
 // to our webhook when a user's calendar changes; reconciliation then reads the

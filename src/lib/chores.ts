@@ -2,7 +2,7 @@
 // upcoming occurrences and which of those are already marked done.
 
 import { eq, and, inArray } from "drizzle-orm";
-import { db, chores, choreAssignments, choreLogs } from "@/db";
+import { db, chores, choreAssignments, choreLogs, profiles } from "@/db";
 import { getHouseholdContext } from "@/lib/household";
 import { nextOccurrences, toISODate } from "@/lib/recurrence";
 
@@ -11,11 +11,21 @@ export interface ChoreOccurrence {
   done: boolean;
 }
 
+/** One assignee of a chore, as the dashboard names them. */
+export interface ChoreAssignee {
+  userId: string;
+  name: string | null;
+  email: string;
+  isSelf: boolean;
+}
+
 export interface MyChore {
   id: string;
   title: string;
   description: string | null;
   rrule: string;
+  /** Everyone the chore is assigned to (incl. the viewer) — drives "Shared with …". */
+  assignees: ChoreAssignee[];
   occurrences: ChoreOccurrence[];
 }
 
@@ -33,6 +43,7 @@ export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore
       title: chores.title,
       description: chores.description,
       rrule: chores.rrule,
+      scheduleFrom: chores.scheduleFrom,
       createdAt: chores.createdAt,
     })
     .from(chores)
@@ -47,8 +58,9 @@ export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore
 
   if (rows.length === 0) return [];
 
-  // Completed occurrences across all of these chores (any assignee counts).
   const choreIds = rows.map((r) => r.id);
+
+  // Completed occurrences across all of these chores (any assignee counts).
   const logs = await db
     .select({ choreId: choreLogs.choreId, occurrenceDate: choreLogs.occurrenceDate })
     .from(choreLogs)
@@ -59,18 +71,40 @@ export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore
     doneByChore.get(l.choreId)!.add(l.occurrenceDate);
   }
 
+  // Full assignee roster per chore (named, so the UI can show "Shared with …").
+  const assignRows = await db
+    .select({
+      choreId: choreAssignments.choreId,
+      userId: choreAssignments.userId,
+      name: profiles.name,
+      email: profiles.email,
+    })
+    .from(choreAssignments)
+    .innerJoin(profiles, eq(choreAssignments.userId, profiles.id))
+    .where(inArray(choreAssignments.choreId, choreIds));
+  const assigneesByChore = new Map<string, ChoreAssignee[]>();
+  for (const a of assignRows) {
+    if (!assigneesByChore.has(a.choreId)) assigneesByChore.set(a.choreId, []);
+    assigneesByChore.get(a.choreId)!.push({
+      userId: a.userId,
+      name: a.name,
+      email: a.email,
+      isSelf: a.userId === userId,
+    });
+  }
+
   const today = toISODate(new Date());
   return rows.map((r) => {
     const done = doneByChore.get(r.id) ?? new Set<string>();
-    const dates = nextOccurrences(r.rrule, toISODate(new Date(r.createdAt)), {
-      from: today,
-      count: upcoming,
-    });
+    // Count the recurrence from the chore's effective anchor (fall back to created date).
+    const anchor = r.scheduleFrom ?? toISODate(new Date(r.createdAt));
+    const dates = nextOccurrences(r.rrule, anchor, { from: today, count: upcoming });
     return {
       id: r.id,
       title: r.title,
       description: r.description,
       rrule: r.rrule,
+      assignees: assigneesByChore.get(r.id) ?? [],
       occurrences: dates.map((date) => ({ date, done: done.has(date) })),
     };
   });

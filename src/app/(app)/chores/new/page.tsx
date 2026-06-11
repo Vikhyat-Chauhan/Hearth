@@ -51,7 +51,7 @@ export default async function NewChorePage() {
         icon="✓"
         accent="brand"
         title="New chore"
-        subtitle={`Assign a recurring chore to one or more members of ${ctx.household.name}. It will appear on each connected member's Google Calendar.`}
+        subtitle={`Set up a recurring routine for ${ctx.household.name} — pick who's on it and how often it repeats. It lands on each connected housemate's Google Calendar.`}
       />
       <ChoreForm
         householdId={ctx.household.id}
