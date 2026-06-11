@@ -53,6 +53,35 @@ export async function registerWatch(
   return { status: "watching", channelId };
 }
 
+export type EnsureWatchResult = RegisterWatchResult | { status: "already" };
+
+/**
+ * Make sure two-way sync is ON for a connected user — this is the default, armed
+ * automatically when Google is connected (see the auth callback). No-ops when a
+ * still-valid watch channel already exists; otherwise clears any expired channels
+ * and registers a fresh one (so a periodic re-login renews the watch). Self-skips
+ * when the user hasn't connected Google. Best-effort: callers swallow failures.
+ */
+export async function ensureWatch(
+  userId: string,
+  webhookAddress: string,
+): Promise<EnsureWatchResult> {
+  const channels = await db
+    .select({ id: calendarChannels.id, expiration: calendarChannels.expiration })
+    .from(calendarChannels)
+    .where(eq(calendarChannels.userId, userId));
+
+  const now = new Date();
+  const hasActive = channels.some((c) => !c.expiration || c.expiration > now);
+  if (hasActive) return { status: "already" };
+
+  // No live channel — drop any expired rows before re-arming a fresh one.
+  if (channels.length) {
+    await db.delete(calendarChannels).where(eq(calendarChannels.userId, userId));
+  }
+  return registerWatch(userId, webhookAddress);
+}
+
 /** Which user owns a given watch channel (from a webhook notification). */
 export async function channelOwner(channelId: string): Promise<string | null> {
   const [row] = await db

@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { db, chores, choreAssignments, calendarLinks, profiles } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import { syncChoreToAssignees } from "@/lib/chore-sync";
+import { ensureWatch } from "@/lib/calendar-twoway";
 import { ok, unauthorized, badRequest, withErrorHandling } from "@/lib/api";
 
 export const POST = withErrorHandling(async (req: Request) => {
@@ -36,6 +37,15 @@ export const POST = withErrorHandling(async (req: Request) => {
 
   for (const chore of assigned) {
     await syncChoreToAssignees(chore, [user.id]);
+  }
+
+  // Two-way sync is on by default — arm a watch channel for users who connected
+  // Google before it became automatic. Best-effort; never fails the backfill.
+  try {
+    const origin = new URL(req.url).origin;
+    await ensureWatch(user.id, `${origin}/api/calendar/webhook`);
+  } catch (err) {
+    console.error("[calendar/backfill] auto-enable two-way sync failed:", err);
   }
 
   const linkCount = await db

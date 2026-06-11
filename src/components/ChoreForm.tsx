@@ -55,7 +55,6 @@ const ORDINALS: { value: string; label: string }[] = [
   { value: "3", label: "3rd" },
   { value: "4", label: "4th" },
   { value: "-1", label: "last" },
-  { value: "every", label: "Every week" },
 ];
 
 /** Local calendar date as YYYY-MM-DD (chores anchor to the day they're created). */
@@ -99,9 +98,9 @@ export default function ChoreForm({
     new Set(seed?.byday.length ? seed.byday.map((b) => WEEKDAY_CODES[b.day]) : ["MO"]),
   );
   const [ordinal, setOrdinal] = useState<string>(() => {
-    if (!seed || seed.freq !== "MONTHLY" || !seed.byday.length) return "1";
-    const withOrd = seed.byday.find((b) => b.ordinal !== null);
-    return withOrd ? String(withOrd.ordinal) : "every"; // ordinal-less BYDAY = every week
+    const withOrd = seed?.byday.find((b) => b.ordinal !== null);
+    // Legacy ordinal-less monthly rules open as "1st <weekday>" (a valid option).
+    return withOrd ? String(withOrd.ordinal) : "1";
   });
   const [endDate, setEndDate] = useState<string>(seed?.until ?? "");
   const [assignees, setAssignees] = useState<Set<string>>(new Set(initial?.assigneeUserIds ?? []));
@@ -118,7 +117,7 @@ export default function ChoreForm({
     return buildRRule({
       freq: "MONTHLY",
       interval,
-      byday: ordinal === "every" ? days : days.map((c) => `${ordinal}${c}`),
+      byday: days.map((c) => `${ordinal}${c}`),
       until,
     });
   }, [mode, interval, days, ordinal, endDate]);
@@ -133,11 +132,7 @@ export default function ChoreForm({
       base = `${every}${interval > 1 ? "weeks" : "week"}${dayList ? ` on ${dayList}` : ""}`;
     else {
       const ord = ORDINALS.find((o) => o.value === ordinal)!.label;
-      const phrase = !dayList
-        ? ""
-        : ordinal === "every"
-          ? ` on every ${dayList}`
-          : ` on the ${ord} ${dayList}`;
+      const phrase = dayList ? ` on the ${ord} ${dayList}` : "";
       base = `${every}${interval > 1 ? "months" : "month"}${phrase}`;
     }
     return endDate ? `${base}, until ${formatOccurrenceDate(endDate)}` : base;
