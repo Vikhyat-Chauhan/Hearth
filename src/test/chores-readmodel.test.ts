@@ -144,3 +144,63 @@ describe.skipIf(!hasDb)("all-household chores read model", () => {
     expect(await getHouseholdChores(randomUUID())).toEqual([]);
   });
 });
+
+describe.skipIf(!hasDb)("chore history read model: 14-day window by occurrence date", () => {
+  afterAll(async () => {
+    const { db, households, profiles } = await import("@/db");
+    const { inArray } = await import("drizzle-orm");
+    if (householdIds.length) await db.delete(households).where(inArray(households.id, householdIds));
+    if (profileIds.length) await db.delete(profiles).where(inArray(profiles.id, profileIds));
+  });
+
+  it("includes recent completions (with completer name + isSelf) and excludes ones older than 14 days", async () => {
+    const { db, profiles, households, memberships, chores, choreAssignments, choreLogs } =
+      await import("@/db");
+    const { getChoreHistory } = await import("@/lib/chores");
+    const { generateInviteCode } = await import("@/lib/household");
+
+    const admin = randomUUID();
+    profileIds.push(admin);
+    await db.insert(profiles).values([{ id: admin, email: `h-${admin}@t.dev`, name: "Hana" }]);
+
+    const [hh] = await db
+      .insert(households)
+      .values({ name: "History House", adminUserId: admin, inviteCode: generateInviteCode() })
+      .returning();
+    householdIds.push(hh.id);
+    await db.insert(memberships).values([{ householdId: hh.id, userId: admin, role: "admin" }]);
+
+    const [chore] = await db
+      .insert(chores)
+      .values({ householdId: hh.id, title: "Recycling", rrule: "FREQ=DAILY", createdBy: admin })
+      .returning();
+    await db.insert(choreAssignments).values([{ choreId: chore.id, userId: admin }]);
+
+    const iso = (daysAgo: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - daysAgo);
+      return d.toISOString().slice(0, 10);
+    };
+    const recent = iso(3); // inside the 14-day window
+    const old = iso(20); // outside the window
+    await db.insert(choreLogs).values([
+      { choreId: chore.id, userId: admin, occurrenceDate: recent },
+      { choreId: chore.id, userId: admin, occurrenceDate: old },
+    ]);
+
+    const history = await getChoreHistory(admin);
+    const dates = history.filter((h) => h.choreId === chore.id).map((h) => h.date);
+    expect(dates).toContain(recent);
+    expect(dates).not.toContain(old);
+
+    const entry = history.find((h) => h.date === recent && h.choreId === chore.id)!;
+    expect(entry.title).toBe("Recycling");
+    expect(entry.completedByName).toBe("Hana");
+    expect(entry.isSelf).toBe(true);
+  });
+
+  it("returns [] for a user with no household", async () => {
+    const { getChoreHistory } = await import("@/lib/chores");
+    expect(await getChoreHistory(randomUUID())).toEqual([]);
+  });
+});
