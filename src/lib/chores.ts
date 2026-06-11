@@ -56,6 +56,54 @@ export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore
       ),
     );
 
+  return buildChoreViews(rows, userId, upcoming);
+}
+
+/**
+ * Every active chore in `userId`'s active household (not just the ones assigned
+ * to them), each with its assignee roster and upcoming occurrences. Powers the
+ * "All chores" view; `isSelf` is still computed for the viewer.
+ */
+export async function getHouseholdChores(userId: string, upcoming = 5): Promise<MyChore[]> {
+  const ctx = await getHouseholdContext(userId);
+  if (!ctx) return [];
+
+  const rows = await db
+    .select({
+      id: chores.id,
+      title: chores.title,
+      description: chores.description,
+      rrule: chores.rrule,
+      scheduleFrom: chores.scheduleFrom,
+      createdAt: chores.createdAt,
+    })
+    .from(chores)
+    .where(and(eq(chores.householdId, ctx.household.id), eq(chores.active, true)))
+    .orderBy(chores.createdAt);
+
+  return buildChoreViews(rows, userId, upcoming);
+}
+
+/** Row shape selected for the chore read model. */
+type ChoreRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  rrule: string;
+  scheduleFrom: string | null;
+  createdAt: Date;
+};
+
+/**
+ * Turn a set of chore rows into the dashboard read model: attach the named
+ * assignee roster (with `isSelf` for `viewerId`), the completed-occurrence set
+ * (any-one-marks-it), and up to `upcoming` future occurrences each.
+ */
+async function buildChoreViews(
+  rows: ChoreRow[],
+  viewerId: string,
+  upcoming: number,
+): Promise<MyChore[]> {
   if (rows.length === 0) return [];
 
   const choreIds = rows.map((r) => r.id);
@@ -89,7 +137,7 @@ export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore
       userId: a.userId,
       name: a.name,
       email: a.email,
-      isSelf: a.userId === userId,
+      isSelf: a.userId === viewerId,
     });
   }
 

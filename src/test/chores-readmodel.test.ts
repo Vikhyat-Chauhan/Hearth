@@ -76,3 +76,71 @@ describe.skipIf(!hasDb)("my chores read model: co-assignees + schedule anchor", 
     }
   });
 });
+
+describe.skipIf(!hasDb)("all-household chores read model", () => {
+  afterAll(async () => {
+    const { db, households, profiles } = await import("@/db");
+    const { inArray } = await import("drizzle-orm");
+    if (householdIds.length) await db.delete(households).where(inArray(households.id, householdIds));
+    if (profileIds.length) await db.delete(profiles).where(inArray(profiles.id, profileIds));
+  });
+
+  it("returns every active chore in the household (incl. ones not assigned to the viewer); excludes inactive and other-household chores", async () => {
+    const { db, profiles, households, memberships, chores, choreAssignments } = await import("@/db");
+    const { getHouseholdChores } = await import("@/lib/chores");
+    const { generateInviteCode } = await import("@/lib/household");
+
+    const member = randomUUID(); // the viewer — assigned to nothing
+    const mate = randomUUID();
+    profileIds.push(member, mate);
+    await db.insert(profiles).values([
+      { id: member, email: `m-${member}@t.dev`, name: "Mia" },
+      { id: mate, email: `n-${mate}@t.dev`, name: "Noah" },
+    ]);
+
+    const [hh] = await db
+      .insert(households)
+      .values({ name: "All House", adminUserId: mate, inviteCode: generateInviteCode() })
+      .returning();
+    const [other] = await db
+      .insert(households)
+      .values({ name: "Other House", adminUserId: mate, inviteCode: generateInviteCode() })
+      .returning();
+    householdIds.push(hh.id, other.id);
+    await db.insert(memberships).values([
+      { householdId: hh.id, userId: member, role: "member" },
+      { householdId: hh.id, userId: mate, role: "admin" },
+    ]);
+
+    // A chore assigned to mate only (NOT the viewer); an inactive chore; and a
+    // chore in another household the viewer doesn't belong to.
+    const [assigned] = await db
+      .insert(chores)
+      .values({ householdId: hh.id, title: "Dishes", rrule: "FREQ=DAILY", createdBy: mate })
+      .returning();
+    await db.insert(choreAssignments).values({ choreId: assigned.id, userId: mate });
+    const [inactive] = await db
+      .insert(chores)
+      .values({ householdId: hh.id, title: "Old", rrule: "FREQ=DAILY", active: false, createdBy: mate })
+      .returning();
+    const [foreign] = await db
+      .insert(chores)
+      .values({ householdId: other.id, title: "Not mine", rrule: "FREQ=DAILY", createdBy: mate })
+      .returning();
+
+    const all = await getHouseholdChores(member);
+    const ids = all.map((c) => c.id);
+    expect(ids).toContain(assigned.id); // visible though the viewer isn't an assignee
+    expect(ids).not.toContain(inactive.id);
+    expect(ids).not.toContain(foreign.id);
+
+    // isSelf is computed for the viewer (who is assigned to nothing here).
+    const row = all.find((c) => c.id === assigned.id)!;
+    expect(row.assignees.every((a) => !a.isSelf)).toBe(true);
+  });
+
+  it("returns [] for a user with no household", async () => {
+    const { getHouseholdChores } = await import("@/lib/chores");
+    expect(await getHouseholdChores(randomUUID())).toEqual([]);
+  });
+});
