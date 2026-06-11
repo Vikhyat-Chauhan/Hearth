@@ -39,16 +39,18 @@ export default function TwoWaySync({ active }: { active: boolean }) {
     <div className="mt-8 border-t border-gray-100 pt-6">
       <h2 className="text-sm font-semibold text-gray-700">Two-way sync</h2>
       <p className="mt-1 text-xs text-gray-500">
-        Let changes you make on Google Calendar flow back to Hearth. If you delete a chore&apos;s
-        event on your calendar, Hearth drops that calendar link.
+        On by default once Google is connected — changes you make on Google Calendar flow back to
+        Hearth. If you delete a chore&apos;s event on your calendar, Hearth drops that calendar link.
       </p>
-      {active ? (
-        <p className="mt-3 text-sm text-green-700">✓ Two-way sync is active.</p>
-      ) : (
-        <Button variant="secondary" onClick={enable} disabled={busy} className="mt-3">
-          {busy ? "Enabling…" : "Enable two-way sync"}
-        </Button>
-      )}
+      {active && <p className="mt-3 text-sm text-green-700">✓ Two-way sync is active.</p>}
+      <Button
+        variant="secondary"
+        onClick={enable}
+        disabled={active || busy}
+        className="mt-3"
+      >
+        {active ? "Two-way sync is on" : busy ? "Enabling…" : "Turn on two-way sync"}
+      </Button>
       {status && <p role="status" className="mt-3 text-sm text-gray-600">{status}</p>}
     </div>
   );

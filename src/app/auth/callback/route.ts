@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db, profiles } from "@/db";
 import { encryptToken } from "@/lib/crypto";
+import { ensureWatch } from "@/lib/calendar-twoway";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -54,6 +55,15 @@ export async function GET(request: Request) {
   } catch (err) {
     console.error("[auth/callback] profile upsert failed:", err);
     return NextResponse.redirect(`${origin}/?error=profile_failed`);
+  }
+
+  // Two-way sync is on by default: once Google is connected, arm a watch channel
+  // so calendar edits flow back to Hearth. Best-effort and idempotent — a failure
+  // (or no Google token yet) never blocks the login redirect.
+  try {
+    await ensureWatch(user.id, `${origin}/api/calendar/webhook`);
+  } catch (err) {
+    console.error("[auth/callback] auto-enable two-way sync failed:", err);
   }
 
   return NextResponse.redirect(`${origin}/`);

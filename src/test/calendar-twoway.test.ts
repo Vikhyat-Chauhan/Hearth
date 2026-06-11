@@ -45,4 +45,34 @@ describe.skipIf(!hasDb)("two-way calendar sync", () => {
     const res = await registerWatch(uid, "https://example.com/api/calendar/webhook");
     expect(res.status).toBe("skipped");
   });
+
+  it("ensureWatch no-ops when a live channel already exists, and skips without Google", async () => {
+    const { db, profiles, calendarChannels } = await import("@/db");
+    const { ensureWatch } = await import("@/lib/calendar-twoway");
+
+    // Connected user who already has a non-expired watch channel → "already" (no Google call).
+    const uid = randomUUID();
+    profileIds.push(uid);
+    await db.insert(profiles).values({
+      id: uid,
+      email: `cw3-${uid}@test.dev`,
+      name: "Armed",
+      googleRefreshTokenEnc: "enc",
+    });
+    const channelId = randomUUID();
+    channelIds.push(channelId);
+    await db.insert(calendarChannels).values({
+      userId: uid,
+      channelId,
+      resourceId: "res-live",
+      expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // a week out
+    });
+    expect((await ensureWatch(uid, "https://example.com/api/calendar/webhook")).status).toBe("already");
+
+    // User without Google connected → skipped, never throws.
+    const uid2 = randomUUID();
+    profileIds.push(uid2);
+    await db.insert(profiles).values({ id: uid2, email: `cw4-${uid2}@test.dev`, name: "Unlinked2" });
+    expect((await ensureWatch(uid2, "https://example.com/api/calendar/webhook")).status).toBe("skipped");
+  });
 });
