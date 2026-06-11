@@ -5,20 +5,23 @@
 // read-only; admins get Edit links). Visible to everyone; only admins edit.
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import type { MyChore } from "@/lib/chores";
+import type { MyChore, ChoreHistoryEntry } from "@/lib/chores";
 import { EmptyState } from "@/components/states";
 import LinkButton from "@/components/ui/LinkButton";
 import ChoreList from "@/components/ChoreList";
+import ChoreHistoryList from "@/components/ChoreHistoryList";
 
-type Tab = "mine" | "all";
+type Tab = "mine" | "all" | "history";
 
 export default function ChoreTabs({
   myChores,
   allChores,
+  history,
   isAdmin,
 }: {
   myChores: MyChore[];
   allChores: MyChore[];
+  history: ChoreHistoryEntry[];
   isAdmin: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("mine");
@@ -54,9 +57,30 @@ export default function ChoreTabs({
         >
           All chores
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "history"}
+          className={tabClass(tab === "history")}
+          onClick={() => setTab("history")}
+        >
+          History
+        </button>
       </div>
 
-      {tab === "mine" ? (
+      {tab === "history" ? (
+        history.length === 0 ? (
+          <div className="mt-6">
+            <EmptyState
+              title="No completed chores yet"
+              description="Chores your household completes will show here for two weeks."
+              icon="🗓️"
+            />
+          </div>
+        ) : (
+          <ChoreHistoryList entries={history} />
+        )
+      ) : tab === "mine" ? (
         myChores.length === 0 ? (
           <div className="mt-6">
             <EmptyState

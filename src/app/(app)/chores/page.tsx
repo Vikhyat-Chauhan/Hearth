@@ -4,7 +4,7 @@
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext } from "@/lib/household";
-import { getMyChores, getHouseholdChores } from "@/lib/chores";
+import { getMyChores, getHouseholdChores, getChoreHistory } from "@/lib/chores";
 import { EmptyState } from "@/components/states";
 import PageHeader from "@/components/ui/PageHeader";
 import LinkButton from "@/components/ui/LinkButton";
@@ -29,9 +29,10 @@ export default async function ChoresPage() {
   }
 
   const isAdmin = ctx.role === "admin";
-  const [myChores, allChores] = await Promise.all([
+  const [myChores, allChores, history] = await Promise.all([
     getMyChores(user.id),
     getHouseholdChores(user.id),
+    getChoreHistory(user.id),
   ]);
 
   return (
@@ -50,7 +51,7 @@ export default async function ChoresPage() {
         }
       />
 
-      <ChoreTabs myChores={myChores} allChores={allChores} isAdmin={isAdmin} />
+      <ChoreTabs myChores={myChores} allChores={allChores} history={history} isAdmin={isAdmin} />
     </main>
   );
 }

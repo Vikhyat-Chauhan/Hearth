@@ -1,7 +1,7 @@
 // Chore read model (server-only): the chores assigned to a user, each with its
 // upcoming occurrences and which of those are already marked done.
 
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, gte, lt, desc } from "drizzle-orm";
 import { db, chores, choreAssignments, choreLogs, profiles } from "@/db";
 import { getHouseholdContext } from "@/lib/household";
 import { nextOccurrences, toISODate } from "@/lib/recurrence";
@@ -82,6 +82,69 @@ export async function getHouseholdChores(userId: string, upcoming = 5): Promise<
     .orderBy(chores.createdAt);
 
   return buildChoreViews(rows, userId, upcoming);
+}
+
+/** One completed occurrence in the household's recent history. */
+export interface ChoreHistoryEntry {
+  choreId: string;
+  title: string;
+  /** Occurrence date (YYYY-MM-DD), not the moment it was marked done. */
+  date: string;
+  completedById: string;
+  completedByName: string | null;
+  completedByEmail: string;
+  /** completedById === viewer — drives "by you". */
+  isSelf: boolean;
+  completedAt: Date;
+}
+
+/**
+ * Completed chore occurrences across `userId`'s active household, limited to the
+ * last `days` days *by occurrence date* (strictly before today, so it never
+ * overlaps the forward-looking views). Nothing is deleted — older logs simply
+ * fall outside the window. Newest first.
+ */
+export async function getChoreHistory(
+  userId: string,
+  days = 14,
+): Promise<ChoreHistoryEntry[]> {
+  const ctx = await getHouseholdContext(userId);
+  if (!ctx) return [];
+
+  const today = toISODate(new Date());
+  const back = new Date();
+  back.setUTCDate(back.getUTCDate() - days);
+  const cutoff = toISODate(back);
+
+  const rows = await db
+    .select({
+      choreId: choreLogs.choreId,
+      title: chores.title,
+      occurrenceDate: choreLogs.occurrenceDate,
+      completedById: choreLogs.userId,
+      completedByName: profiles.name,
+      completedByEmail: profiles.email,
+      completedAt: choreLogs.completedAt,
+    })
+    .from(choreLogs)
+    .innerJoin(
+      chores,
+      and(eq(choreLogs.choreId, chores.id), eq(chores.householdId, ctx.household.id)),
+    )
+    .innerJoin(profiles, eq(choreLogs.userId, profiles.id))
+    .where(and(gte(choreLogs.occurrenceDate, cutoff), lt(choreLogs.occurrenceDate, today)))
+    .orderBy(desc(choreLogs.occurrenceDate), desc(choreLogs.completedAt));
+
+  return rows.map((r) => ({
+    choreId: r.choreId,
+    title: r.title,
+    date: r.occurrenceDate,
+    completedById: r.completedById,
+    completedByName: r.completedByName,
+    completedByEmail: r.completedByEmail,
+    isSelf: r.completedById === userId,
+    completedAt: r.completedAt,
+  }));
 }
 
 /** Row shape selected for the chore read model. */
