@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import ToastProvider from "@/components/ui/Toast";
 import ConfirmProvider from "@/components/ui/ConfirmDialog";
+import { Analytics } from "@vercel/analytics/next";
 import { assertServerEnv } from "@/lib/env";
 
 // Fail fast on a misconfigured deploy: validate required server env at startup.
@@ -54,6 +55,7 @@ export default function RootLayout({
             </div>
           </ToastProvider>
         </ConfirmProvider>
+        <Analytics />
       </body>
     </html>
   );
