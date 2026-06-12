@@ -102,6 +102,8 @@ export default function ChoreForm({
     // Legacy ordinal-less monthly rules open as "1st <weekday>" (a valid option).
     return withOrd ? String(withOrd.ordinal) : "1";
   });
+  // Recurrence start anchor — picked on create; on edit it's managed server-side.
+  const [startDate, setStartDate] = useState<string>(today);
   const [endDate, setEndDate] = useState<string>(seed?.until ?? "");
   const [assignees, setAssignees] = useState<Set<string>>(new Set(initial?.assigneeUserIds ?? []));
   const [submitting, setSubmitting] = useState(false);
@@ -138,10 +140,12 @@ export default function ChoreForm({
     return endDate ? `${base}, until ${formatOccurrenceDate(endDate)}` : base;
   }, [mode, interval, days, ordinal, endDate]);
 
+  // On create the schedule counts from the chosen start date; on edit it's anchored server-side.
+  const anchor = isEdit ? today : startDate || today;
   const preview = useMemo(() => {
     if (!endDate) return [];
-    return nextOccurrences(rrule, today, { from: today, count: 4 });
-  }, [rrule, today, endDate]);
+    return nextOccurrences(rrule, anchor, { from: anchor, count: 4 });
+  }, [rrule, anchor, endDate]);
 
   function toggle(set: Set<string>, value: string): Set<string> {
     const next = new Set(set);
@@ -152,11 +156,15 @@ export default function ChoreForm({
 
   const needsDays = mode === "WEEKLY" || mode === "MONTHLY";
   const missingDays = needsDays && weekdays.size === 0;
-  const missingEnd = !endDate || endDate < today;
+  // On create the start date is the floor for the end date; on edit it's today.
+  const endFloor = isEdit ? today : startDate || today;
+  const missingStart = !isEdit && (!startDate || startDate < today);
+  const missingEnd = !endDate || endDate < endFloor;
   const canSubmit =
     title.trim().length > 0 &&
     assignees.size > 0 &&
     !missingDays &&
+    !missingStart &&
     !missingEnd &&
     !submitting &&
     !deleting;
@@ -170,7 +178,7 @@ export default function ChoreForm({
         method: isEdit ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...(isEdit ? {} : { householdId }),
+          ...(isEdit ? {} : { householdId, startDate }),
           title: title.trim(),
           description: description.trim() || null,
           rrule,
@@ -227,8 +235,11 @@ export default function ChoreForm({
         <legend className="px-1 text-sm font-medium text-gray-700">How often?</legend>
 
         <p className="text-xs text-gray-400">
-          Starts <span className="font-medium text-gray-600">today</span> · lands on each connected
-          housemate&apos;s Google Calendar.
+          {isEdit ? (
+            "Lands on each connected housemate's Google Calendar."
+          ) : (
+            "Pick when it starts · lands on each connected housemate's Google Calendar."
+          )}
         </p>
 
         {/* Repetition mode */}
@@ -316,19 +327,39 @@ export default function ChoreForm({
           </div>
         )}
 
+        {/* Start date (create only — edits are re-anchored server-side) */}
+        {!isEdit && (
+          <div className="mt-4">
+            <Label htmlFor="start">Starts on</Label>
+            <Input
+              id="start"
+              type="date"
+              min={today}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="mt-1"
+            />
+            {startDate && startDate < today && (
+              <p className="mt-1.5 text-xs text-amber-600">Start date can&apos;t be before today.</p>
+            )}
+          </div>
+        )}
+
         {/* End date (required) */}
         <div className="mt-4">
           <Label htmlFor="end">Ends on</Label>
           <Input
             id="end"
             type="date"
-            min={today}
+            min={endFloor}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             className="mt-1"
           />
-          {endDate && endDate < today && (
-            <p className="mt-1.5 text-xs text-amber-600">End date can&apos;t be before today.</p>
+          {endDate && endDate < endFloor && (
+            <p className="mt-1.5 text-xs text-amber-600">
+              {isEdit ? "End date can't be before today." : "End date can't be before the start date."}
+            </p>
           )}
         </div>
 

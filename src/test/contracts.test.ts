@@ -58,6 +58,16 @@ describe("choreCreateSchema", () => {
   it("rejects zero assignees", () => {
     expect(parseBody(choreCreateSchema, { ...valid, assigneeUserIds: [] }).success).toBe(false);
   });
+  it("accepts an optional future start date", () => {
+    expect(parseBody(choreCreateSchema, { ...valid, startDate: "2099-01-01" }).success).toBe(true);
+  });
+  it("accepts a chore with no start date (defaults to today server-side)", () => {
+    expect("startDate" in valid).toBe(false);
+    expect(parseBody(choreCreateSchema, valid).success).toBe(true);
+  });
+  it("rejects a start date in the past", () => {
+    expect(parseBody(choreCreateSchema, { ...valid, startDate: "2000-01-01" }).success).toBe(false);
+  });
 });
 
 describe("choreLogCreateSchema", () => {

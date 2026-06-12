@@ -17,6 +17,7 @@
 //   });
 
 import { z } from "zod";
+import { toISODate } from "@/lib/recurrence";
 
 /**
  * Validate an unknown payload against a schema. Returns a discriminated result
@@ -51,6 +52,8 @@ export function parseBody<T extends z.ZodTypeAny>(
 export const cents = z.number().int().nonnegative();
 export const nonEmpty = (label = "This field") =>
   z.string().trim().min(1, `${label} is required`);
+// Calendar date as YYYY-MM-DD.
+export const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD");
 
 // ---------------------------------------------------------------------------
 // RRULE (RFC 5545) — recurrence is stored verbatim and passed to the Google
@@ -108,6 +111,11 @@ export const choreCreateSchema = z.object({
   title: nonEmpty("Title").pipe(z.string().max(120, "Title must be 120 characters or fewer")),
   description: z.string().trim().max(1000, "Description must be 1000 characters or fewer").optional().nullable(),
   rrule,
+  // Recurrence anchor (YYYY-MM-DD). Optional — defaults to today server-side.
+  // Today or future only; backdating is rejected.
+  startDate: isoDate
+    .refine((d) => d >= toISODate(new Date()), "Start date can't be in the past")
+    .optional(),
   assigneeUserIds: z
     .array(z.string().uuid())
     .min(1, "Assign the chore to at least one member"),
