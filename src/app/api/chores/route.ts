@@ -6,7 +6,7 @@ import { getUser } from "@/lib/supabase/server";
 import { choreCreateSchema, parseBody } from "@/lib/validation";
 import { isAdmin } from "@/lib/household";
 import { syncChoreToAssignees } from "@/lib/chore-sync";
-import { toISODate } from "@/lib/recurrence";
+import { toISODate, withSchedule } from "@/lib/recurrence";
 import { ok, badRequest, unauthorized, forbidden, withErrorHandling } from "@/lib/api";
 
 export const POST = withErrorHandling(async (req: Request) => {
@@ -37,7 +37,8 @@ export const POST = withErrorHandling(async (req: Request) => {
       .insert(chores)
       .values({
         householdId,
-        title,
+        // Bake the schedule into the name so chores are self-describing.
+        title: withSchedule(title, rrule),
         description: description ?? null,
         rrule,
         // Anchor the recurrence at the chosen start date (defaults to today);

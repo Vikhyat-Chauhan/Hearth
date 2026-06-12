@@ -7,7 +7,7 @@ import { getUser } from "@/lib/supabase/server";
 import { choreUpdateSchema, parseBody } from "@/lib/validation";
 import { isAdmin } from "@/lib/household";
 import { syncChoreToAssignees, unsyncChore } from "@/lib/chore-sync";
-import { toISODate, nextAnchorOnEdit } from "@/lib/recurrence";
+import { toISODate, nextAnchorOnEdit, withSchedule } from "@/lib/recurrence";
 import { ok, badRequest, unauthorized, forbidden, notFound, withErrorHandling } from "@/lib/api";
 
 async function loadChore(choreId: string) {
@@ -57,7 +57,7 @@ export const PATCH = withErrorHandling(async (req: Request) => {
   const updated = await db.transaction(async (tx) => {
     const [row] = await tx
       .update(chores)
-      .set({ title, description: description ?? null, rrule, scheduleFrom })
+      .set({ title: withSchedule(title, rrule), description: description ?? null, rrule, scheduleFrom })
       .where(eq(chores.id, choreId))
       .returning();
     if (toRemove.length) {

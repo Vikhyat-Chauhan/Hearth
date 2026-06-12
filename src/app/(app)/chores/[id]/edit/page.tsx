@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { db, chores, choreAssignments } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import { isAdmin, listMembers } from "@/lib/household";
+import { stripScheduleSuffix } from "@/lib/recurrence";
 import ChoreForm from "@/components/ChoreForm";
 import { EmptyState } from "@/components/states";
 import PageHeader from "@/components/ui/PageHeader";
@@ -59,7 +60,8 @@ export default async function EditChorePage({ params }: { params: Promise<{ id: 
         members={members.map((m) => ({ userId: m.userId, name: m.name, email: m.email }))}
         initial={{
           id: chore.id,
-          title: chore.title,
+          // Show just the base name; the schedule suffix is re-derived on save.
+          title: stripScheduleSuffix(chore.title),
           description: chore.description,
           rrule: chore.rrule,
           assigneeUserIds: assignmentRows.map((a) => a.userId),
