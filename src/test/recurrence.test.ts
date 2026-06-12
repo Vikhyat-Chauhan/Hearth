@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { nextOccurrences, firstOccurrence, parseRRule, buildRRule, nextAnchorOnEdit } from "@/lib/recurrence";
+import {
+  nextOccurrences,
+  firstOccurrence,
+  parseRRule,
+  buildRRule,
+  nextAnchorOnEdit,
+  rruleToText,
+  withSchedule,
+} from "@/lib/recurrence";
 
 describe("parseRRule", () => {
   it("extracts freq, interval, byday", () => {
@@ -108,5 +116,43 @@ describe("nextAnchorOnEdit", () => {
     expect(
       nextAnchorOnEdit("FREQ=WEEKLY;BYDAY=MO", "2026-01-01", "FREQ=WEEKLY;BYDAY=MO", "2026-06-11"),
     ).toBe("2026-01-01");
+  });
+});
+
+describe("rruleToText", () => {
+  it("summarizes daily, weekly, monthly, and yearly cadences", () => {
+    expect(rruleToText("FREQ=DAILY")).toBe("every day");
+    expect(rruleToText("FREQ=DAILY;INTERVAL=3")).toBe("every 3 days");
+    expect(rruleToText("FREQ=WEEKLY;BYDAY=MO")).toBe("every Monday");
+    expect(rruleToText("FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE")).toBe("every 2 weeks on Mon, Wed");
+    expect(rruleToText("FREQ=WEEKLY")).toBe("every week");
+    expect(rruleToText("FREQ=MONTHLY;BYDAY=2MO")).toBe("every month on the 2nd Monday");
+    expect(rruleToText("FREQ=MONTHLY;BYDAY=-1FR")).toBe("every month on the last Friday");
+    expect(rruleToText("FREQ=MONTHLY;BYMONTHDAY=15")).toBe("every month on the 15th");
+    expect(rruleToText("FREQ=YEARLY")).toBe("every year");
+  });
+
+  it("returns empty for rules it can't summarize", () => {
+    expect(rruleToText("FREQ=HOURLY")).toBe("");
+  });
+});
+
+describe("withSchedule", () => {
+  it("appends the schedule suffix to a base title", () => {
+    expect(withSchedule("Vacuum", "FREQ=WEEKLY;BYDAY=MO")).toBe("Vacuum · every Monday");
+  });
+
+  it("is idempotent — re-applying the same rule does not stack suffixes", () => {
+    const once = withSchedule("Vacuum", "FREQ=WEEKLY;BYDAY=MO");
+    expect(withSchedule(once, "FREQ=WEEKLY;BYDAY=MO")).toBe(once);
+  });
+
+  it("replaces an existing suffix when the recurrence changes", () => {
+    const weekly = withSchedule("Vacuum", "FREQ=WEEKLY;BYDAY=MO");
+    expect(withSchedule(weekly, "FREQ=DAILY")).toBe("Vacuum · every day");
+  });
+
+  it("leaves the title unchanged (no suffix) for unsummarizable rules", () => {
+    expect(withSchedule("Vacuum", "FREQ=HOURLY")).toBe("Vacuum");
   });
 });

@@ -182,6 +182,81 @@ function matches(rule: ParsedRule, anchor: Date, day: Date): boolean {
   }
 }
 
+// ── Human-readable schedule names ────────────────────────────────────────────
+// We bake a chore's cadence into its stored title (e.g. "Vacuum · every Monday")
+// so chores are self-describing/unique. The text is derived from the RRULE; the
+// suffix is idempotent so re-saving an edited chore never stacks ("· … · …").
+
+/** Separator between a chore's base title and its schedule suffix. */
+export const SCHEDULE_SEP = " · ";
+
+const FULL_WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const SHORT_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/** "1st", "2nd", "3rd", "21st"… for a day-of-month or positive ordinal. */
+function ordinalLabel(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
+}
+
+/**
+ * A concise lowercase summary of a recurrence, e.g. "every day",
+ * "every Monday", "every 2 weeks on Mon, Wed", "every month on the 2nd Monday".
+ * Returns "" for rules we can't summarize (so no suffix is appended).
+ */
+export function rruleToText(rrule: string): string {
+  const r = parseRRule(rrule);
+  const n = r.interval;
+  switch (r.freq) {
+    case "DAILY":
+      return n === 1 ? "every day" : `every ${n} days`;
+    case "WEEKLY": {
+      const everyWeek = n === 1 ? "every week" : `every ${n} weeks`;
+      if (!r.byday.length) return everyWeek;
+      const days = [...r.byday].sort((a, b) => a.day - b.day);
+      if (n === 1 && days.length === 1) return `every ${FULL_WEEKDAYS[days[0].day]}`;
+      return `${everyWeek} on ${days.map((b) => SHORT_WEEKDAYS[b.day]).join(", ")}`;
+    }
+    case "MONTHLY": {
+      const everyMonth = n === 1 ? "every month" : `every ${n} months`;
+      const ord = r.byday.find((b) => b.ordinal !== null);
+      if (ord) {
+        const label = ord.ordinal === -1 ? "last" : ordinalLabel(ord.ordinal!);
+        return `${everyMonth} on the ${label} ${FULL_WEEKDAYS[ord.day]}`;
+      }
+      if (r.bymonthday.length) return `${everyMonth} on the ${ordinalLabel(r.bymonthday[0])}`;
+      return everyMonth;
+    }
+    case "YEARLY":
+      return n === 1 ? "every year" : `every ${n} years`;
+    default:
+      return "";
+  }
+}
+
+/**
+ * Remove a previously-appended schedule suffix from a title, so re-saving is
+ * idempotent. Cuts from the last separator only when what follows looks like our
+ * generated text ("every …"); otherwise leaves the title untouched.
+ */
+export function stripScheduleSuffix(title: string): string {
+  const i = title.lastIndexOf(SCHEDULE_SEP);
+  if (i === -1) return title;
+  const rest = title.slice(i + SCHEDULE_SEP.length);
+  return rest.startsWith("every") ? title.slice(0, i).trimEnd() : title;
+}
+
+/**
+ * Bake the schedule into a title: strip any existing suffix, then append the
+ * current one. Idempotent — `withSchedule(withSchedule(t, r), r)` === `withSchedule(t, r)`.
+ */
+export function withSchedule(baseTitle: string, rrule: string): string {
+  const base = stripScheduleSuffix(baseTitle).trim();
+  const text = rruleToText(rrule);
+  return text ? `${base}${SCHEDULE_SEP}${text}` : base;
+}
+
 /** The first occurrence on or after the anchor — used as the calendar event's start date. */
 export function firstOccurrence(rrule: string, anchorISO: string): string {
   const next = nextOccurrences(rrule, anchorISO, { from: anchorISO, count: 1 });
