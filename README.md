@@ -18,6 +18,8 @@ bills tracking, and Splitwise-style expense splitting.
 
 **Live:** https://hearth.tnmlabs.com
 
+[![Hearth — live](docs/hearth-hero.png)](https://hearth.tnmlabs.com)
+
 ## Features
 
 - **Google sign-in** — one consent grants both login and Google Calendar access.
