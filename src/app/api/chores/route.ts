@@ -15,7 +15,7 @@ export const POST = withErrorHandling(async (req: Request) => {
 
   const result = parseBody(choreCreateSchema, await req.json());
   if (!result.success) return badRequest(result.error, result.issues);
-  const { householdId, title, description, rrule, assigneeUserIds } = result.data;
+  const { householdId, title, description, rrule, startDate, assigneeUserIds } = result.data;
 
   if (!(await isAdmin(user.id, householdId))) {
     return forbidden("Only the household admin can create chores");
@@ -40,8 +40,9 @@ export const POST = withErrorHandling(async (req: Request) => {
         title,
         description: description ?? null,
         rrule,
-        // Anchor the recurrence at the creation date; edits move it forward.
-        scheduleFrom: toISODate(new Date()),
+        // Anchor the recurrence at the chosen start date (defaults to today);
+        // edits move it forward when the recurrence changes.
+        scheduleFrom: startDate ?? toISODate(new Date()),
         createdBy: user.id,
       })
       .returning();
