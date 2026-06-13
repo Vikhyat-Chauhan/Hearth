@@ -96,6 +96,17 @@ export default function SettingsMenu({
             Calendar
           </Link>
 
+          <Link
+            href="/settings/notifications"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            aria-current={isActive("/settings/notifications") ? "page" : undefined}
+            className={itemClass("/settings/notifications")}
+          >
+            <span aria-hidden="true">✉️</span>
+            Notifications
+          </Link>
+
           <div className="my-1 border-t border-gray-100" />
 
           <form action="/auth/signout" method="post">

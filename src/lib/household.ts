@@ -97,6 +97,8 @@ export async function listMembers(householdId: string) {
       joinedAt: memberships.joinedAt,
       name: profiles.name,
       email: profiles.email,
+      notifyAnnouncements: profiles.notifyAnnouncements,
+      notifyChores: profiles.notifyChores,
     })
     .from(memberships)
     .innerJoin(profiles, eq(memberships.userId, profiles.id))

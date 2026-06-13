@@ -243,3 +243,15 @@ export const settlementCreateSchema = z
     path: ["toUserId"],
   });
 export type SettlementCreate = z.infer<typeof settlementCreateSchema>;
+
+// Email-notification preferences (opt-out toggles). Both optional so a PATCH can
+// update one without the other, but at least one must be present and a boolean.
+export const notificationPrefsSchema = z
+  .object({
+    notifyAnnouncements: z.boolean().optional(),
+    notifyChores: z.boolean().optional(),
+  })
+  .refine((p) => p.notifyAnnouncements !== undefined || p.notifyChores !== undefined, {
+    message: "Provide at least one preference to update",
+  });
+export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;

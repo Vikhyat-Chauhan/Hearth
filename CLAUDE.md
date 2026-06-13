@@ -69,6 +69,8 @@ Keeps parallel agents off each other's files. Update as files are created.
 | `src/app/auth/callback/` | OAuth callback — exchanges code, captures + encrypts the Google refresh token |
 | `src/lib/calendar.ts` | **Only** module that calls the Google Calendar API (create/update/delete events) — **frozen contract after Sprint 0** |
 | `src/lib/crypto.ts` | Encrypt/decrypt the Google refresh token at rest (`TOKEN_ENC_KEY`) |
+| `src/lib/email.ts` | **Only** module that sends email (Resend) — best-effort; `RESEND_API_KEY`/`EMAIL_FROM` |
+| `src/lib/notifications.ts` | Notification recipient/digest logic (announcement recipients, due-chore digests) |
 | `src/components/` | Shared UI components |
 | `src/components/states/` | Loading / Empty / Error UI primitives (reuse everywhere) |
 | `src/lib/types.ts` | Shared types / data shapes — **frozen after Sprint 0** |
@@ -262,6 +264,7 @@ ACCEPTANCE CRITERIA:
 | Splitwise-style expense splitting | P2 | `app/api/expenses/route.ts`, `app/api/expenses/[id]/route.ts`, `app/api/settlements/route.ts`, `(app)/expenses`, `components/ExpenseForm.tsx`, `components/SettlementForm.tsx`, `lib/expenses.ts` | feat/expenses |
 | Multiple households per user | P2 | `app/api/households/active/route.ts`, `components/HouseholdSwitcher.tsx`, `lib/household.ts` (`listUserHouseholds`, active-household cookie) | feat/multi-household |
 | Two-way Google Calendar sync | P2 | `app/api/calendar/watch/route.ts`, `app/api/calendar/webhook/route.ts`, `(app)/settings/calendar`, `components/TwoWaySync.tsx`, `lib/calendar-twoway.ts`, `lib/calendar.ts` (`watchCalendar`/`getEventStatus`) | feat/calendar-twoway |
+| Email notifications (announcements + due-chore digest) | P2 | `lib/email.ts` (Resend — **only** mailer), `lib/notifications.ts` (`recipientsForAnnouncement`/`dueChoreDigests`), `app/api/announcements/route.ts` (best-effort notify on post), `app/api/cron/due-chores/route.ts` + `vercel.json` (daily cron, `CRON_SECRET`-guarded), `app/api/settings/notifications/route.ts` (PATCH prefs), `(app)/settings/notifications`, `components/NotificationPrefs.tsx`, `profiles.notify_announcements`/`notify_chores`, `drizzle/0007_*.sql` | feat/email-notifications |
 | Shared types/schema/validation additions | P2 | `db/schema.ts`, `lib/types.ts`, `lib/validation.ts`, `lib/utils.ts` (money helpers), `drizzle/0001_*.sql` | (shared) |
 
 ---

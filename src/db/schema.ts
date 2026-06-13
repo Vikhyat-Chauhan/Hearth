@@ -30,6 +30,9 @@ export const profiles = pgTable("profiles", {
   name: text("name"),
   // Encrypted Google refresh token; null until the user connects Google.
   googleRefreshTokenEnc: text("google_refresh_token_enc"),
+  // Email-notification preferences (opt-out). Default on for everyone.
+  notifyAnnouncements: boolean("notify_announcements").notNull().default(true),
+  notifyChores: boolean("notify_chores").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
