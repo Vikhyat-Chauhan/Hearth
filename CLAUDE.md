@@ -253,6 +253,7 @@ ACCEPTANCE CRITERIA:
 | Chores page: My / All chores tabs | P2 | `(app)/chores/page.tsx`, `components/ChoreTabs.tsx`, `components/ChoreList.tsx`, `lib/chores.ts` (`getHouseholdChores`) | feat/chores-allview |
 | Admin edits/deletes a chore | P1 | `app/api/chores/[id]/route.ts`, `(app)/chores/[id]/edit`, `components/ChoreForm.tsx` | feat/chore-edit |
 | Admin removes a member | P1 | `app/api/households/members/route.ts`, `components/RemoveMemberButton.tsx`, `(app)/household` | feat/member-remove |
+| Rename household (admin) | P2 | `app/api/households/[id]/route.ts` (`PATCH`), `components/RenameHouseholdControl.tsx`, `(app)/household` | feat/household-rename |
 | Leave / delete / transfer household | P2 | `app/api/households/route.ts` (`DELETE`), `app/api/households/leave/route.ts`, `app/api/households/transfer/route.ts`, `components/LeaveHouseholdButton.tsx`, `components/DeleteHouseholdButton.tsx`, `components/TransferAdminControl.tsx`, `lib/household.ts` (`purgeMemberFromHousehold`), `(app)/household` (Danger zone) | feat/household-exit |
 | Connect Google later (backfill) | P1 | `app/api/calendar/backfill/route.ts`, `(app)/settings/calendar`, `components/ConnectCalendar.tsx` | feat/connect-later |
 | Announcements / message board | P2 | `app/api/announcements/route.ts`, `app/api/announcements/[id]/route.ts`, `(app)/announcements`, `components/AnnouncementForm.tsx`, `lib/announcements.ts` | feat/announcements |

@@ -10,6 +10,7 @@ import CopyInviteButton from "@/components/CopyInviteButton";
 import LeaveHouseholdButton from "@/components/LeaveHouseholdButton";
 import DeleteHouseholdButton from "@/components/DeleteHouseholdButton";
 import TransferAdminControl from "@/components/TransferAdminControl";
+import RenameHouseholdControl from "@/components/RenameHouseholdControl";
 
 export default async function HouseholdPage() {
   const user = await getUser();
@@ -55,6 +56,16 @@ export default async function HouseholdPage() {
           </span>
         }
       />
+
+      {role === "admin" && (
+        <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
+          <h2 className="font-display text-base font-semibold text-gray-900">Household name</h2>
+          <p className="mt-1 text-sm text-gray-500">Rename the household for everyone.</p>
+          <div className="mt-3">
+            <RenameHouseholdControl householdId={household.id} currentName={household.name} />
+          </div>
+        </section>
+      )}
 
       <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
         <h2 className="font-display text-base font-semibold text-gray-900">Invite code</h2>
