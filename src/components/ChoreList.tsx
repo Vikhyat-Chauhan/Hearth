@@ -87,8 +87,8 @@ export default function ChoreList({
                   <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-brand-400" />
                   <div className="min-w-0">
                     <span
-                      className={`text-sm ${
-                        row.done ? "text-gray-400 line-through" : "text-gray-600"
+                      className={`font-display text-sm font-semibold ${
+                        row.done ? "text-gray-400 line-through" : "text-gray-900"
                       }`}
                     >
                       {row.title}
