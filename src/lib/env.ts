@@ -47,4 +47,12 @@ export function assertServerEnv(): void {
 
   // Shape-check the encryption key (must decode to 32 bytes). Throws if malformed.
   assertTokenEncKey();
+
+  // Email notifications are optional — the app runs without them, but warn once
+  // so a deploy that expects them isn't silently dropping every message.
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    console.warn(
+      "[env] RESEND_API_KEY/EMAIL_FROM not set — email notifications are disabled (sends are skipped).",
+    );
+  }
 }
