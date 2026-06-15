@@ -2,7 +2,7 @@
 // — so the selection rules (who gets emailed, what's due today) are unit-testable
 // without sending mail. The actual sending lives in src/lib/email.ts.
 
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, gte, lte } from "drizzle-orm";
 import {
   db,
   chores,
@@ -34,15 +34,29 @@ export async function recipientsForAnnouncement(
     .map((m) => ({ email: m.email, name: m.name }));
 }
 
+/** A chore with past-due occurrences still not marked done, grouped per chore. */
+export interface OverdueChore {
+  title: string;
+  /** Oldest still-undone occurrence within the lookback window (YYYY-MM-DD). */
+  oldestDate: string;
+  /** How many occurrences in the window remain undone. */
+  count: number;
+}
+
 export interface DueChoreDigest {
   email: string;
   name: string | null;
   householdName: string;
   titles: string[];
+  overdue: OverdueChore[];
 }
 
+/** How far back the digest looks for missed (overdue) occurrences. */
+const OVERDUE_LOOKBACK_DAYS = 14;
+
 /**
- * One digest per member with ≥1 chore due *today* and not yet done, across ALL
+ * One digest per member with ≥1 chore due *today* and not yet done, OR with a
+ * past-due occurrence in the last {@link OVERDUE_LOOKBACK_DAYS} days, across ALL
  * households (the cron has no per-user/cookie context). Mirrors the occurrence
  * math in buildChoreViews: count from scheduleFrom (fallback created_at) and ask
  * whether today is the next occurrence. Skips members who opted out of chore
@@ -50,6 +64,7 @@ export interface DueChoreDigest {
  */
 export async function dueChoreDigests(): Promise<DueChoreDigest[]> {
   const today = toISODate(new Date());
+  const lookbackStart = toISODate(new Date(Date.now() - OVERDUE_LOOKBACK_DAYS * 86400000));
 
   // Every active chore + each assignee's profile + household name, in one pass.
   const rows = await db
@@ -73,31 +88,49 @@ export async function dueChoreDigests(): Promise<DueChoreDigest[]> {
 
   if (rows.length === 0) return [];
 
-  // Which chores are already completed for today's occurrence (any assignee).
+  // Which (chore, occurrence) pairs are already completed (any assignee) across
+  // the overdue window through today. Keyed `${choreId}|${date}`.
   const choreIds = [...new Set(rows.map((r) => r.choreId))];
   const doneRows = await db
-    .select({ choreId: choreLogs.choreId })
+    .select({ choreId: choreLogs.choreId, occurrenceDate: choreLogs.occurrenceDate })
     .from(choreLogs)
     .where(
-      and(inArray(choreLogs.choreId, choreIds), eq(choreLogs.occurrenceDate, today)),
+      and(
+        inArray(choreLogs.choreId, choreIds),
+        gte(choreLogs.occurrenceDate, lookbackStart),
+        lte(choreLogs.occurrenceDate, today),
+      ),
     );
-  const doneToday = new Set(doneRows.map((r) => r.choreId));
+  const doneSet = new Set(doneRows.map((r) => `${r.choreId}|${r.occurrenceDate}`));
 
-  // Group due-today, not-done, opted-in titles by recipient (keyed by user).
+  // Group due-today titles + overdue chores by recipient (keyed by user). A user
+  // gets a digest if they have anything due today OR any missed past occurrence.
   const byUser = new Map<string, DueChoreDigest>();
-  for (const r of rows) {
-    if (!r.notifyChores || !r.email) continue;
-    if (doneToday.has(r.choreId)) continue;
-    const anchor = r.scheduleFrom ?? toISODate(new Date(r.createdAt));
-    const next = nextOccurrences(r.rrule, anchor, { from: today, count: 1 })[0];
-    if (next !== today) continue;
-
+  const entryFor = (r: (typeof rows)[number]): DueChoreDigest => {
     let entry = byUser.get(r.userId);
     if (!entry) {
-      entry = { email: r.email, name: r.name, householdName: r.householdName, titles: [] };
+      entry = { email: r.email!, name: r.name, householdName: r.householdName, titles: [], overdue: [] };
       byUser.set(r.userId, entry);
     }
-    entry.titles.push(r.title);
+    return entry;
+  };
+
+  for (const r of rows) {
+    if (!r.notifyChores || !r.email) continue;
+    const anchor = r.scheduleFrom ?? toISODate(new Date(r.createdAt));
+
+    // Due today (and not yet done today).
+    if (!doneSet.has(`${r.choreId}|${today}`)) {
+      const next = nextOccurrences(r.rrule, anchor, { from: today, count: 1 })[0];
+      if (next === today) entryFor(r).titles.push(r.title);
+    }
+
+    // Past-due occurrences in the lookback window still not done.
+    const occ = nextOccurrences(r.rrule, anchor, { from: lookbackStart, count: 32 });
+    const missed = occ.filter((d) => d < today && !doneSet.has(`${r.choreId}|${d}`));
+    if (missed.length > 0) {
+      entryFor(r).overdue.push({ title: r.title, oldestDate: missed[0], count: missed.length });
+    }
   }
 
   return [...byUser.values()];

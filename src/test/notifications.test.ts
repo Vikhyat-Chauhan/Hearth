@@ -138,4 +138,48 @@ describe.skipIf(!hasDb)("notification recipients & digests", () => {
     // Opted-out member gets no digest at all.
     expect(digests.find((d) => d.email === `noemail-${optedOut}@test.dev`)).toBeUndefined();
   });
+
+  it("surfaces overdue occurrences and clears them once marked done", async () => {
+    const { db, profiles, households, memberships, chores, choreAssignments, choreLogs } =
+      await import("@/db");
+    const { generateInviteCode } = await import("@/lib/household");
+    const { dueChoreDigests } = await import("@/lib/notifications");
+
+    const user = randomUUID();
+    profileIds.push(user);
+    await db.insert(profiles).values([{ id: user, email: `od-${user}@test.dev`, name: "Owen Overdue" }]);
+
+    const [hh] = await db
+      .insert(households)
+      .values({ name: "Overdue House", adminUserId: user, inviteCode: generateInviteCode() })
+      .returning();
+    householdIds.push(hh.id);
+    await db.insert(memberships).values([{ householdId: hh.id, userId: user, role: "admin" }]);
+
+    // Weekly chore anchored 6 days ago: its only occurrence in the window is 6 days
+    // back (the next falls a day in the future), so it's overdue and nothing is due
+    // today for this user.
+    const sixAgo = toISODate(new Date(Date.now() - 6 * 86400000));
+    const [chore] = await db
+      .insert(chores)
+      .values({ householdId: hh.id, title: "Water plants", rrule: "FREQ=WEEKLY", scheduleFrom: sixAgo, createdBy: user })
+      .returning();
+    await db.insert(choreAssignments).values([{ choreId: chore.id, userId: user }]);
+
+    // Only-overdue members still get a digest, with the chore in `overdue`.
+    let digests = await dueChoreDigests();
+    let mine = digests.find((d) => d.email === `od-${user}@test.dev`);
+    expect(mine).toBeDefined();
+    expect(mine!.titles).not.toContain("Water plants"); // not due today
+    const od = mine!.overdue.find((o) => o.title === "Water plants");
+    expect(od).toBeDefined();
+    expect(od!.oldestDate).toBe(sixAgo);
+    expect(od!.count).toBe(1);
+
+    // Marking that missed occurrence done clears it from overdue.
+    await db.insert(choreLogs).values({ choreId: chore.id, userId: user, occurrenceDate: sixAgo });
+    digests = await dueChoreDigests();
+    mine = digests.find((d) => d.email === `od-${user}@test.dev`);
+    expect(mine?.overdue.find((o) => o.title === "Water plants")).toBeUndefined();
+  });
 });

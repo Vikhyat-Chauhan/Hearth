@@ -19,7 +19,7 @@ export const GET = withErrorHandling(async (req: Request) => {
   const digests = await dueChoreDigests();
   await Promise.allSettled(
     digests.map((d) => {
-      const { subject, html } = dueChoresEmail(d.name, d.householdName, d.titles);
+      const { subject, html } = dueChoresEmail(d.name, d.householdName, d.titles, d.overdue);
       return sendEmail({ to: d.email, subject, html });
     }),
   );
