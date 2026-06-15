@@ -72,8 +72,8 @@ export default function ChoreTabs({
         history.length === 0 ? (
           <div className="mt-6">
             <EmptyState
-              title="No completed chores yet"
-              description="Chores your household completes will show here for two weeks."
+              title="No recent chores yet"
+              description="Your household's chores from the last two weeks will show here."
               icon="🗓️"
             />
           </div>

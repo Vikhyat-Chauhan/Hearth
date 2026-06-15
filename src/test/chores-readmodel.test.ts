@@ -153,7 +153,7 @@ describe.skipIf(!hasDb)("chore history read model: 14-day window by occurrence d
     if (profileIds.length) await db.delete(profiles).where(inArray(profiles.id, profileIds));
   });
 
-  it("includes recent completions (with completer name + isSelf) and excludes ones older than 14 days", async () => {
+  it("expands past occurrences as done/overdue, attributes completions, and excludes ones older than 14 days", async () => {
     const { db, profiles, households, memberships, chores, choreAssignments, choreLogs } =
       await import("@/db");
     const { getChoreHistory } = await import("@/lib/chores");
@@ -170,33 +170,54 @@ describe.skipIf(!hasDb)("chore history read model: 14-day window by occurrence d
     householdIds.push(hh.id);
     await db.insert(memberships).values([{ householdId: hh.id, userId: admin, role: "admin" }]);
 
-    const [chore] = await db
-      .insert(chores)
-      .values({ householdId: hh.id, title: "Recycling", rrule: "FREQ=DAILY", createdBy: admin })
-      .returning();
-    await db.insert(choreAssignments).values([{ choreId: chore.id, userId: admin }]);
-
     const iso = (daysAgo: number) => {
       const d = new Date();
       d.setUTCDate(d.getUTCDate() - daysAgo);
       return d.toISOString().slice(0, 10);
     };
+
+    // Anchor 25 days back so daily occurrences span the whole 14-day window
+    // (and a few days beyond it, to exercise the cutoff).
+    const [chore] = await db
+      .insert(chores)
+      .values({
+        householdId: hh.id,
+        title: "Recycling",
+        rrule: "FREQ=DAILY",
+        scheduleFrom: iso(25),
+        createdBy: admin,
+      })
+      .returning();
+    await db.insert(choreAssignments).values([{ choreId: chore.id, userId: admin }]);
+
     const recent = iso(3); // inside the 14-day window
-    const old = iso(20); // outside the window
+    const old = iso(20); // a real occurrence, but outside the window
     await db.insert(choreLogs).values([
       { choreId: chore.id, userId: admin, occurrenceDate: recent },
       { choreId: chore.id, userId: admin, occurrenceDate: old },
     ]);
 
-    const history = await getChoreHistory(admin);
-    const dates = history.filter((h) => h.choreId === chore.id).map((h) => h.date);
+    const mine = await getChoreHistory(admin);
+    const ours = mine.filter((h) => h.choreId === chore.id);
+    const dates = ours.map((h) => h.date);
     expect(dates).toContain(recent);
-    expect(dates).not.toContain(old);
+    expect(dates).not.toContain(old); // older than 14 days → excluded
+    expect(dates).not.toContain(iso(0)); // today is excluded (still forward-looking)
 
-    const entry = history.find((h) => h.date === recent && h.choreId === chore.id)!;
-    expect(entry.title).toBe("Recycling");
-    expect(entry.completedByName).toBe("Hana");
-    expect(entry.isSelf).toBe(true);
+    // The logged occurrence is "done", attributed to the completer.
+    const doneEntry = ours.find((h) => h.date === recent)!;
+    expect(doneEntry.title).toBe("Recycling");
+    expect(doneEntry.status).toBe("done");
+    expect(doneEntry.completedByName).toBe("Hana");
+    expect(doneEntry.isSelf).toBe(true);
+    expect(doneEntry.completedAt).not.toBeNull();
+
+    // An un-logged past occurrence shows as "overdue" with no completer.
+    const overdueEntry = ours.find((h) => h.date === iso(5))!;
+    expect(overdueEntry.status).toBe("overdue");
+    expect(overdueEntry.completedById).toBeNull();
+    expect(overdueEntry.completedAt).toBeNull();
+    expect(overdueEntry.isSelf).toBe(false);
   });
 
   it("returns [] for a user with no household", async () => {

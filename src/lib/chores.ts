@@ -1,7 +1,7 @@
 // Chore read model (server-only): the chores assigned to a user, each with its
 // upcoming occurrences and which of those are already marked done.
 
-import { eq, and, inArray, gte, lt, desc } from "drizzle-orm";
+import { eq, and, inArray, gte, lt } from "drizzle-orm";
 import { db, chores, choreAssignments, choreLogs, profiles } from "@/db";
 import { getHouseholdContext } from "@/lib/household";
 import { nextOccurrences, toISODate } from "@/lib/recurrence";
@@ -84,25 +84,31 @@ export async function getHouseholdChores(userId: string, upcoming = 5): Promise<
   return buildChoreViews(rows, userId, upcoming);
 }
 
-/** One completed occurrence in the household's recent history. */
+export type ChoreHistoryStatus = "done" | "overdue";
+
+/** One past chore occurrence in the household's recent history (done or overdue). */
 export interface ChoreHistoryEntry {
   choreId: string;
   title: string;
   /** Occurrence date (YYYY-MM-DD), not the moment it was marked done. */
   date: string;
-  completedById: string;
+  /** "done" if anyone logged it; "overdue" if the occurrence passed unmarked. */
+  status: ChoreHistoryStatus;
+  /** Completer fields are null for overdue occurrences. */
+  completedById: string | null;
   completedByName: string | null;
-  completedByEmail: string;
-  /** completedById === viewer — drives "by you". */
+  completedByEmail: string | null;
+  /** completedById === viewer — drives "by you" (false when overdue). */
   isSelf: boolean;
-  completedAt: Date;
+  completedAt: Date | null;
 }
 
 /**
- * Completed chore occurrences across `userId`'s active household, limited to the
- * last `days` days *by occurrence date* (strictly before today, so it never
- * overlaps the forward-looking views). Nothing is deleted — older logs simply
- * fall outside the window. Newest first.
+ * Every past chore occurrence across `userId`'s household in the last `days`
+ * days *by occurrence date* (strictly before today, so it never overlaps the
+ * forward-looking views). Occurrences are expanded from each chore's recurrence
+ * and labeled "done" (anyone logged it, any-one-marks-it) or "overdue". One row
+ * per (chore, occurrence date), household-wide. Newest first.
  */
 export async function getChoreHistory(
   userId: string,
@@ -115,11 +121,30 @@ export async function getChoreHistory(
   const back = new Date();
   back.setUTCDate(back.getUTCDate() - days);
   const cutoff = toISODate(back);
+  const DAY_MS = 86_400_000;
+  const cutoffMs = Date.parse(`${cutoff}T00:00:00Z`);
+  const todayMs = Date.parse(`${today}T00:00:00Z`);
 
-  const rows = await db
+  // All chores in the household (incl. recently deactivated ones — their recent
+  // past occurrences still belong in history).
+  const choreRows = await db
+    .select({
+      id: chores.id,
+      title: chores.title,
+      rrule: chores.rrule,
+      scheduleFrom: chores.scheduleFrom,
+      createdAt: chores.createdAt,
+    })
+    .from(chores)
+    .where(eq(chores.householdId, ctx.household.id));
+
+  if (choreRows.length === 0) return [];
+  const choreIds = choreRows.map((c) => c.id);
+
+  // Completions in the window, keyed by `${choreId}|${occurrenceDate}`.
+  const logRows = await db
     .select({
       choreId: choreLogs.choreId,
-      title: chores.title,
       occurrenceDate: choreLogs.occurrenceDate,
       completedById: choreLogs.userId,
       completedByName: profiles.name,
@@ -127,24 +152,50 @@ export async function getChoreHistory(
       completedAt: choreLogs.completedAt,
     })
     .from(choreLogs)
-    .innerJoin(
-      chores,
-      and(eq(choreLogs.choreId, chores.id), eq(chores.householdId, ctx.household.id)),
-    )
     .innerJoin(profiles, eq(choreLogs.userId, profiles.id))
-    .where(and(gte(choreLogs.occurrenceDate, cutoff), lt(choreLogs.occurrenceDate, today)))
-    .orderBy(desc(choreLogs.occurrenceDate), desc(choreLogs.completedAt));
+    .where(
+      and(
+        inArray(choreLogs.choreId, choreIds),
+        gte(choreLogs.occurrenceDate, cutoff),
+        lt(choreLogs.occurrenceDate, today),
+      ),
+    );
+  const logByOccurrence = new Map<string, (typeof logRows)[number]>();
+  for (const l of logRows) logByOccurrence.set(`${l.choreId}|${l.occurrenceDate}`, l);
 
-  return rows.map((r) => ({
-    choreId: r.choreId,
-    title: r.title,
-    date: r.occurrenceDate,
-    completedById: r.completedById,
-    completedByName: r.completedByName,
-    completedByEmail: r.completedByEmail,
-    isSelf: r.completedById === userId,
-    completedAt: r.completedAt,
-  }));
+  const entries: ChoreHistoryEntry[] = [];
+  for (const c of choreRows) {
+    const anchor = c.scheduleFrom ?? toISODate(new Date(c.createdAt));
+    // nextOccurrences walks forward from min(anchor, from); size the horizon to
+    // reach today even when the anchor predates the window, and allow one more
+    // than the window's worth of daily occurrences (today is filtered out below).
+    const anchorMs = Date.parse(`${anchor}T00:00:00Z`);
+    const horizonDays = Math.ceil((todayMs - Math.min(anchorMs, cutoffMs)) / DAY_MS) + 1;
+    const dates = nextOccurrences(c.rrule, anchor, {
+      from: cutoff,
+      count: days + 1,
+      horizonDays,
+    });
+    for (const date of dates) {
+      if (date >= today) continue; // past occurrences only
+      const log = logByOccurrence.get(`${c.id}|${date}`);
+      entries.push({
+        choreId: c.id,
+        title: c.title,
+        date,
+        status: log ? "done" : "overdue",
+        completedById: log?.completedById ?? null,
+        completedByName: log?.completedByName ?? null,
+        completedByEmail: log?.completedByEmail ?? null,
+        isSelf: log ? log.completedById === userId : false,
+        completedAt: log?.completedAt ?? null,
+      });
+    }
+  }
+
+  // Newest occurrence first; tie-break by title for a stable order.
+  entries.sort((a, b) => (a.date === b.date ? a.title.localeCompare(b.title) : a.date < b.date ? 1 : -1));
+  return entries;
 }
 
 /** Row shape selected for the chore read model. */
