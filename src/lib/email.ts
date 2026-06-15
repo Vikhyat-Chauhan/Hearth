@@ -6,6 +6,7 @@
 // gate on persistence, so a mail failure must NEVER bubble into a 500.
 
 import { Resend } from "resend";
+import type { OverdueChore } from "@/lib/notifications";
 
 let client: Resend | null = null;
 
@@ -55,6 +56,14 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "2026-06-03" → "Jun 3", formatted as a UTC calendar date (no tz drift). */
+function formatShortDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
+}
+
 function shell(heading: string, inner: string): string {
   return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:480px;margin:0 auto;color:#1f2937">
   <p style="font-size:20px;font-weight:700;color:#b45309">🔥 Hearth</p>
@@ -79,25 +88,52 @@ export function announcementEmail(
   return { subject, html };
 }
 
-/** Daily digest of the chores due today for one member. */
+/** Daily digest of the chores due today (and any overdue) for one member. */
 export function dueChoresEmail(
   name: string | null,
   householdName: string,
-  choreTitles: string[],
+  dueTitles: string[],
+  overdue: OverdueChore[] = [],
 ): { subject: string; html: string } {
   const greeting = name ? `Hi ${escapeHtml(name)},` : "Hi,";
-  const items = choreTitles
-    .map((t) => `<li style="margin:4px 0">${escapeHtml(t)}</li>`)
-    .join("");
+  const hh = escapeHtml(householdName);
+
+  const sections: string[] = [`<p style="font-size:15px">${greeting}</p>`];
+
+  if (dueTitles.length > 0) {
+    const items = dueTitles
+      .map((t) => `<li style="margin:4px 0">${escapeHtml(t)}</li>`)
+      .join("");
+    sections.push(
+      `<p style="font-size:15px">You have these chores due today in ${hh}:</p>
+       <ul style="font-size:15px;line-height:1.5;padding-left:20px">${items}</ul>`,
+    );
+  }
+
+  if (overdue.length > 0) {
+    const items = overdue
+      .map((o) => {
+        const since = `overdue since ${formatShortDate(o.oldestDate)}`;
+        const times = o.count > 1 ? ` (${o.count}×)` : "";
+        return `<li style="margin:4px 0">${escapeHtml(o.title)} — ${since}${times}</li>`;
+      })
+      .join("");
+    sections.push(
+      `<p style="font-size:15px;color:#b45309">⚠️ Still overdue:</p>
+       <ul style="font-size:15px;line-height:1.5;padding-left:20px;color:#92400e">${items}</ul>`,
+    );
+  }
+
   const subject =
-    choreTitles.length === 1
-      ? `1 chore due today in ${householdName}`
-      : `${choreTitles.length} chores due today in ${householdName}`;
-  const html = shell(
-    "Chores due today",
-    `<p style="font-size:15px">${greeting}</p>
-     <p style="font-size:15px">You have these chores due today in ${escapeHtml(householdName)}:</p>
-     <ul style="font-size:15px;line-height:1.5;padding-left:20px">${items}</ul>`,
-  );
+    dueTitles.length > 0
+      ? dueTitles.length === 1
+        ? `1 chore due today in ${householdName}`
+        : `${dueTitles.length} chores due today in ${householdName}`
+      : overdue.length === 1
+        ? `1 overdue chore in ${householdName}`
+        : `${overdue.length} overdue chores in ${householdName}`;
+
+  const heading = dueTitles.length > 0 ? "Chores due today" : "Overdue chores";
+  const html = shell(heading, sections.join("\n"));
   return { subject, html };
 }
