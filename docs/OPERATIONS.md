@@ -45,20 +45,25 @@ Registered in `vercel.json`:
 
 | Path | Schedule (UTC) | Does |
 |------|----------------|------|
-| `/api/cron/due-chores` | `0 13 * * *` | Daily due-chore email digest (no deletion). |
-| `/api/cron/retention` | `30 3 * * *` | Prunes old data — see "Data retention" below. |
-| `/api/calendar/refresh-channels` | `0 */12 * * *` | Re-arms Google watch channels nearing expiration. |
+| `/api/cron/retention` | `0 3 * * *` | Prunes old data — see "Data retention" below. |
 | `/api/cron/calendar-cleanup` | `0 4 * * *` | Deletes expired `calendar_channels` rows and reconciles stale `calendar_links`. |
+| `/api/calendar/refresh-channels` | `0 5 * * *` | Re-arms Google watch channels nearing expiration. |
+| `/api/cron/due-chores` | `0 13 * * *` | Daily due-chore email digest (no deletion). |
 
-> **Vercel Hobby plans cap cron count/frequency.** If a deploy is on Hobby and rejects these,
-> merge them into one daily `/api/cron/maintenance` route calling the same lib functions.
+> **Hobby plans allow 100 cron jobs but only once-per-day schedules** — a more-frequent
+> expression (`*/n`, hourly, multi-value minute/hour) fails at deploy with
+> *"Hobby accounts are limited to daily cron jobs"*, and each job triggers within its
+> scheduled hour (±59 min), so the jobs are staggered by hour rather than minute. All four
+> crons here are daily, so they deploy on any plan. For sub-daily or precise timing
+> (e.g. faster channel refresh), upgrade to Pro.
 
 ### Calendar watch channel expiration (resolved)
 
-Google watch channels expire (~7 days). `/api/calendar/refresh-channels` runs every 12h and
+Google watch channels expire (~7 days). `/api/calendar/refresh-channels` runs daily and
 calls `refreshExpiringWatches` (`src/lib/calendar-twoway.ts`) to re-`registerWatch` any channel
-expiring within 48h, so two-way sync no longer silently lapses. The webhook address is built
-from `APP_BASE_URL` (a cron has no request origin); set it on the Vercel project.
+expiring within 72h, so two-way sync no longer silently lapses (the 72h window leaves margin
+for a late or missed daily run). The webhook address is built from `APP_BASE_URL` (a cron has
+no request origin); set it on the Vercel project.
 
 ### Data retention
 

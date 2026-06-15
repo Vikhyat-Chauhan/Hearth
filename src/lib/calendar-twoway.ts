@@ -92,13 +92,15 @@ export interface RefreshWatchesResult {
  * Re-arm watch channels nearing expiration so two-way sync doesn't silently lapse.
  * Google channels live ~7 days; this finds channels whose `expiration` falls within
  * the next `withinHours`, drops them, and registers a fresh channel for each owner.
- * Invoked by the /api/calendar/refresh-channels cron. Best-effort: a failure for one
+ * Invoked by the /api/calendar/refresh-channels cron (daily). The 72h default leaves
+ * margin so a channel is renewed even if a daily run fires late or is skipped — Hobby
+ * crons trigger within their scheduled hour (±59 min). Best-effort: a failure for one
  * user is counted and skipped, never thrown. `registerWatch` self-skips a user who
  * has since disconnected Google.
  */
 export async function refreshExpiringWatches(
   webhookAddress: string,
-  withinHours = 48,
+  withinHours = 72,
 ): Promise<RefreshWatchesResult> {
   const soon = new Date(Date.now() + withinHours * 60 * 60 * 1000);
   const expiring = await db
