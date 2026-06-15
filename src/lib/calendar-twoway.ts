@@ -6,7 +6,7 @@
 // failed watch never blocks anything.
 
 import { randomUUID, randomBytes } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, lt, isNotNull, and } from "drizzle-orm";
 import { db, profiles, calendarLinks, calendarChannels } from "@/db";
 import { watchCalendar, getEventStatus } from "@/lib/calendar";
 
@@ -80,6 +80,54 @@ export async function ensureWatch(
     await db.delete(calendarChannels).where(eq(calendarChannels.userId, userId));
   }
   return registerWatch(userId, webhookAddress);
+}
+
+export interface RefreshWatchesResult {
+  refreshed: number;
+  skipped: number;
+  failed: number;
+}
+
+/**
+ * Re-arm watch channels nearing expiration so two-way sync doesn't silently lapse.
+ * Google channels live ~7 days; this finds channels whose `expiration` falls within
+ * the next `withinHours`, drops them, and registers a fresh channel for each owner.
+ * Invoked by the /api/calendar/refresh-channels cron (daily). The 72h default leaves
+ * margin so a channel is renewed even if a daily run fires late or is skipped — Hobby
+ * crons trigger within their scheduled hour (±59 min). Best-effort: a failure for one
+ * user is counted and skipped, never thrown. `registerWatch` self-skips a user who
+ * has since disconnected Google.
+ */
+export async function refreshExpiringWatches(
+  webhookAddress: string,
+  withinHours = 72,
+): Promise<RefreshWatchesResult> {
+  const soon = new Date(Date.now() + withinHours * 60 * 60 * 1000);
+  const expiring = await db
+    .select({ userId: calendarChannels.userId })
+    .from(calendarChannels)
+    .where(and(isNotNull(calendarChannels.expiration), lt(calendarChannels.expiration, soon)));
+
+  // One refresh per owner even if they have several expiring channels.
+  const userIds = [...new Set(expiring.map((r) => r.userId))];
+
+  const out: RefreshWatchesResult = { refreshed: 0, skipped: 0, failed: 0 };
+  await Promise.allSettled(
+    userIds.map(async (userId) => {
+      try {
+        // Clear the user's channels (the expiring ones plus any stale rows) then re-arm.
+        await db.delete(calendarChannels).where(eq(calendarChannels.userId, userId));
+        const res = await registerWatch(userId, webhookAddress);
+        if (res.status === "watching") out.refreshed += 1;
+        else out.skipped += 1;
+      } catch (err) {
+        console.error(`[calendar-twoway] refresh failed for user ${userId}:`, err);
+        out.failed += 1;
+      }
+    }),
+  );
+
+  return out;
 }
 
 /** Which user owns a given watch channel (from a webhook notification). */
