@@ -212,12 +212,15 @@ describe.skipIf(!hasDb)("chore history read model: 14-day window by occurrence d
     expect(doneEntry.isSelf).toBe(true);
     expect(doneEntry.completedAt).not.toBeNull();
 
-    // An un-logged past occurrence shows as "overdue" with no completer.
+    // An un-logged past occurrence shows as "overdue" with no completer, but is
+    // attributed to the chore's assignee(s) so the UI can show who it belongs to.
     const overdueEntry = ours.find((h) => h.date === iso(5))!;
     expect(overdueEntry.status).toBe("overdue");
     expect(overdueEntry.completedById).toBeNull();
     expect(overdueEntry.completedAt).toBeNull();
     expect(overdueEntry.isSelf).toBe(false);
+    expect(overdueEntry.assignees.map((a) => a.name)).toContain("Hana");
+    expect(overdueEntry.assignees.find((a) => a.name === "Hana")!.isSelf).toBe(true);
   });
 
   it("returns [] for a user with no household", async () => {

@@ -21,6 +21,10 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
       {entries.map((entry) => {
         const done = entry.status === "done";
         const who = entry.isSelf ? "you" : entry.completedByName ?? entry.completedByEmail;
+        // Overdue rows show who the chore belongs to, mirroring "by <completer>".
+        const owedBy = entry.assignees
+          .map((a) => (a.isSelf ? "you" : a.name ?? a.email))
+          .join(", ");
         return (
           <li
             key={`${entry.choreId}-${entry.date}`}
@@ -38,7 +42,9 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
                 <p className="mt-0.5 text-sm text-gray-500">
                   {done && entry.completedAt
                     ? `${formatDate(entry.date)} · ${formatClockTime(entry.completedAt)} · by ${who}`
-                    : formatDate(entry.date)}
+                    : owedBy
+                      ? `${formatDate(entry.date)} · ${owedBy}`
+                      : formatDate(entry.date)}
                 </p>
               </div>
               {done ? (
