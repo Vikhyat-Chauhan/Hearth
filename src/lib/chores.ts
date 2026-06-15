@@ -86,6 +86,14 @@ export async function getHouseholdChores(userId: string, upcoming = 5): Promise<
 
 export type ChoreHistoryStatus = "done" | "overdue";
 
+/** A person attached to a history entry (the completer, or an overdue assignee). */
+export interface ChoreHistoryPerson {
+  name: string | null;
+  email: string;
+  /** Matches the viewer — drives "you" in the UI. */
+  isSelf: boolean;
+}
+
 /** One past chore occurrence in the household's recent history (done or overdue). */
 export interface ChoreHistoryEntry {
   choreId: string;
@@ -101,6 +109,8 @@ export interface ChoreHistoryEntry {
   /** completedById === viewer — drives "by you" (false when overdue). */
   isSelf: boolean;
   completedAt: Date | null;
+  /** Everyone the chore is assigned to — who an overdue occurrence belongs to. */
+  assignees: ChoreHistoryPerson[];
 }
 
 /**
@@ -163,6 +173,25 @@ export async function getChoreHistory(
   const logByOccurrence = new Map<string, (typeof logRows)[number]>();
   for (const l of logRows) logByOccurrence.set(`${l.choreId}|${l.occurrenceDate}`, l);
 
+  // Assignee roster per chore (named) — who an overdue occurrence belongs to.
+  const assignRows = await db
+    .select({
+      choreId: choreAssignments.choreId,
+      userId: choreAssignments.userId,
+      name: profiles.name,
+      email: profiles.email,
+    })
+    .from(choreAssignments)
+    .innerJoin(profiles, eq(choreAssignments.userId, profiles.id))
+    .where(inArray(choreAssignments.choreId, choreIds));
+  const assigneesByChore = new Map<string, ChoreHistoryPerson[]>();
+  for (const a of assignRows) {
+    if (!assigneesByChore.has(a.choreId)) assigneesByChore.set(a.choreId, []);
+    assigneesByChore
+      .get(a.choreId)!
+      .push({ name: a.name, email: a.email, isSelf: a.userId === userId });
+  }
+
   const entries: ChoreHistoryEntry[] = [];
   for (const c of choreRows) {
     const anchor = c.scheduleFrom ?? toISODate(new Date(c.createdAt));
@@ -189,6 +218,7 @@ export async function getChoreHistory(
         completedByEmail: log?.completedByEmail ?? null,
         isSelf: log ? log.completedById === userId : false,
         completedAt: log?.completedAt ?? null,
+        assignees: assigneesByChore.get(c.id) ?? [],
       });
     }
   }
