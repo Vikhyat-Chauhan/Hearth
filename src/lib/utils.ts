@@ -56,6 +56,11 @@ export function formatOccurrenceDate(isoDate: string, todayIso: string = localIS
   return new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric" }).format(local);
 }
 
+/** Clock time for a completion timestamp, e.g. "7:42 PM". */
+export function formatClockTime(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(date);
+}
+
 function localISODate(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
