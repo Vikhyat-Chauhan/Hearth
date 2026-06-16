@@ -37,7 +37,7 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
         return (
           <li
             key={`${entry.choreId}-${entry.date}`}
-            className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-card"
+            className="relative overflow-hidden rounded-xl border border-line bg-surface p-4 shadow-card"
           >
             <span
               aria-hidden="true"
@@ -45,10 +45,10 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
             />
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="truncate font-display text-base font-semibold text-gray-900">
+                <h2 className="truncate font-display text-base font-semibold text-ink">
                   {entry.title}
                 </h2>
-                <p className="mt-0.5 text-sm text-gray-500">
+                <p className="mt-0.5 text-sm text-muted">
                   {done && entry.completedAt
                     ? `${formatDate(entry.date)} · ${formatClockTime(entry.completedAt)} · by ${who}`
                     : owedBy

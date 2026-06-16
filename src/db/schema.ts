@@ -33,6 +33,8 @@ export const profiles = pgTable("profiles", {
   // Email-notification preferences (opt-out). Default on for everyone.
   notifyAnnouncements: boolean("notify_announcements").notNull().default(true),
   notifyChores: boolean("notify_chores").notNull().default(true),
+  // UI color-theme preference. "system" follows the OS; resolved client-side.
+  theme: text("theme", { enum: ["light", "dark", "system"] }).notNull().default("system"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

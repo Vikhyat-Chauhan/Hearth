@@ -40,7 +40,7 @@ export default async function Home({
     return (
       <main className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="font-display text-4xl font-bold text-brand-700">Welcome to Hearth</h1>
-        <p className="mt-3 max-w-xl text-gray-600">
+        <p className="mt-3 max-w-xl text-muted">
           Create a household, invite your roommates, and assign recurring chores that land on
           everyone&apos;s Google Calendar.
         </p>
@@ -48,16 +48,16 @@ export default async function Home({
           <Link href="/households/new" className="group">
             <Card className="transition hover:-translate-y-0.5 hover:shadow-card-hover">
               <div className="text-2xl" aria-hidden="true">🏡</div>
-              <h2 className="mt-2 font-semibold text-gray-900">Create a household</h2>
-              <p className="mt-1 text-sm text-gray-500">Become the admin and get an invite code.</p>
+              <h2 className="mt-2 font-semibold text-ink">Create a household</h2>
+              <p className="mt-1 text-sm text-muted">Become the admin and get an invite code.</p>
               <span className="mt-3 inline-block text-sm font-medium text-brand-600">Get started →</span>
             </Card>
           </Link>
           <Link href="/join" className="group">
             <Card className="transition hover:-translate-y-0.5 hover:shadow-card-hover">
               <div className="text-2xl" aria-hidden="true">🔑</div>
-              <h2 className="mt-2 font-semibold text-gray-900">Join a household</h2>
-              <p className="mt-1 text-sm text-gray-500">Enter an invite code from your main roommate.</p>
+              <h2 className="mt-2 font-semibold text-ink">Join a household</h2>
+              <p className="mt-1 text-sm text-muted">Enter an invite code from your main roommate.</p>
               <span className="mt-3 inline-block text-sm font-medium text-brand-600">Enter code →</span>
             </Card>
           </Link>
@@ -146,8 +146,8 @@ export default async function Home({
           <ul className="space-y-2">
             {upcomingChores.map((c, i) => (
               <li key={i} className="flex items-center justify-between gap-3 text-sm">
-                <span className="truncate text-gray-700">{c.title}</span>
-                <span className="shrink-0 text-gray-500">{formatOccurrenceDate(c.date)}</span>
+                <span className="truncate text-muted">{c.title}</span>
+                <span className="shrink-0 text-muted">{formatOccurrenceDate(c.date)}</span>
               </li>
             ))}
           </ul>
@@ -166,12 +166,12 @@ export default async function Home({
             {latestAnnouncements.map((a) => (
               <li key={a.id} className="text-sm">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-muted">
                     {a.isAnonymous ? "Anonymous" : a.authorName || a.authorEmail}
                   </span>
-                  <span className="shrink-0 text-xs text-gray-400">{formatRelativeTime(a.createdAt)}</span>
+                  <span className="shrink-0 text-xs text-faint">{formatRelativeTime(a.createdAt)}</span>
                 </div>
-                <p className="mt-0.5 line-clamp-1 text-gray-500">{a.body}</p>
+                <p className="mt-0.5 line-clamp-1 text-muted">{a.body}</p>
               </li>
             ))}
           </ul>
@@ -189,8 +189,8 @@ export default async function Home({
         >
           <ul className="space-y-2">
             {unchecked.slice(0, 5).map((item) => (
-              <li key={item.id} className="flex items-center gap-2 text-sm text-gray-700">
-                <span aria-hidden="true" className="text-gray-400">•</span>
+              <li key={item.id} className="flex items-center gap-2 text-sm text-muted">
+                <span aria-hidden="true" className="text-faint">•</span>
                 <span className="truncate">{item.name}</span>
               </li>
             ))}
@@ -212,9 +212,9 @@ export default async function Home({
               <li key={b.id} className="flex items-center justify-between gap-3 text-sm">
                 <span className="flex min-w-0 items-center gap-2">
                   <Badge variant="unpaid">Unpaid</Badge>
-                  <span className="truncate text-gray-700">{b.title}</span>
+                  <span className="truncate text-muted">{b.title}</span>
                 </span>
-                <span className="shrink-0 font-medium text-gray-900">{formatCents(b.amountCents)}</span>
+                <span className="shrink-0 font-medium text-ink">{formatCents(b.amountCents)}</span>
               </li>
             ))}
           </ul>
@@ -230,7 +230,7 @@ export default async function Home({
           emptyText="No shared expenses yet."
         >
           <div className="text-sm">
-            <p className="text-gray-700">
+            <p className="text-muted">
               {!myBalance || myBalance.netCents === 0 ? (
                 "You're all settled up."
               ) : myBalance.netCents > 0 ? (
@@ -252,7 +252,7 @@ export default async function Home({
               )}
             </p>
             {others.length > 0 && (
-              <ul className="mt-2 space-y-1 text-gray-500">
+              <ul className="mt-2 space-y-1 text-muted">
                 {others.map((o) => (
                   <li key={o.userId} className="flex items-center justify-between gap-3">
                     <span className="truncate">{o.name || o.email}</span>

@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,6 +11,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Semantic surface/text/border tokens, backed by CSS variables that flip
+        // under the `.dark` class (see globals.css). The `<alpha-value>` form keeps
+        // Tailwind opacity utilities (e.g. bg-surface/50) working.
+        canvas: "rgb(var(--c-canvas) / <alpha-value>)", // page background
+        surface: "rgb(var(--c-surface) / <alpha-value>)", // cards (former bg-white)
+        "surface-2": "rgb(var(--c-surface-2) / <alpha-value>)", // subtle fills (former gray-50/100)
+        ink: "rgb(var(--c-ink) / <alpha-value>)", // primary text
+        muted: "rgb(var(--c-muted) / <alpha-value>)", // secondary text
+        faint: "rgb(var(--c-faint) / <alpha-value>)", // tertiary text / icons / placeholders
+        line: "rgb(var(--c-line) / <alpha-value>)", // borders / dividers
         // Warm ember/terracotta — the "hearth" brand accent. Used for the
         // primary action on every surface and the active nav state.
         brand: {

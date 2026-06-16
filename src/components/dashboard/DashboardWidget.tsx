@@ -31,7 +31,7 @@ export default function DashboardWidget({
   return (
     <Card accent={accent} interactive className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 font-display text-base font-semibold text-gray-900">
+        <h2 className="flex items-center gap-2 font-display text-base font-semibold text-ink">
           <span
             aria-hidden="true"
             className={cn("flex h-9 w-9 items-center justify-center rounded-xl text-base", a.chip)}
@@ -55,7 +55,7 @@ export default function DashboardWidget({
 
       <div className="mt-4 flex-1">
         {empty ? (
-          <p className="py-3 text-sm text-gray-500">{emptyText}</p>
+          <p className="py-3 text-sm text-muted">{emptyText}</p>
         ) : (
           children
         )}

@@ -66,7 +66,7 @@ export default function ShoppingForm({
           {busy ? "Adding…" : "Add"}
         </Button>
       </div>
-      <p className="text-xs text-gray-400">Posting as {posterLabel}</p>
+      <p className="text-xs text-faint">Posting as {posterLabel}</p>
       <FieldError id="shopping-error">{error}</FieldError>
     </form>
   );

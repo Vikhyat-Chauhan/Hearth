@@ -42,7 +42,7 @@ export default function MobileNav({ links }: { links: NavLink[] }) {
   function linkClass(href: string) {
     return isActive(href)
       ? "font-medium text-brand-700"
-      : "text-gray-600 hover:text-gray-900";
+      : "text-muted hover:text-ink";
   }
 
   return (
@@ -71,20 +71,20 @@ export default function MobileNav({ links }: { links: NavLink[] }) {
           aria-expanded={open}
           aria-haspopup="menu"
           aria-label="Toggle navigation menu"
-          className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-gray-700 hover:bg-gray-50"
+          className="rounded-lg border border-line px-2.5 py-1.5 text-muted hover:bg-surface-2"
         >
           <span aria-hidden="true">{open ? "✕" : "☰"}</span>
         </button>
         {open && (
-          <div className="absolute right-0 z-20 mt-2 flex w-44 flex-col rounded-lg border border-gray-200 bg-white py-1 text-sm shadow-lg">
+          <div className="absolute right-0 z-20 mt-2 flex w-44 flex-col rounded-lg border border-line bg-surface py-1 text-sm shadow-lg">
             {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
                 aria-current={isActive(l.href) ? "page" : undefined}
-                className={`flex items-center gap-2 px-4 py-2 hover:bg-gray-50 ${
-                  isActive(l.href) ? "font-medium text-brand-700" : "text-gray-600"
+                className={`flex items-center gap-2 px-4 py-2 hover:bg-surface-2 ${
+                  isActive(l.href) ? "font-medium text-brand-700" : "text-muted"
                 }`}
               >
                 {l.icon && <span aria-hidden="true">{l.icon}</span>}

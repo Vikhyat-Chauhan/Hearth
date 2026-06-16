@@ -10,7 +10,7 @@ const CurrencyInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInput
       <div className="relative">
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-faint"
         >
           $
         </span>
@@ -19,7 +19,7 @@ const CurrencyInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInput
           inputMode="decimal"
           placeholder="0.00"
           className={cn(
-            "w-full rounded-lg border border-gray-300 bg-white py-2 pl-7 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none disabled:opacity-60",
+            "w-full rounded-lg border border-line bg-surface py-2 pl-7 pr-3 text-sm text-ink placeholder:text-faint focus:border-brand-500 focus:outline-none disabled:opacity-60",
             className,
           )}
           {...props}

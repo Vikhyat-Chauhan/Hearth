@@ -53,17 +53,17 @@ export default async function ExpensesPage() {
       />
 
       {/* Balances */}
-      <section className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <h2 className="font-display text-base font-semibold text-gray-900">Balances</h2>
+      <section className="mt-6 rounded-xl border border-line bg-surface p-4 shadow-card">
+        <h2 className="font-display text-base font-semibold text-ink">Balances</h2>
         <ul className="mt-3 space-y-1">
           {balances.map((b) => (
             <li key={b.userId} className="flex items-center justify-between text-sm">
-              <span className="text-gray-700">
+              <span className="text-muted">
                 {b.userId === user.id ? "You" : (b.name ?? b.email)}
               </span>
               <span
                 className={
-                  b.netCents > 0 ? "font-medium text-green-600" : b.netCents < 0 ? "font-medium text-red-600" : "text-gray-400"
+                  b.netCents > 0 ? "font-medium text-green-600" : b.netCents < 0 ? "font-medium text-red-600" : "text-faint"
                 }
               >
                 {b.netCents > 0 && (
@@ -81,15 +81,15 @@ export default async function ExpensesPage() {
             </li>
           ))}
         </ul>
-        <div className="mt-4 border-t border-gray-100 pt-3">
-          <p className="mb-2 text-xs font-medium text-gray-500">Record a payment</p>
+        <div className="mt-4 border-t border-line pt-3">
+          <p className="mb-2 text-xs font-medium text-muted">Record a payment</p>
           <SettlementForm householdId={householdId} members={members} currentUserId={user.id} />
         </div>
       </section>
 
       {/* Add expense */}
-      <section className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
-        <h2 className="mb-3 font-display text-base font-semibold text-gray-900">Add an expense</h2>
+      <section className="mt-6 rounded-xl border border-line bg-surface p-4 shadow-card">
+        <h2 className="mb-3 font-display text-base font-semibold text-ink">Add an expense</h2>
         <ExpenseForm householdId={householdId} members={members} currentUserId={user.id} />
       </section>
 
@@ -103,14 +103,14 @@ export default async function ExpensesPage() {
           {expenseList.map((e) => (
             <li
               key={e.id}
-              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-800">{e.description}</span>
-                  <span className="text-sm text-gray-500">{formatCents(e.amountCents)}</span>
+                  <span className="font-medium text-ink">{e.description}</span>
+                  <span className="text-sm text-muted">{formatCents(e.amountCents)}</span>
                 </div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-faint">
                   {e.paidBy === user.id ? "You" : nameOf(e.paidBy)} paid · split {e.splits.length}{" "}
                   {e.splits.length === 1 ? "way" : "ways"}
                 </p>

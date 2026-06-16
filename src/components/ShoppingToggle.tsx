@@ -48,7 +48,7 @@ export default function ShoppingToggle({
       onChange={toggle}
       disabled={busy}
       aria-label={isChecked ? "Mark as not bought" : "Mark as bought"}
-      className="h-5 w-5 shrink-0 cursor-pointer rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:opacity-50"
+      className="h-5 w-5 shrink-0 cursor-pointer rounded border-line text-brand-600 focus:ring-brand-500 disabled:opacity-50"
     />
   );
 }

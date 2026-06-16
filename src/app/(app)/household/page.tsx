@@ -58,18 +58,18 @@ export default async function HouseholdPage() {
       />
 
       {role === "admin" && (
-        <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
-          <h2 className="font-display text-base font-semibold text-gray-900">Household name</h2>
-          <p className="mt-1 text-sm text-gray-500">Rename the household for everyone.</p>
+        <section className="mt-6 rounded-xl border border-line bg-surface p-5 shadow-card">
+          <h2 className="font-display text-base font-semibold text-ink">Household name</h2>
+          <p className="mt-1 text-sm text-muted">Rename the household for everyone.</p>
           <div className="mt-3">
             <RenameHouseholdControl householdId={household.id} currentName={household.name} />
           </div>
         </section>
       )}
 
-      <section className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
-        <h2 className="font-display text-base font-semibold text-gray-900">Invite code</h2>
-        <p className="mt-1 text-sm text-gray-500">Share this so roommates can join.</p>
+      <section className="mt-6 rounded-xl border border-line bg-surface p-5 shadow-card">
+        <h2 className="font-display text-base font-semibold text-ink">Invite code</h2>
+        <p className="mt-1 text-sm text-muted">Share this so roommates can join.</p>
         <div className="mt-3 flex items-center gap-3">
           <p className="font-mono text-2xl tracking-widest">{household.inviteCode}</p>
           <CopyInviteButton code={household.inviteCode} />
@@ -77,18 +77,18 @@ export default async function HouseholdPage() {
       </section>
 
       <section className="mt-6">
-        <h2 className="font-display text-base font-semibold text-gray-900">
+        <h2 className="font-display text-base font-semibold text-ink">
           Members ({members.length})
         </h2>
-        <ul className="mt-3 divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-card">
+        <ul className="mt-3 divide-y divide-line rounded-xl border border-line bg-surface shadow-card">
           {members.map((m) => (
-            <li key={m.userId} className="flex items-center justify-between px-4 py-3 transition hover:bg-stone-50">
+            <li key={m.userId} className="flex items-center justify-between px-4 py-3 transition hover:bg-canvas">
               <div>
                 <p className="font-medium">{m.name ?? m.email}</p>
-                <p className="text-sm text-gray-500">{m.email}</p>
+                <p className="text-sm text-muted">{m.email}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-medium text-gray-500">{m.role}</span>
+                <span className="text-xs font-medium text-muted">{m.role}</span>
                 {role === "admin" && m.userId !== user.id && (
                   <RemoveMemberButton householdId={household.id} userId={m.userId} name={m.name ?? m.email} />
                 )}
@@ -107,12 +107,12 @@ export default async function HouseholdPage() {
       )}
 
       {/* Danger zone — leaving (members) / transferring + deleting (admin). */}
-      <section className="mt-10 rounded-xl border border-red-200 bg-white p-5 shadow-card">
+      <section className="mt-10 rounded-xl border border-red-200 bg-surface p-5 shadow-card">
         <h2 className="font-display text-base font-semibold text-red-700">Danger zone</h2>
 
         {role === "member" ? (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted">
               Leave this household. Your chore assignments and calendar events will be removed.
             </p>
             <LeaveHouseholdButton householdId={household.id} householdName={household.name} />
@@ -121,8 +121,8 @@ export default async function HouseholdPage() {
           <div className="mt-3 space-y-5">
             {otherMembers.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-gray-700">Hand off the household</p>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="text-sm font-medium text-muted">Hand off the household</p>
+                <p className="mt-1 text-sm text-muted">
                   Make another member the admin and leave. The household and its data stay.
                 </p>
                 <div className="mt-3">
@@ -131,9 +131,9 @@ export default async function HouseholdPage() {
               </div>
             )}
 
-            <div className="border-t border-gray-100 pt-5">
+            <div className="border-t border-line pt-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted">
                   Delete this household for everyone. This removes all chores, shopping, bills,
                   expenses, and board posts. This can&apos;t be undone.
                 </p>

@@ -41,8 +41,8 @@ export default function SettingsMenu({
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   function itemClass(href: string) {
-    return `flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 ${
-      isActive(href) ? "font-medium text-brand-700" : "text-gray-700"
+    return `flex items-center gap-2 px-4 py-2 text-sm hover:bg-surface-2 ${
+      isActive(href) ? "font-medium text-brand-700" : "text-muted"
     }`;
   }
 
@@ -53,19 +53,19 @@ export default function SettingsMenu({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted hover:bg-surface-2"
       >
         <span aria-hidden="true">⚙</span>
         <span className="hidden sm:inline">Settings</span>
-        <span aria-hidden="true" className="text-gray-400">▾</span>
+        <span aria-hidden="true" className="text-faint">▾</span>
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-20 mt-2 flex w-56 flex-col rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+          className="absolute right-0 z-20 mt-2 flex w-56 flex-col rounded-lg border border-line bg-surface py-1 shadow-lg"
         >
-          <p className="truncate px-4 py-2 text-xs text-gray-400" title={userEmail}>
+          <p className="truncate px-4 py-2 text-xs text-faint" title={userEmail}>
             {userEmail}
           </p>
 
@@ -107,13 +107,24 @@ export default function SettingsMenu({
             Notifications
           </Link>
 
-          <div className="my-1 border-t border-gray-100" />
+          <Link
+            href="/settings/appearance"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            aria-current={isActive("/settings/appearance") ? "page" : undefined}
+            className={itemClass("/settings/appearance")}
+          >
+            <span aria-hidden="true">🎨</span>
+            Appearance
+          </Link>
+
+          <div className="my-1 border-t border-line" />
 
           <form action="/auth/signout" method="post">
             <button
               type="submit"
               role="menuitem"
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+              className="w-full px-4 py-2 text-left text-sm text-muted hover:bg-surface-2"
             >
               Logout
             </button>

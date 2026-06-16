@@ -44,7 +44,7 @@ export default async function ShoppingPage() {
         subtitle={`Shared with everyone in ${ctx.household.name}.`}
       />
 
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
+      <div className="mt-6 rounded-xl border border-line bg-surface p-4 shadow-card">
         <ShoppingForm householdId={ctx.household.id} posterLabel={posterLabel} />
       </div>
 
@@ -53,15 +53,15 @@ export default async function ShoppingPage() {
           <EmptyState title="The list is empty" description="Add the first item above." />
         </div>
       ) : (
-        <ul className="mt-6 divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-card">
+        <ul className="mt-6 divide-y divide-line rounded-xl border border-line bg-surface shadow-card">
           {items.map((item) => (
-            <li key={item.id} className="flex items-center gap-3 px-4 py-3 transition hover:bg-stone-50">
+            <li key={item.id} className="flex items-center gap-3 px-4 py-3 transition hover:bg-canvas">
               <ShoppingToggle itemId={item.id} checked={item.checked} />
               <div className="min-w-0 flex-1">
-                <span className={`text-sm ${item.checked ? "text-gray-400 line-through" : "text-gray-800"}`}>
+                <span className={`text-sm ${item.checked ? "text-faint line-through" : "text-ink"}`}>
                   {item.name}
                 </span>
-                <span className="ml-2 text-xs text-gray-400">· {item.addedByName ?? item.addedByEmail}</span>
+                <span className="ml-2 text-xs text-faint">· {item.addedByName ?? item.addedByEmail}</span>
               </div>
               <DeleteButton endpoint={`/api/shopping/${item.id}`} label="Remove" />
             </li>

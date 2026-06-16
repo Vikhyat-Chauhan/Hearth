@@ -40,7 +40,7 @@ export default async function Navbar() {
   }
 
   return (
-    <header className="border-b border-gray-200 bg-white">
+    <header className="border-b border-line bg-surface">
       <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="font-display text-xl font-bold text-brand-700">
           <span aria-hidden="true">🔥</span> Hearth
@@ -58,7 +58,7 @@ export default async function Navbar() {
           ) : (
             <GoogleSignIn
               showError={false}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted hover:bg-surface-2"
             >
               Sign in
             </GoogleSignIn>

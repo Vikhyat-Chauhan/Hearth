@@ -75,12 +75,12 @@ export default function ConfirmProvider({ children }: { children: ReactNode }) {
             aria-modal="true"
             aria-labelledby="confirm-title"
             aria-describedby="confirm-message"
-            className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-5 shadow-card-hover"
+            className="w-full max-w-sm rounded-xl border border-line bg-surface p-5 shadow-card-hover"
           >
-            <h2 id="confirm-title" className="font-display text-lg font-semibold text-gray-900">
+            <h2 id="confirm-title" className="font-display text-lg font-semibold text-ink">
               {state.title ?? "Are you sure?"}
             </h2>
-            <p id="confirm-message" className="mt-2 text-sm text-gray-600">
+            <p id="confirm-message" className="mt-2 text-sm text-muted">
               {state.message}
             </p>
             <div className="mt-5 flex justify-end gap-2">

@@ -56,13 +56,13 @@ export default function ConnectCalendar({ connected }: { connected: boolean }) {
           <Button onClick={backfill} disabled={busy}>
             {busy ? "Syncing…" : "Backfill my chores to my calendar"}
           </Button>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted">
             Re-runs the one-way sync for every chore assigned to you — useful if events are missing.
           </p>
         </>
       ) : (
         <>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted">
             Your Google Calendar isn&apos;t connected yet. Connect it to have your chores appear on
             your calendar.
           </p>
@@ -71,7 +71,7 @@ export default function ConnectCalendar({ connected }: { connected: boolean }) {
           </Button>
         </>
       )}
-      {status && <p role="status" className="text-sm text-gray-600">{status}</p>}
+      {status && <p role="status" className="text-sm text-muted">{status}</p>}
     </div>
   );
 }

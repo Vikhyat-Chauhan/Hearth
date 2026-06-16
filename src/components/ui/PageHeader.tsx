@@ -50,8 +50,8 @@ export default function PageHeader({
               {eyebrow}
             </p>
           )}
-          <h1 className="font-display text-2xl font-semibold text-gray-900 sm:text-3xl">{title}</h1>
-          {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+          <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">{title}</h1>
+          {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
         </div>
       </div>
       {action && <div className="shrink-0">{action}</div>}

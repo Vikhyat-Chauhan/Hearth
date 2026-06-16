@@ -59,7 +59,7 @@ export default async function BillsPage() {
         }
       />
 
-      <div className="mt-6 rounded-xl border border-gray-200 p-4">
+      <div className="mt-6 rounded-xl border border-line p-4">
         <BillForm householdId={ctx.household.id} />
       </div>
 
@@ -72,18 +72,18 @@ export default async function BillsPage() {
           {items.map((bill) => (
             <li
               key={bill.id}
-              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className={`font-medium ${bill.paid ? "text-gray-400 line-through" : "text-gray-800"}`}>
+                  <span className={`font-medium ${bill.paid ? "text-faint line-through" : "text-ink"}`}>
                     {bill.title}
                   </span>
-                  <span className="text-sm text-gray-500">{formatCents(bill.amountCents)}</span>
+                  <span className="text-sm text-muted">{formatCents(bill.amountCents)}</span>
                   <Badge variant={bill.paid ? "paid" : "unpaid"}>{bill.paid ? "Paid" : "Unpaid"}</Badge>
                 </div>
                 {bill.dueDate && (
-                  <p className="text-xs text-gray-400">Due {formatDue(bill.dueDate)}</p>
+                  <p className="text-xs text-faint">Due {formatDue(bill.dueDate)}</p>
                 )}
               </div>
               <BillPaidToggle billId={bill.id} paid={bill.paid} />

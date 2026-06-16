@@ -89,7 +89,7 @@ export default function BillForm({ householdId }: { householdId: string }) {
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
           aria-label="Due date (optional)"
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none"
+          className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-muted focus:border-brand-500 focus:outline-none"
         />
       </div>
       <FieldError id="bill-error">{error}</FieldError>
