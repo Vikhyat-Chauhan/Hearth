@@ -5,7 +5,12 @@
 
 import { eq, and } from "drizzle-orm";
 import { db, profiles, calendarLinks } from "@/db";
-import { syncChoreEvent, deleteChoreEvent, cancelChoreInstance } from "@/lib/calendar";
+import {
+  syncChoreEvent,
+  deleteChoreEvent,
+  cancelChoreInstance,
+  restoreChoreInstance,
+} from "@/lib/calendar";
 import { firstOccurrence, toISODate } from "@/lib/recurrence";
 import type { Chore } from "@/lib/types";
 
@@ -106,6 +111,29 @@ export async function cancelOccurrenceOnCalendars(
     } catch (err) {
       console.error(
         `[chore-sync] instance cancel failed for user ${link.userId}, chore ${choreId} @ ${occurrenceDate}:`,
+        err,
+      );
+    }
+  }
+}
+
+/**
+ * Restore a single occurrence on every assignee's calendar — the inverse of
+ * `cancelOccurrenceOnCalendars`, called when an assignee marks that occurrence
+ * undone. Best-effort: each per-assignee failure is caught and logged, never thrown.
+ */
+export async function restoreOccurrenceOnCalendars(
+  choreId: string,
+  occurrenceDate: string,
+): Promise<void> {
+  const links = await db.select().from(calendarLinks).where(eq(calendarLinks.choreId, choreId));
+  for (const link of links) {
+    try {
+      const tokenEnc = await refreshTokenFor(link.userId);
+      await restoreChoreInstance(tokenEnc, link.externalEventId, occurrenceDate);
+    } catch (err) {
+      console.error(
+        `[chore-sync] instance restore failed for user ${link.userId}, chore ${choreId} @ ${occurrenceDate}:`,
         err,
       );
     }

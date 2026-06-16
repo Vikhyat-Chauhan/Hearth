@@ -89,7 +89,7 @@ function eventBody(input: ChoreEventInput) {
 
 async function callCalendar(
   accessToken: string,
-  method: "GET" | "POST" | "PUT" | "DELETE",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   body?: unknown,
 ): Promise<Response> {
@@ -160,6 +160,27 @@ export async function cancelChoreInstance(
   const res = await callCalendar(accessToken, "DELETE", `/${instanceId}`);
   if (!res.ok && res.status !== 404 && res.status !== 410) {
     throw new Error(`Google Calendar instance cancel failed (${res.status}): ${await res.text()}`);
+  }
+}
+
+/**
+ * Restore a SINGLE previously-cancelled occurrence of a chore's recurring event —
+ * the inverse of `cancelChoreInstance`. Used when an assignee marks that occurrence
+ * undone. Cancelling an instance leaves a cancelled exception behind; PATCHing it
+ * back to `confirmed` re-shows it. No-op if the member isn't connected; 404/410
+ * (no such exception / already gone) are success — the instance is simply visible.
+ */
+export async function restoreChoreInstance(
+  refreshTokenEnc: string | null,
+  externalEventId: string,
+  occurrenceDate: string,
+): Promise<void> {
+  if (!refreshTokenEnc || !googleConfigured()) return;
+  const accessToken = await getAccessToken(decryptToken(refreshTokenEnc));
+  const instanceId = `${externalEventId}_${occurrenceDate.replace(/-/g, "")}`;
+  const res = await callCalendar(accessToken, "PATCH", `/${instanceId}`, { status: "confirmed" });
+  if (!res.ok && res.status !== 404 && res.status !== 410) {
+    throw new Error(`Google Calendar instance restore failed (${res.status}): ${await res.text()}`);
   }
 }
 

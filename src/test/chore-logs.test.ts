@@ -17,7 +17,7 @@ describe.skipIf(!hasDb)("my chores + mark done", () => {
 
   it("lists assigned chores, marks done idempotently, and reflects done state", async () => {
     const { db, profiles, households, memberships, chores, choreAssignments, choreLogs } = await import("@/db");
-    const { eq } = await import("drizzle-orm");
+    const { and, eq } = await import("drizzle-orm");
     const { getMyChores, isAssignee } = await import("@/lib/chores");
     const { generateInviteCode } = await import("@/lib/household");
 
@@ -61,5 +61,17 @@ describe.skipIf(!hasDb)("my chores + mark done", () => {
 
     const after = await getMyChores(userId);
     expect(after[0].occurrences.find((o) => o.date === today)?.done).toBe(true);
+
+    // Mark undone — twice, to prove the delete is idempotent (no row, no error).
+    for (let i = 0; i < 2; i++) {
+      await db
+        .delete(choreLogs)
+        .where(and(eq(choreLogs.choreId, chore.id), eq(choreLogs.occurrenceDate, today)));
+    }
+    const afterUndo = await db.select().from(choreLogs).where(eq(choreLogs.choreId, chore.id));
+    expect(afterUndo).toHaveLength(0);
+
+    const reverted = await getMyChores(userId);
+    expect(reverted[0].occurrences.find((o) => o.date === today)?.done).toBe(false);
   });
 });
