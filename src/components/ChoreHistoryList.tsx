@@ -4,6 +4,7 @@
 // chore-grouped <ChoreList>.
 import type { ChoreHistoryEntry } from "@/lib/chores";
 import { formatClockTime } from "@/lib/utils";
+import MarkDoneButton from "@/components/MarkDoneButton";
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -20,6 +21,9 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
     <ul className="mt-6 space-y-3">
       {entries.map((entry) => {
         const done = entry.status === "done";
+        // Only an assignee may mark an occurrence done (the API enforces this too),
+        // so the catch-up button shows only on the viewer's own overdue rows.
+        const canMarkDone = !done && entry.assignees.some((a) => a.isSelf);
         const who = entry.isSelf ? "you" : entry.completedByName ?? entry.completedByEmail;
         // Overdue rows show who the chore belongs to, mirroring "by <completer>".
         const owedBy = entry.assignees
@@ -52,9 +56,18 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
                   <span aria-hidden="true">✓</span> Done
                 </span>
               ) : (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
-                  Overdue
-                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
+                    Overdue
+                  </span>
+                  {canMarkDone && (
+                    <MarkDoneButton
+                      choreId={entry.choreId}
+                      occurrenceDate={entry.date}
+                      done={false}
+                    />
+                  )}
+                </div>
               )}
             </div>
           </li>
