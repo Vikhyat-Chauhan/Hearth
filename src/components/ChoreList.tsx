@@ -59,7 +59,7 @@ export default function ChoreList({
   const today = toISODate(new Date());
 
   if (rows.length === 0) {
-    return <p className="mt-6 text-sm text-gray-400">No upcoming occurrences.</p>;
+    return <p className="mt-6 text-sm text-faint">No upcoming occurrences.</p>;
   }
 
   // Group the sorted rows into date sections, preserving date order.
@@ -74,10 +74,10 @@ export default function ChoreList({
     <div className="mt-6 space-y-6">
       {sections.map((section) => (
         <section key={section.date}>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
             {formatDate(section.date)}
           </h2>
-          <ul className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card">
+          <ul className="overflow-hidden rounded-xl border border-line bg-surface shadow-card">
             {section.rows.map((row) => {
               const others = row.assignees.filter((a) => !a.isSelf);
               const sharedNames = interactive
@@ -86,13 +86,13 @@ export default function ChoreList({
               return (
                 <li
                   key={`${row.choreId}-${row.date}`}
-                  className="relative flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 transition last:border-b-0 hover:bg-stone-50"
+                  className="relative flex items-center justify-between gap-3 border-b border-line px-4 py-3 transition last:border-b-0 hover:bg-canvas"
                 >
                   <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-brand-400" />
                   <div className="min-w-0">
                     <span
                       className={`font-display text-sm font-semibold ${
-                        row.done ? "text-gray-400 line-through" : "text-gray-900"
+                        row.done ? "text-faint line-through" : "text-ink"
                       }`}
                     >
                       {row.title}
@@ -120,7 +120,7 @@ export default function ChoreList({
                     {isAdmin && (
                       <Link
                         href={`/chores/${row.choreId}/edit`}
-                        className="text-sm text-gray-500 hover:text-gray-900"
+                        className="text-sm text-muted hover:text-ink"
                       >
                         Edit
                       </Link>

@@ -66,16 +66,16 @@ export default function AnnouncementForm({
       <FieldError id="announcement-error">{error}</FieldError>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
               checked={anonymous}
               onChange={(e) => setAnonymous(e.target.checked)}
-              className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+              className="h-5 w-5 rounded border-line text-brand-600 focus:ring-brand-500"
             />
             Post anonymously
           </label>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-faint">
             {anonymous ? "Hidden from your roommates" : `Posting as ${posterLabel}`}
           </p>
         </div>

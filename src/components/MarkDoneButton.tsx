@@ -55,7 +55,7 @@ export default function MarkDoneButton({
   // Not yet due — can't be marked done until its date arrives.
   if (upcoming) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+      <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-muted">
         <span aria-hidden="true">🔒</span> Upcoming
       </span>
     );

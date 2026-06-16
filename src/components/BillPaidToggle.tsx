@@ -48,7 +48,7 @@ export default function BillPaidToggle({
       className={`shrink-0 rounded-lg border px-3 py-1 text-sm font-medium transition disabled:opacity-50 ${
         isPaid
           ? "border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
-          : "border-gray-300 text-gray-700 hover:bg-gray-50"
+          : "border-line text-muted hover:bg-surface-2"
       }`}
     >
       {isPaid ? "✓ Paid" : "Mark paid"}

@@ -8,9 +8,9 @@ export default function Label({
   ...props
 }: LabelHTMLAttributes<HTMLLabelElement> & { optional?: boolean; children: ReactNode }) {
   return (
-    <label className={cn("block text-sm font-medium text-gray-700", className)} {...props}>
+    <label className={cn("block text-sm font-medium text-muted", className)} {...props}>
       {children}
-      {optional && <span className="ml-1 font-normal text-gray-400">(optional)</span>}
+      {optional && <span className="ml-1 font-normal text-faint">(optional)</span>}
     </label>
   );
 }

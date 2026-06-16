@@ -17,7 +17,7 @@ export const ACCENTS: Record<
   accent: { chip: "bg-accent-50 text-accent-700", line: "bg-accent-400", badge: "bg-accent-50 text-accent-700" },
   green: { chip: "bg-green-50 text-green-700", line: "bg-green-400", badge: "bg-green-50 text-green-700" },
   amber: { chip: "bg-amber-50 text-amber-700", line: "bg-amber-400", badge: "bg-amber-50 text-amber-700" },
-  neutral: { chip: "bg-gray-100 text-gray-600", line: "bg-gray-300", badge: "bg-gray-100 text-gray-600" },
+  neutral: { chip: "bg-surface-2 text-muted", line: "bg-line", badge: "bg-surface-2 text-muted" },
 };
 
 // Per-feature accent assignment used by page headers and the dashboard widgets.

@@ -126,19 +126,19 @@ export default function ExpenseForm({
         </Select>
       </div>
 
-      <fieldset className="rounded-lg border border-gray-200 p-3">
-        <legend className="px-1 text-xs font-medium text-gray-500">Split equally between</legend>
+      <fieldset className="rounded-lg border border-line p-3">
+        <legend className="px-1 text-xs font-medium text-muted">Split equally between</legend>
         <div className="flex flex-wrap gap-1">
           {members.map((m) => (
             <label
               key={m.userId}
-              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted hover:bg-surface-2"
             >
               <input
                 type="checkbox"
                 checked={sharers.has(m.userId)}
                 onChange={() => toggleSharer(m.userId)}
-                className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                className="h-5 w-5 rounded border-line text-brand-600 focus:ring-brand-500"
               />
               {label(m)}
             </label>

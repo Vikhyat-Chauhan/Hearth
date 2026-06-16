@@ -231,10 +231,10 @@ export default function ChoreForm({
   return (
     <form onSubmit={onSubmit} className="mt-6 space-y-6" aria-busy={submitting || deleting}>
       {/* 1 — How often? Pick the cadence first. */}
-      <fieldset className="rounded-2xl border border-gray-200 bg-white p-4 shadow-card">
-        <legend className="px-1 text-sm font-medium text-gray-700">How often?</legend>
+      <fieldset className="rounded-2xl border border-line bg-surface p-4 shadow-card">
+        <legend className="px-1 text-sm font-medium text-muted">How often?</legend>
 
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-faint">
           {isEdit ? (
             "Lands on each connected housemate's Google Calendar."
           ) : (
@@ -254,7 +254,7 @@ export default function ChoreForm({
                 "rounded-full border px-3.5 py-1.5 text-sm font-medium transition",
                 mode === m.value
                   ? "border-brand-600 bg-brand-600 text-white"
-                  : "border-gray-300 text-gray-600 hover:bg-gray-50",
+                  : "border-line text-muted hover:bg-surface-2",
               )}
             >
               {m.label}
@@ -263,7 +263,7 @@ export default function ChoreForm({
         </div>
 
         {/* Interval */}
-        <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+        <div className="mt-4 flex items-center gap-2 text-sm text-muted">
           <span>Repeat every</span>
           <Input
             type="number"
@@ -282,7 +282,7 @@ export default function ChoreForm({
 
         {/* Monthly ordinal */}
         {mode === "MONTHLY" && (
-          <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+          <div className="mt-3 flex items-center gap-2 text-sm text-muted">
             <span>Which week of the month?</span>
             <Select
               value={ordinal}
@@ -302,7 +302,7 @@ export default function ChoreForm({
         {/* Weekday chips (weekly + monthly) */}
         {needsDays && (
           <div className="mt-3">
-            <span className="text-sm text-gray-600">{mode === "MONTHLY" ? "Weekday" : "On"}</span>
+            <span className="text-sm text-muted">{mode === "MONTHLY" ? "Weekday" : "On"}</span>
             <div className="mt-2 flex flex-wrap gap-2">
               {WEEKDAYS.map((d) => (
                 <button
@@ -314,7 +314,7 @@ export default function ChoreForm({
                     "rounded-full border px-3 py-1 text-sm transition",
                     weekdays.has(d.code)
                       ? "border-brand-600 bg-brand-600 text-white"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-50",
+                      : "border-line text-muted hover:bg-surface-2",
                   )}
                 >
                   {d.label}
@@ -364,20 +364,20 @@ export default function ChoreForm({
         </div>
 
         {/* Summary + preview */}
-        <div className="mt-4 rounded-xl bg-stone-50 p-3">
-          <p className="text-sm font-medium text-gray-700">{summary}</p>
+        <div className="mt-4 rounded-xl bg-canvas p-3">
+          <p className="text-sm font-medium text-muted">{summary}</p>
           {preview.length > 0 && (
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted">
               Next: {preview.map((d) => formatOccurrenceDate(d)).join(" · ")}
             </p>
           )}
-          <p className="mt-2 font-mono text-[11px] text-gray-300">{rrule}</p>
+          <p className="mt-2 font-mono text-[11px] text-faint">{rrule}</p>
         </div>
       </fieldset>
 
       {/* 2 — What is the chore? */}
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700">What&apos;s the chore?</legend>
+        <legend className="text-sm font-medium text-muted">What&apos;s the chore?</legend>
         <div className="mt-2">
           <Label htmlFor="title">Title</Label>
           <Input
@@ -406,8 +406,8 @@ export default function ChoreForm({
 
       {/* 3 — Who's on it? One by default; add others to share. */}
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700">Who&apos;s on it?</legend>
-        <p className="mt-0.5 text-xs text-gray-400">
+        <legend className="text-sm font-medium text-muted">Who&apos;s on it?</legend>
+        <p className="mt-0.5 text-xs text-faint">
           Assign it to one housemate — add others to share the load. Anyone assigned can complete it
           for everyone.
         </p>
@@ -421,20 +421,20 @@ export default function ChoreForm({
                   "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition",
                   on
                     ? "border-brand-500 bg-brand-50 shadow-glow"
-                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
+                    : "border-line hover:border-line hover:bg-surface-2",
                 )}
               >
                 <input
                   type="checkbox"
                   checked={on}
                   onChange={() => setAssignees((s) => toggle(s, m.userId))}
-                  className="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                  className="h-5 w-5 rounded border-line text-brand-600 focus:ring-brand-500"
                 />
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium text-gray-800">
+                  <span className="block truncate text-sm font-medium text-ink">
                     {m.name ?? m.email}
                   </span>
-                  <span className="block truncate text-xs text-gray-400">{m.email}</span>
+                  <span className="block truncate text-xs text-faint">{m.email}</span>
                 </span>
               </label>
             );

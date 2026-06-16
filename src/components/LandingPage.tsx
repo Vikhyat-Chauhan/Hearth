@@ -150,7 +150,7 @@ function GoogleCTA({
     >
       <span
         aria-hidden="true"
-        className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-brand-700"
+        className="flex h-5 w-5 items-center justify-center rounded-full bg-surface text-xs font-bold text-brand-700"
       >
         G
       </span>
@@ -164,13 +164,13 @@ function GoogleCTA({
 // tiles). Purely illustrative, so the whole thing is aria-hidden.
 function FeatureMockup({ kind }: { kind: MockupKind }) {
   const shell =
-    "w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-5 shadow-card-hover";
+    "w-full max-w-sm rounded-2xl border border-line bg-surface p-5 shadow-card-hover";
 
   if (kind === "chores") {
     return (
       <div aria-hidden="true" className={`${shell} rotate-1`}>
         <div className="flex items-center justify-between">
-          <p className="font-display text-lg font-semibold text-gray-900">This week</p>
+          <p className="font-display text-lg font-semibold text-ink">This week</p>
           <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
             Apt 4B
           </span>
@@ -183,26 +183,26 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
           ].map((c) => (
             <li
               key={c.t}
-              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+              className="flex items-center gap-3 rounded-xl border border-line bg-canvas/60 px-3.5 py-2.5"
             >
               <span
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs ${
                   c.done
                     ? "bg-brand-600 text-white"
-                    : "border border-gray-300 bg-white text-transparent"
+                    : "border border-line bg-surface text-transparent"
                 }`}
               >
                 ✓
               </span>
               <span
                 className={`flex-1 text-sm ${
-                  c.done ? "text-gray-400 line-through" : "text-gray-800"
+                  c.done ? "text-faint line-through" : "text-ink"
                 }`}
               >
                 {c.t}
               </span>
-              <span className="text-xs text-gray-400">{c.who}</span>
-              <span className="rounded-md bg-white px-1.5 py-0.5 text-xs font-medium text-gray-500 shadow-card">
+              <span className="text-xs text-faint">{c.who}</span>
+              <span className="rounded-md bg-surface px-1.5 py-0.5 text-xs font-medium text-muted shadow-card">
                 {c.day}
               </span>
             </li>
@@ -215,7 +215,7 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
   if (kind === "shopping") {
     return (
       <div aria-hidden="true" className={`${shell} -rotate-1`}>
-        <p className="font-display text-lg font-semibold text-gray-900">Shopping list</p>
+        <p className="font-display text-lg font-semibold text-ink">Shopping list</p>
         <ul className="mt-4 space-y-2.5">
           {[
             { t: "Oat milk", who: "Priya", done: false },
@@ -225,25 +225,25 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
           ].map((c) => (
             <li
               key={c.t}
-              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+              className="flex items-center gap-3 rounded-xl border border-line bg-canvas/60 px-3.5 py-2.5"
             >
               <span
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs ${
                   c.done
                     ? "bg-accent-600 text-white"
-                    : "border border-gray-300 bg-white text-transparent"
+                    : "border border-line bg-surface text-transparent"
                 }`}
               >
                 ✓
               </span>
               <span
                 className={`flex-1 text-sm ${
-                  c.done ? "text-gray-400 line-through" : "text-gray-800"
+                  c.done ? "text-faint line-through" : "text-ink"
                 }`}
               >
                 {c.t}
               </span>
-              <span className="text-xs text-gray-400">Added by {c.who}</span>
+              <span className="text-xs text-faint">Added by {c.who}</span>
             </li>
           ))}
         </ul>
@@ -268,11 +268,11 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
           ].map((b) => (
             <li
               key={b.t}
-              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+              className="flex items-center gap-3 rounded-xl border border-line bg-canvas/60 px-3.5 py-2.5"
             >
-              <span className="flex-1 text-sm text-gray-800">{b.t}</span>
-              <span className="text-xs text-gray-400">Due {b.due}</span>
-              <span className="text-sm font-medium text-gray-700">{b.amt}</span>
+              <span className="flex-1 text-sm text-ink">{b.t}</span>
+              <span className="text-xs text-faint">Due {b.due}</span>
+              <span className="text-sm font-medium text-muted">{b.amt}</span>
               <span
                 className={`rounded-md px-1.5 py-0.5 text-xs font-medium ${
                   b.paid ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
@@ -290,18 +290,18 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
   if (kind === "expenses") {
     return (
       <div aria-hidden="true" className={`${shell} -rotate-1`}>
-        <p className="font-display text-lg font-semibold text-gray-900">Balances</p>
+        <p className="font-display text-lg font-semibold text-ink">Balances</p>
         <ul className="mt-4 space-y-2.5">
           {[
             { who: "Priya owes you", amt: "+$18.00", tone: "text-green-700" },
             { who: "Sam owes you", amt: "+$11.50", tone: "text-green-700" },
-            { who: "You owe Alex", amt: "−$6.00", tone: "text-gray-500" },
+            { who: "You owe Alex", amt: "−$6.00", tone: "text-muted" },
           ].map((r) => (
             <li
               key={r.who}
-              className="flex items-center justify-between rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+              className="flex items-center justify-between rounded-xl border border-line bg-canvas/60 px-3.5 py-2.5"
             >
-              <span className="text-sm text-gray-800">{r.who}</span>
+              <span className="text-sm text-ink">{r.who}</span>
               <span className={`font-display text-sm font-semibold ${r.tone}`}>{r.amt}</span>
             </li>
           ))}
@@ -318,16 +318,16 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
   // board
   return (
     <div aria-hidden="true" className={`${shell} rotate-1`}>
-      <p className="font-display text-lg font-semibold text-gray-900">House board</p>
+      <p className="font-display text-lg font-semibold text-ink">House board</p>
       <ul className="mt-4 space-y-3">
-        <li className="rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-3">
-          <p className="text-sm text-gray-800">📦 Package for the house arrives Thursday.</p>
-          <p className="mt-1.5 text-xs text-gray-400">Sam · 2h ago</p>
+        <li className="rounded-xl border border-line bg-canvas/60 px-3.5 py-3">
+          <p className="text-sm text-ink">📦 Package for the house arrives Thursday.</p>
+          <p className="mt-1.5 text-xs text-faint">Sam · 2h ago</p>
         </li>
-        <li className="rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-3">
-          <p className="text-sm text-gray-800">Can we agree on a quiet-hours rule? 🙏</p>
-          <p className="mt-1.5 text-xs text-gray-400">
-            <span className="rounded bg-gray-200 px-1.5 py-0.5 font-medium text-gray-600">
+        <li className="rounded-xl border border-line bg-canvas/60 px-3.5 py-3">
+          <p className="text-sm text-ink">Can we agree on a quiet-hours rule? 🙏</p>
+          <p className="mt-1.5 text-xs text-faint">
+            <span className="rounded bg-surface-2 px-1.5 py-0.5 font-medium text-muted">
               Anonymous
             </span>{" "}
             · 5h ago
@@ -357,7 +357,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
       <section className="relative isolate">
         {/* Warm ambient glow + grain */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-50 via-stone-50 to-stone-50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-50 via-canvas to-canvas dark:from-brand-900/20" />
           <div className="absolute inset-0 bg-hearth-grain opacity-70" />
           <div className="animate-ember absolute -left-24 -top-24 h-96 w-96 rounded-full bg-brand-300/40 blur-3xl" />
           <div
@@ -370,14 +370,14 @@ export default function LandingPage({ error = null }: { error?: string | null })
           {/* Copy */}
           <div>
             <p
-              className="animate-rise inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/70 px-3.5 py-1.5 text-xs font-medium uppercase tracking-wide text-brand-700 backdrop-blur"
+              className="animate-rise inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface/70 px-3.5 py-1.5 text-xs font-medium uppercase tracking-wide text-brand-700 backdrop-blur"
               style={{ animationDelay: "0ms" }}
             >
               <span aria-hidden="true">🔥</span> For students &amp; roommates
             </p>
 
             <h1
-              className="animate-rise mt-6 font-display text-[2.75rem] font-semibold leading-[1.04] tracking-tight text-gray-900 sm:text-6xl"
+              className="animate-rise mt-6 font-display text-[2.75rem] font-semibold leading-[1.04] tracking-tight text-ink sm:text-6xl"
               style={{ animationDelay: "80ms" }}
             >
               Make the shared house{" "}
@@ -392,7 +392,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
             </h1>
 
             <p
-              className="animate-rise mt-6 max-w-xl text-lg leading-relaxed text-gray-600"
+              className="animate-rise mt-6 max-w-xl text-lg leading-relaxed text-muted"
               style={{ animationDelay: "160ms" }}
             >
               Hearth keeps roommates in sync — recurring chores on everyone&apos;s Google Calendar,
@@ -406,14 +406,14 @@ export default function LandingPage({ error = null }: { error?: string | null })
               <GoogleCTA>Get started with Google</GoogleCTA>
               <Link
                 href="#how"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white px-6 py-3.5 text-base font-medium text-gray-700 transition hover:bg-gray-50"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-6 py-3.5 text-base font-medium text-muted transition hover:bg-surface-2"
               >
                 See how it works
               </Link>
             </div>
 
             <p
-              className="animate-rise mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500"
+              className="animate-rise mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted"
               style={{ animationDelay: "300ms" }}
             >
               <span className="inline-flex items-center gap-1.5">
@@ -433,13 +433,13 @@ export default function LandingPage({ error = null }: { error?: string | null })
             className="animate-rise relative mx-auto w-full max-w-md lg:mx-0"
             style={{ animationDelay: "360ms" }}
           >
-            <div className="rotate-1 rounded-2xl border border-gray-200 bg-white p-5 shadow-card-hover">
+            <div className="rotate-1 rounded-2xl border border-line bg-surface p-5 shadow-card-hover">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                  <p className="text-xs font-medium uppercase tracking-wide text-faint">
                     This week
                   </p>
-                  <p className="font-display text-xl font-semibold text-gray-900">Apt 4B</p>
+                  <p className="font-display text-xl font-semibold text-ink">Apt 4B</p>
                 </div>
                 <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
                   4 roommates
@@ -455,27 +455,27 @@ export default function LandingPage({ error = null }: { error?: string | null })
                 ].map((c) => (
                   <li
                     key={c.t}
-                    className="flex items-center gap-3 rounded-xl border border-gray-100 bg-stone-50/60 px-3.5 py-2.5"
+                    className="flex items-center gap-3 rounded-xl border border-line bg-canvas/60 px-3.5 py-2.5"
                   >
                     <span
                       aria-hidden="true"
                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs ${
                         c.done
                           ? "bg-brand-600 text-white"
-                          : "border border-gray-300 bg-white text-transparent"
+                          : "border border-line bg-surface text-transparent"
                       }`}
                     >
                       ✓
                     </span>
                     <span
                       className={`flex-1 text-sm ${
-                        c.done ? "text-gray-400 line-through" : "text-gray-800"
+                        c.done ? "text-faint line-through" : "text-ink"
                       }`}
                     >
                       {c.t}
                     </span>
-                    <span className="text-xs text-gray-400">{c.who}</span>
-                    <span className="rounded-md bg-white px-1.5 py-0.5 text-xs font-medium text-gray-500 shadow-card">
+                    <span className="text-xs text-faint">{c.who}</span>
+                    <span className="rounded-md bg-surface px-1.5 py-0.5 text-xs font-medium text-muted shadow-card">
                       {c.day}
                     </span>
                   </li>
@@ -484,8 +484,8 @@ export default function LandingPage({ error = null }: { error?: string | null })
             </div>
 
             {/* Floating accent card */}
-            <div className="absolute -bottom-6 -left-6 hidden -rotate-3 rounded-xl border border-gray-200 bg-white p-3.5 shadow-card-hover sm:block">
-              <p className="text-xs text-gray-400">You&apos;re owed</p>
+            <div className="absolute -bottom-6 -left-6 hidden -rotate-3 rounded-xl border border-line bg-surface p-3.5 shadow-card-hover sm:block">
+              <p className="text-xs text-faint">You&apos;re owed</p>
               <p className="font-display text-lg font-semibold text-green-700">
                 <span aria-hidden="true">▲ </span>$42.50
               </p>
@@ -500,10 +500,10 @@ export default function LandingPage({ error = null }: { error?: string | null })
           <p className="text-sm font-medium uppercase tracking-wide text-brand-700">
             Five fewer things to argue about
           </p>
-          <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
             Everything a shared home needs
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="mt-4 text-lg text-muted">
             One place for the unglamorous logistics, so you can get back to actually living
             together.
           </p>
@@ -517,7 +517,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
               <a
                 key={f.eyebrow}
                 href={`#feat-${f.mockup}`}
-                className="group flex flex-col items-center gap-2 rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-card transition hover:-translate-y-1 hover:shadow-card-hover"
+                className="group flex flex-col items-center gap-2 rounded-2xl border border-line bg-surface p-4 text-center shadow-card transition hover:-translate-y-1 hover:shadow-card-hover"
               >
                 <span
                   aria-hidden="true"
@@ -525,7 +525,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
                 >
                   {f.icon}
                 </span>
-                <span className="text-sm font-medium text-gray-800">{f.eyebrow}</span>
+                <span className="text-sm font-medium text-ink">{f.eyebrow}</span>
               </a>
             );
           })}
@@ -559,13 +559,13 @@ export default function LandingPage({ error = null }: { error?: string | null })
                   >
                     <span aria-hidden="true">{f.icon}</span> {f.eyebrow}
                   </p>
-                  <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
+                  <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
                     {f.title}
                   </h3>
-                  <p className="mt-4 max-w-xl text-lg leading-relaxed text-gray-600">{f.body}</p>
+                  <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">{f.body}</p>
                   <ul className="mt-6 space-y-2.5">
                     {f.points.map((p) => (
-                      <li key={p} className="flex items-start gap-2.5 text-gray-700">
+                      <li key={p} className="flex items-start gap-2.5 text-muted">
                         <span aria-hidden="true" className={`mt-0.5 shrink-0 ${a.glyph}`}>
                           ✦
                         </span>
@@ -592,7 +592,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
             <p className="text-sm font-medium uppercase tracking-wide text-brand-700">
               Up and running in minutes
             </p>
-            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
               How Hearth works
             </h2>
           </div>
@@ -601,8 +601,8 @@ export default function LandingPage({ error = null }: { error?: string | null })
             {STEPS.map((s) => (
               <div key={s.n} className="relative">
                 <span className="font-display text-5xl font-semibold text-brand-200">{s.n}</span>
-                <h3 className="mt-3 font-display text-xl font-semibold text-gray-900">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-gray-600">{s.body}</p>
+                <h3 className="mt-3 font-display text-xl font-semibold text-ink">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
               </div>
             ))}
           </div>
@@ -624,7 +624,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
             Free to start, syncs with the calendar you already use. Your house will run itself.
           </p>
           <div className="mt-9 flex justify-center">
-            <GoogleSignIn className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-white px-7 py-3.5 text-base font-semibold text-brand-700 shadow-card transition hover:bg-brand-50">
+            <GoogleSignIn className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-surface px-7 py-3.5 text-base font-semibold text-brand-700 shadow-card transition hover:bg-brand-50">
               <span
                 aria-hidden="true"
                 className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white"
@@ -638,15 +638,15 @@ export default function LandingPage({ error = null }: { error?: string | null })
       </section>
 
       {/* ─── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-gray-200">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-gray-500 sm:flex-row">
+      <footer className="border-t border-line">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row">
           <p className="font-display text-base font-semibold text-brand-700">
             <span aria-hidden="true">🔥</span> Hearth
           </p>
           <p>Shared-home harmony for students &amp; roommates.</p>
           <GoogleSignIn
             showError={false}
-            className="font-medium text-gray-700 hover:text-brand-700"
+            className="font-medium text-muted hover:text-brand-700"
           >
             Sign in →
           </GoogleSignIn>

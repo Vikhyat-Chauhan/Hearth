@@ -29,7 +29,7 @@ export default function ChoreTabs({
   const tabClass = (active: boolean) =>
     cn(
       "rounded-lg px-3 py-1.5 text-sm font-medium transition",
-      active ? "bg-brand-600 text-white shadow-card" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+      active ? "bg-brand-600 text-white shadow-card" : "text-muted hover:bg-surface-2 hover:text-ink",
     );
 
   return (
@@ -37,7 +37,7 @@ export default function ChoreTabs({
       <div
         role="tablist"
         aria-label="Chore views"
-        className="mt-6 inline-flex gap-1 rounded-xl border border-gray-200 bg-white p-1 shadow-card"
+        className="mt-6 inline-flex gap-1 rounded-xl border border-line bg-surface p-1 shadow-card"
       >
         <button
           type="button"

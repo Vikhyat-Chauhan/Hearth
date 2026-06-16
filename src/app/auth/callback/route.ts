@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db, profiles } from "@/db";
 import { encryptToken } from "@/lib/crypto";
 import { ensureWatch } from "@/lib/calendar-twoway";
+import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, DEFAULT_THEME, type Theme } from "@/lib/theme";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -33,9 +34,10 @@ export async function GET(request: Request) {
   const user = data.session.user;
   const refreshToken = data.session.provider_refresh_token;
 
+  let theme: Theme = DEFAULT_THEME;
   try {
     const tokenEnc = refreshToken ? encryptToken(refreshToken) : null;
-    await db
+    const [row] = await db
       .insert(profiles)
       .values({
         id: user.id,
@@ -51,7 +53,9 @@ export async function GET(request: Request) {
           // Only refresh the stored token when Google handed us a new one.
           ...(tokenEnc ? { googleRefreshTokenEnc: tokenEnc } : {}),
         },
-      });
+      })
+      .returning({ theme: profiles.theme });
+    if (row?.theme) theme = row.theme;
   } catch (err) {
     console.error("[auth/callback] profile upsert failed:", err);
     return NextResponse.redirect(`${origin}/?error=profile_failed`);
@@ -66,5 +70,13 @@ export async function GET(request: Request) {
     console.error("[auth/callback] auto-enable two-way sync failed:", err);
   }
 
-  return NextResponse.redirect(`${origin}/`);
+  // Mirror the saved theme into the cookie so the user's preference applies with
+  // no flash on this device too — including the first load after signing in.
+  const response = NextResponse.redirect(`${origin}/`);
+  response.cookies.set(THEME_COOKIE, theme, {
+    path: "/",
+    maxAge: THEME_COOKIE_MAX_AGE,
+    sameSite: "lax",
+  });
+  return response;
 }

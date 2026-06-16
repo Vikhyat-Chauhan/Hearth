@@ -8,7 +8,7 @@ export function LoadingState({ label = "Loading…" }: { label?: string }) {
     <div
       role="status"
       aria-live="polite"
-      className="flex items-center justify-center gap-3 py-12 text-gray-500"
+      className="flex items-center justify-center gap-3 py-12 text-muted"
     >
       <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
       <span>{label}</span>
@@ -35,8 +35,8 @@ export function EmptyState({
       >
         {icon}
       </div>
-      <p className="text-lg font-medium text-gray-700">{title}</p>
-      {description && <p className="max-w-sm text-sm text-gray-500">{description}</p>}
+      <p className="text-lg font-medium text-muted">{title}</p>
+      {description && <p className="max-w-sm text-sm text-muted">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

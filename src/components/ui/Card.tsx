@@ -14,7 +14,7 @@ export default function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-gray-200 bg-white p-5 shadow-card",
+        "rounded-xl border border-line bg-surface p-5 shadow-card",
         accent && "relative overflow-hidden",
         interactive && "transition duration-200 hover:-translate-y-0.5 hover:shadow-glow",
         className,

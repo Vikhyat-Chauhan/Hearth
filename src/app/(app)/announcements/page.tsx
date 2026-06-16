@@ -52,7 +52,7 @@ export default async function AnnouncementsPage() {
         subtitle={`Messages for everyone in ${ctx.household.name}.`}
       />
 
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-card">
+      <div className="mt-6 rounded-xl border border-line bg-surface p-4 shadow-card">
         <AnnouncementForm householdId={ctx.household.id} posterLabel={posterLabel} />
       </div>
 
@@ -67,12 +67,12 @@ export default async function AnnouncementsPage() {
             return (
               <li
                 key={a.id}
-                className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
+                className="relative overflow-hidden rounded-xl border border-line bg-surface p-5 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-glow"
               >
                 <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-accent-400" />
                 <div className="flex items-start justify-between gap-3">
-                  <div className="text-sm text-gray-500">
-                    <span className="font-medium text-gray-700">
+                  <div className="text-sm text-muted">
+                    <span className="font-medium text-muted">
                       {a.isAnonymous ? "Anonymous" : (a.authorName ?? a.authorEmail)}
                     </span>
                     {" · "}
@@ -82,7 +82,7 @@ export default async function AnnouncementsPage() {
                     <DeleteButton endpoint={`/api/announcements/${a.id}`} confirm="Delete this message?" />
                   )}
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-gray-800">{a.body}</p>
+                <p className="mt-2 whitespace-pre-wrap text-ink">{a.body}</p>
               </li>
             );
           })}

@@ -255,3 +255,10 @@ export const notificationPrefsSchema = z
     message: "Provide at least one preference to update",
   });
 export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;
+
+// UI color-theme preference. "system" follows the OS color scheme.
+export const THEME_VALUES = ["light", "dark", "system"] as const;
+export const themePrefSchema = z.object({
+  theme: z.enum(THEME_VALUES),
+});
+export type ThemePref = z.infer<typeof themePrefSchema>;

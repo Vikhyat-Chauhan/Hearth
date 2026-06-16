@@ -53,11 +53,11 @@ export default function NotificationPrefs({ initial }: { initial: Prefs }) {
       {TOGGLES.map((t) => (
         <div
           key={t.key}
-          className="flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4"
+          className="flex items-start justify-between gap-4 rounded-lg border border-line bg-surface p-4"
         >
           <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-800">{t.label}</p>
-            <p className="text-xs text-gray-500">{t.hint}</p>
+            <p className="text-sm font-medium text-ink">{t.label}</p>
+            <p className="text-xs text-muted">{t.hint}</p>
           </div>
           <button
             type="button"
@@ -67,11 +67,11 @@ export default function NotificationPrefs({ initial }: { initial: Prefs }) {
             disabled={busy === t.key}
             onClick={() => toggle(t.key)}
             className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition disabled:opacity-50 ${
-              prefs[t.key] ? "bg-brand-600" : "bg-gray-300"
+              prefs[t.key] ? "bg-brand-600" : "bg-gray-300 dark:bg-zinc-600"
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+              className={`inline-block h-4 w-4 transform rounded-full bg-surface transition ${
                 prefs[t.key] ? "translate-x-6" : "translate-x-1"
               }`}
             />

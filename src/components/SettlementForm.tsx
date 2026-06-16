@@ -71,7 +71,7 @@ export default function SettlementForm({
   }
 
   if (members.length < 2) {
-    return <p className="text-sm text-gray-500">Settlements need at least two members.</p>;
+    return <p className="text-sm text-muted">Settlements need at least two members.</p>;
   }
 
   return (
@@ -90,7 +90,7 @@ export default function SettlementForm({
           <option key={m.userId} value={m.userId}>{label(m)}</option>
         ))}
       </Select>
-      <span className="text-gray-400">paid</span>
+      <span className="text-faint">paid</span>
       <Select
         value={toUserId}
         onChange={(e) => setToUserId(e.target.value)}

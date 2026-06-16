@@ -43,7 +43,7 @@ export default async function EditChorePage({ params }: { params: Promise<{ id: 
 
   return (
     <main className="mx-auto max-w-lg px-4 py-12">
-      <Link href="/chores" className="text-sm text-gray-500 transition hover:text-gray-900">
+      <Link href="/chores" className="text-sm text-muted transition hover:text-ink">
         <span aria-hidden="true">←</span> Back to chores
       </Link>
       <div className="mt-2">
