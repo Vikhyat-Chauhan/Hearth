@@ -253,6 +253,7 @@ ACCEPTANCE CRITERIA:
 | Chores: create & assign + calendar sync | P0 | `app/api/chores/route.ts`, `(app)/chores/new`, `components/ChoreForm.tsx`, `lib/chore-sync.ts`, `lib/calendar.ts`, `lib/recurrence.ts` | feat/chores |
 | My Chores: view + mark done | P0 | `app/api/chore-logs/route.ts`, `(app)/chores/page.tsx`, `components/MarkDoneButton.tsx`, `lib/chores.ts` | feat/my-chores |
 | Mark a done occurrence undone (History tab) | P2 | `app/api/chore-logs/route.ts` (`DELETE`), `components/MarkUndoneButton.tsx`, `components/ChoreHistoryList.tsx`, `lib/chore-sync.ts` (`restoreOccurrenceOnCalendars`), `lib/calendar.ts` (`restoreChoreInstance`) | feat/mark-overdue-chores-done |
+| Lock future occurrences (can't mark done before their date) | P2 | `lib/recurrence.ts` (`isFutureOccurrence`), `app/api/chore-logs/route.ts` (`POST` guard), `components/ChoreList.tsx`, `components/MarkDoneButton.tsx` (`upcoming` → 🔒 Upcoming badge) | feat/lock-future-occurrences |
 | Chores page: My / All chores tabs | P2 | `(app)/chores/page.tsx`, `components/ChoreTabs.tsx`, `components/ChoreList.tsx`, `lib/chores.ts` (`getHouseholdChores`) | feat/chores-allview |
 | Admin edits/deletes a chore | P1 | `app/api/chores/[id]/route.ts`, `(app)/chores/[id]/edit`, `components/ChoreForm.tsx` | feat/chore-edit |
 | Admin removes a member | P1 | `app/api/households/members/route.ts`, `components/RemoveMemberButton.tsx`, `(app)/household` | feat/member-remove |

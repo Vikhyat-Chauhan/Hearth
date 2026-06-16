@@ -9,10 +9,12 @@ export default function MarkDoneButton({
   choreId,
   occurrenceDate,
   done,
+  upcoming = false,
 }: {
   choreId: string;
   occurrenceDate: string;
   done: boolean;
+  upcoming?: boolean;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -48,6 +50,15 @@ export default function MarkDoneButton({
 
   if (isDone) {
     return <span className="text-sm font-medium text-green-600">✓ Done</span>;
+  }
+
+  // Not yet due — can't be marked done until its date arrives.
+  if (upcoming) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+        <span aria-hidden="true">🔒</span> Upcoming
+      </span>
+    );
   }
 
   return (

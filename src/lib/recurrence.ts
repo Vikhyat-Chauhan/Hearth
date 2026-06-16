@@ -94,6 +94,11 @@ export function toISODate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** True when an occurrence date is still in the future relative to `today` (YYYY-MM-DD compare). */
+export function isFutureOccurrence(date: string, today: string = toISODate(new Date())): boolean {
+  return date > today; // lexical compare on YYYY-MM-DD is chronological
+}
+
 function fromISODate(s: string): Date {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d));

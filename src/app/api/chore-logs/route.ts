@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { db, choreLogs } from "@/db";
 import { getUser } from "@/lib/supabase/server";
 import { choreLogCreateSchema, parseBody } from "@/lib/validation";
+import { isFutureOccurrence } from "@/lib/recurrence";
 import { isAssignee } from "@/lib/chores";
 import { cancelOccurrenceOnCalendars, restoreOccurrenceOnCalendars } from "@/lib/chore-sync";
 import { ok, badRequest, unauthorized, forbidden, withErrorHandling } from "@/lib/api";
@@ -17,6 +18,12 @@ export const POST = withErrorHandling(async (req: Request) => {
   const result = parseBody(choreLogCreateSchema, await req.json());
   if (!result.success) return badRequest(result.error, result.issues);
   const { choreId, occurrenceDate } = result.data;
+
+  // Honor system: an occurrence can't be cleared before its day arrives (today and
+  // overdue catch-up are fine; only future dates are locked).
+  if (isFutureOccurrence(occurrenceDate)) {
+    return badRequest("You can't mark a chore done before its date");
+  }
 
   if (!(await isAssignee(user.id, choreId))) {
     return forbidden("You can only mark chores assigned to you");
