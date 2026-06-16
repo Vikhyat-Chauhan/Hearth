@@ -5,7 +5,6 @@
 import type { ChoreHistoryEntry } from "@/lib/chores";
 import { formatClockTime } from "@/lib/utils";
 import MarkDoneButton from "@/components/MarkDoneButton";
-import MarkUndoneButton from "@/components/MarkUndoneButton";
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -24,11 +23,7 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
         const done = entry.status === "done";
         // Only an assignee may mark an occurrence done (the API enforces this too),
         // so the catch-up button shows only on the viewer's own overdue rows.
-        const isAssignee = entry.assignees.some((a) => a.isSelf);
-        const canMarkDone = !done && isAssignee;
-        // Any assignee can reverse a completion (mirrors any-one-marks-it); the API
-        // enforces this too.
-        const canMarkUndone = done && isAssignee;
+        const canMarkDone = !done && entry.assignees.some((a) => a.isSelf);
         const who = entry.isSelf ? "you" : entry.completedByName ?? entry.completedByEmail;
         // Overdue rows show who the chore belongs to, mirroring "by <completer>".
         const owedBy = entry.assignees

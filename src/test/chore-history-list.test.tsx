@@ -1,7 +1,6 @@
-// Covers the History tab's presentation: an overdue occurrence the viewer is
-// assigned to gets a "Mark done" catch-up button, and a done occurrence the
-// viewer is assigned to gets a "Mark undone" reversal button. Rows belonging to
-// someone else stay read-only.
+// Covers the History tab's presentation: done rows are read-only, while an
+// overdue occurrence the viewer is assigned to gets a "Mark done" catch-up
+// button. Overdue rows belonging to someone else stay read-only.
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import ChoreHistoryList from "@/components/ChoreHistoryList";
@@ -48,7 +47,7 @@ describe("ChoreHistoryList", () => {
     expect(screen.queryByRole("button", { name: "Mark done" })).not.toBeInTheDocument();
   });
 
-  it("shows a Mark undone button on a done occurrence the viewer is assigned to", () => {
+  it("renders a done occurrence with no action", () => {
     render(
       <ChoreHistoryList
         entries={[
@@ -65,26 +64,6 @@ describe("ChoreHistoryList", () => {
     );
     const item = screen.getByRole("listitem");
     expect(within(item).getByText("Done")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Mark undone" })).toBeInTheDocument();
-  });
-
-  it("keeps a done occurrence the viewer is not assigned to read-only", () => {
-    render(
-      <ChoreHistoryList
-        entries={[
-          entry({
-            status: "done",
-            completedById: "u2",
-            completedByName: "Sam",
-            isSelf: false,
-            completedAt: new Date("2026-06-12T10:00:00Z"),
-            assignees: [{ name: "Sam", email: "sam@x.com", isSelf: false }],
-          }),
-        ]}
-      />,
-    );
-    const item = screen.getByRole("listitem");
-    expect(within(item).getByText("Done")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Mark undone" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Mark done" })).not.toBeInTheDocument();
   });
 });
