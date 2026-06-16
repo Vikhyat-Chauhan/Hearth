@@ -52,9 +52,14 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
                 </p>
               </div>
               {done ? (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                  <span aria-hidden="true">✓</span> Done
-                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
+                    <span aria-hidden="true">✓</span> Done
+                  </span>
+                  {canMarkUndone && (
+                    <MarkUndoneButton choreId={entry.choreId} occurrenceDate={entry.date} />
+                  )}
+                </div>
               ) : (
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
