@@ -5,6 +5,7 @@
 // Mark-done button; otherwise the done state is shown read-only.
 import Link from "next/link";
 import type { MyChore, ChoreAssignee } from "@/lib/chores";
+import { isFutureOccurrence, toISODate } from "@/lib/recurrence";
 import MarkDoneButton from "@/components/MarkDoneButton";
 
 function formatDate(iso: string): string {
@@ -54,6 +55,9 @@ export default function ChoreList({
     )
     .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
 
+  // Occurrences before today can't be marked done yet — derive "today" once, server-side.
+  const today = toISODate(new Date());
+
   if (rows.length === 0) {
     return <p className="mt-6 text-sm text-gray-400">No upcoming occurrences.</p>;
   }
@@ -102,7 +106,12 @@ export default function ChoreList({
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     {interactive ? (
-                      <MarkDoneButton choreId={row.choreId} occurrenceDate={row.date} done={row.done} />
+                      <MarkDoneButton
+                        choreId={row.choreId}
+                        occurrenceDate={row.date}
+                        done={row.done}
+                        upcoming={isFutureOccurrence(row.date, today)}
+                      />
                     ) : row.done ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
                         <span aria-hidden="true">✓</span> Done

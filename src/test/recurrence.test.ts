@@ -7,6 +7,8 @@ import {
   nextAnchorOnEdit,
   rruleToText,
   withSchedule,
+  isFutureOccurrence,
+  toISODate,
 } from "@/lib/recurrence";
 
 describe("parseRRule", () => {
@@ -154,5 +156,29 @@ describe("withSchedule", () => {
 
   it("leaves the title unchanged (no suffix) for unsummarizable rules", () => {
     expect(withSchedule("Vacuum", "FREQ=HOURLY")).toBe("Vacuum");
+  });
+});
+
+describe("isFutureOccurrence", () => {
+  const today = "2026-06-15";
+
+  it("is true for a date after today", () => {
+    expect(isFutureOccurrence("2026-06-16", today)).toBe(true);
+    expect(isFutureOccurrence("2999-01-01", today)).toBe(true);
+  });
+
+  it("is false for today (markable on its day)", () => {
+    expect(isFutureOccurrence(today, today)).toBe(false);
+  });
+
+  it("is false for a past date (overdue catch-up stays allowed)", () => {
+    expect(isFutureOccurrence("2026-06-14", today)).toBe(false);
+    expect(isFutureOccurrence("2000-01-01", today)).toBe(false);
+  });
+
+  it("defaults to the real today when omitted", () => {
+    const realToday = toISODate(new Date());
+    expect(isFutureOccurrence(realToday)).toBe(false);
+    expect(isFutureOccurrence("2999-01-01")).toBe(true);
   });
 });
