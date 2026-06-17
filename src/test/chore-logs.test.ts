@@ -4,6 +4,9 @@ import { toISODate } from "@/lib/recurrence";
 
 // Mock only auth; handlers run against the real DB.
 vi.mock("@/lib/supabase/server", () => ({ getUser: vi.fn() }));
+// No Next request scope in this unit test: stub cookies() so viewerToday() (used
+// by the POST future-occurrence guard) falls back to UTC, like the server default.
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
 
 // Integration: runs locally (DATABASE_URL from .env.local); skips in CI.
 const hasDb = !!process.env.DATABASE_URL;

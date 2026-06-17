@@ -5,7 +5,7 @@
 // Mark-done button; otherwise the done state is shown read-only.
 import Link from "next/link";
 import type { MyChore, ChoreAssignee } from "@/lib/chores";
-import { isFutureOccurrence, toISODate } from "@/lib/recurrence";
+import { isFutureOccurrence } from "@/lib/recurrence";
 import MarkDoneButton from "@/components/MarkDoneButton";
 
 function formatDate(iso: string): string {
@@ -35,10 +35,13 @@ type Row = {
 export default function ChoreList({
   chores,
   isAdmin,
+  today,
   interactive = false,
 }: {
   chores: MyChore[];
   isAdmin: boolean;
+  /** Viewer's local today (YYYY-MM-DD) — an occurrence after it is upcoming/locked. */
+  today: string;
   interactive?: boolean;
 }) {
   // Flatten every chore's occurrences into a single row list, then sort by date
@@ -54,9 +57,6 @@ export default function ChoreList({
       })),
     )
     .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
-
-  // Occurrences before today can't be marked done yet — derive "today" once, server-side.
-  const today = toISODate(new Date());
 
   if (rows.length === 0) {
     return <p className="mt-6 text-sm text-faint">No upcoming occurrences.</p>;

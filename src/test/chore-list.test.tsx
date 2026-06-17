@@ -30,7 +30,7 @@ const chores: MyChore[] = [
 
 describe("ChoreList", () => {
   it("flattens occurrences and groups them under one header per date, date-sorted", () => {
-    render(<ChoreList chores={chores} isAdmin={false} />);
+    render(<ChoreList chores={chores} isAdmin={false} today="2026-06-12" />);
 
     // One section heading per distinct date, in ascending order.
     const headings = screen.getAllByRole("heading", { level: 2 });
@@ -46,7 +46,7 @@ describe("ChoreList", () => {
   });
 
   it("shows an empty line when no chore has upcoming occurrences", () => {
-    render(<ChoreList chores={[{ ...chores[0], occurrences: [] }]} isAdmin={false} />);
+    render(<ChoreList chores={[{ ...chores[0], occurrences: [] }]} isAdmin={false} today="2026-06-12" />);
     expect(screen.getByText("No upcoming occurrences.")).toBeInTheDocument();
   });
 });

@@ -7,6 +7,7 @@ import ToastProvider from "@/components/ui/Toast";
 import ConfirmProvider from "@/components/ui/ConfirmDialog";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_COOKIE, DEFAULT_THEME, serverPrefersDark, type Theme } from "@/lib/theme";
+import { TZ_COOKIE, TZ_COOKIE_MAX_AGE } from "@/lib/today";
 import { Analytics } from "@vercel/analytics/next";
 import { assertServerEnv } from "@/lib/env";
 
@@ -14,6 +15,12 @@ import { assertServerEnv } from "@/lib/env";
 // wrong theme. Reads the same `hearth-theme` cookie the server used, and resolves
 // "system" via matchMedia (which the server can't). Runs in <head> before <body>.
 const THEME_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )${THEME_COOKIE}=([^;]*)/);var t=m?decodeURIComponent(m[1]):"system";var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
+
+// Mirror the browser's IANA timezone into the `hearth-tz` cookie so the server
+// can compute the viewer's *local* "today" for chore overdue/upcoming logic.
+// Runs before paint; on a brand-new session the current SSR falls back to UTC
+// for one render, then every subsequent request reads the correct zone.
+const TZ_SCRIPT = `(function(){try{var z=Intl.DateTimeFormat().resolvedOptions().timeZone;if(z)document.cookie="${TZ_COOKIE}="+z+";path=/;max-age=${TZ_COOKIE_MAX_AGE};samesite=lax";}catch(e){}})();`;
 
 // Fail fast on a misconfigured deploy: validate required server env at startup.
 assertServerEnv();
@@ -49,6 +56,7 @@ export default async function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: TZ_SCRIPT }} />
       </head>
       <body className="font-sans">
         <a

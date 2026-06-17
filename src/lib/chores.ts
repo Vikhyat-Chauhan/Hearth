@@ -33,7 +33,11 @@ export interface MyChore {
  * Chores assigned to `userId` in their active household, each with up to
  * `upcoming` future occurrences and their done state (any-one-marks-it).
  */
-export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore[]> {
+export async function getMyChores(
+  userId: string,
+  upcoming = 5,
+  today: string = toISODate(new Date()),
+): Promise<MyChore[]> {
   const ctx = await getHouseholdContext(userId);
   if (!ctx) return [];
 
@@ -56,7 +60,7 @@ export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore
       ),
     );
 
-  return buildChoreViews(rows, userId, upcoming);
+  return buildChoreViews(rows, userId, upcoming, today);
 }
 
 /**
@@ -64,7 +68,11 @@ export async function getMyChores(userId: string, upcoming = 5): Promise<MyChore
  * to them), each with its assignee roster and upcoming occurrences. Powers the
  * "All chores" view; `isSelf` is still computed for the viewer.
  */
-export async function getHouseholdChores(userId: string, upcoming = 5): Promise<MyChore[]> {
+export async function getHouseholdChores(
+  userId: string,
+  upcoming = 5,
+  today: string = toISODate(new Date()),
+): Promise<MyChore[]> {
   const ctx = await getHouseholdContext(userId);
   if (!ctx) return [];
 
@@ -81,7 +89,7 @@ export async function getHouseholdChores(userId: string, upcoming = 5): Promise<
     .where(and(eq(chores.householdId, ctx.household.id), eq(chores.active, true)))
     .orderBy(chores.createdAt);
 
-  return buildChoreViews(rows, userId, upcoming);
+  return buildChoreViews(rows, userId, upcoming, today);
 }
 
 export type ChoreHistoryStatus = "done" | "overdue";
@@ -123,12 +131,14 @@ export interface ChoreHistoryEntry {
 export async function getChoreHistory(
   userId: string,
   days = 14,
+  today: string = toISODate(new Date()),
 ): Promise<ChoreHistoryEntry[]> {
   const ctx = await getHouseholdContext(userId);
   if (!ctx) return [];
 
-  const today = toISODate(new Date());
-  const back = new Date();
+  // Window the last `days` by occurrence date, anchored on the viewer's local
+  // today so today's occurrences are never (yet) counted as past/overdue.
+  const back = new Date(`${today}T00:00:00Z`);
   back.setUTCDate(back.getUTCDate() - days);
   const cutoff = toISODate(back);
   const DAY_MS = 86_400_000;
@@ -247,6 +257,7 @@ async function buildChoreViews(
   rows: ChoreRow[],
   viewerId: string,
   upcoming: number,
+  today: string,
 ): Promise<MyChore[]> {
   if (rows.length === 0) return [];
 
@@ -285,7 +296,6 @@ async function buildChoreViews(
     });
   }
 
-  const today = toISODate(new Date());
   return rows.map((r) => {
     const done = doneByChore.get(r.id) ?? new Set<string>();
     // Count the recurrence from the chore's effective anchor (fall back to created date).

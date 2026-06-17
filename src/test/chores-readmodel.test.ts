@@ -223,6 +223,45 @@ describe.skipIf(!hasDb)("chore history read model: 14-day window by occurrence d
     expect(overdueEntry.assignees.find((a) => a.name === "Hana")!.isSelf).toBe(true);
   });
 
+  it("treats the passed `today` as the boundary: today is not overdue, the day before is", async () => {
+    const { db, profiles, households, memberships, chores, choreAssignments } = await import("@/db");
+    const { getChoreHistory } = await import("@/lib/chores");
+    const { generateInviteCode } = await import("@/lib/household");
+
+    const admin = randomUUID();
+    profileIds.push(admin);
+    await db.insert(profiles).values([{ id: admin, email: `tz-${admin}@t.dev`, name: "Tess" }]);
+
+    const [hh] = await db
+      .insert(households)
+      .values({ name: "TZ House", adminUserId: admin, inviteCode: generateInviteCode() })
+      .returning();
+    householdIds.push(hh.id);
+    await db.insert(memberships).values([{ householdId: hh.id, userId: admin, role: "admin" }]);
+
+    const iso = (daysAgo: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - daysAgo);
+      return d.toISOString().slice(0, 10);
+    };
+
+    const [chore] = await db
+      .insert(chores)
+      .values({ householdId: hh.id, title: "Sweep", rrule: "FREQ=DAILY", scheduleFrom: iso(10), createdBy: admin })
+      .returning();
+    await db.insert(choreAssignments).values([{ choreId: chore.id, userId: admin }]);
+
+    // Pretend the viewer's local "today" is 3 days ago. The occurrence on that
+    // day must be excluded (still forward-looking), the day before must be overdue.
+    const localToday = iso(3);
+    const history = await getChoreHistory(admin, 14, localToday);
+    const dates = history.filter((h) => h.choreId === chore.id).map((h) => h.date);
+    expect(dates).not.toContain(localToday); // == today → not yet past
+    const dayBefore = iso(4);
+    expect(dates).toContain(dayBefore);
+    expect(history.find((h) => h.date === dayBefore)!.status).toBe("overdue");
+  });
+
   it("returns [] for a user with no household", async () => {
     const { getChoreHistory } = await import("@/lib/chores");
     expect(await getChoreHistory(randomUUID())).toEqual([]);

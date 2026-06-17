@@ -94,6 +94,21 @@ export function toISODate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Today's calendar date (YYYY-MM-DD) in the given IANA timezone — so "today"
+ * tracks the viewer's local day, not the server's UTC day. Falls back to UTC
+ * when `tz` is missing or unrecognized.
+ */
+export function todayInTimeZone(tz?: string, now: Date = new Date()): string {
+  if (!tz) return toISODate(now);
+  try {
+    // en-CA formats as YYYY-MM-DD.
+    return new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(now);
+  } catch {
+    return toISODate(now);
+  }
+}
+
 /** True when an occurrence date is still in the future relative to `today` (YYYY-MM-DD compare). */
 export function isFutureOccurrence(date: string, today: string = toISODate(new Date())): boolean {
   return date > today; // lexical compare on YYYY-MM-DD is chronological

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { getHouseholdContext } from "@/lib/household";
 import { getMyChores, getHouseholdChores, getChoreHistory } from "@/lib/chores";
+import { viewerToday } from "@/lib/today";
 import { EmptyState } from "@/components/states";
 import PageHeader from "@/components/ui/PageHeader";
 import LinkButton from "@/components/ui/LinkButton";
@@ -29,10 +30,11 @@ export default async function ChoresPage() {
   }
 
   const isAdmin = ctx.role === "admin";
+  const today = await viewerToday();
   const [myChores, allChores, history] = await Promise.all([
-    getMyChores(user.id),
-    getHouseholdChores(user.id),
-    getChoreHistory(user.id),
+    getMyChores(user.id, 5, today),
+    getHouseholdChores(user.id, 5, today),
+    getChoreHistory(user.id, 14, today),
   ]);
 
   return (
@@ -51,7 +53,13 @@ export default async function ChoresPage() {
         }
       />
 
-      <ChoreTabs myChores={myChores} allChores={allChores} history={history} isAdmin={isAdmin} />
+      <ChoreTabs
+        myChores={myChores}
+        allChores={allChores}
+        history={history}
+        isAdmin={isAdmin}
+        today={today}
+      />
     </main>
   );
 }
