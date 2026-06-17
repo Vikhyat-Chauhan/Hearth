@@ -9,6 +9,7 @@ import {
   withSchedule,
   isFutureOccurrence,
   toISODate,
+  todayInTimeZone,
 } from "@/lib/recurrence";
 
 describe("parseRRule", () => {
@@ -180,5 +181,27 @@ describe("isFutureOccurrence", () => {
     const realToday = toISODate(new Date());
     expect(isFutureOccurrence(realToday)).toBe(false);
     expect(isFutureOccurrence("2999-01-01")).toBe(true);
+  });
+});
+
+describe("todayInTimeZone", () => {
+  // 01:00 UTC on the 16th is still the 15th in US Pacific (UTC-7/8) — this is the
+  // boundary where the old UTC-only "today" flipped today's chores to overdue.
+  const instant = new Date("2026-06-16T01:00:00Z");
+
+  it("uses the viewer's local calendar day, not UTC", () => {
+    expect(todayInTimeZone("America/Los_Angeles", instant)).toBe("2026-06-15");
+    expect(todayInTimeZone("UTC", instant)).toBe("2026-06-16");
+  });
+
+  it("handles zones east of UTC", () => {
+    // 22:30 UTC on the 15th is already the 16th in India (UTC+5:30).
+    const evening = new Date("2026-06-15T22:30:00Z");
+    expect(todayInTimeZone("Asia/Kolkata", evening)).toBe("2026-06-16");
+  });
+
+  it("falls back to UTC for a missing or invalid timezone", () => {
+    expect(todayInTimeZone(undefined, instant)).toBe("2026-06-16");
+    expect(todayInTimeZone("Not/AZone", instant)).toBe("2026-06-16");
   });
 });

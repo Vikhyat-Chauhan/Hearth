@@ -18,11 +18,14 @@ export default function ChoreTabs({
   allChores,
   history,
   isAdmin,
+  today,
 }: {
   myChores: MyChore[];
   allChores: MyChore[];
   history: ChoreHistoryEntry[];
   isAdmin: boolean;
+  /** Viewer's local today (YYYY-MM-DD) — drives the upcoming/lock state. */
+  today: string;
 }) {
   const [tab, setTab] = useState<Tab>("mine");
 
@@ -95,7 +98,7 @@ export default function ChoreTabs({
             />
           </div>
         ) : (
-          <ChoreList chores={myChores} isAdmin={isAdmin} interactive />
+          <ChoreList chores={myChores} isAdmin={isAdmin} today={today} interactive />
         )
       ) : allChores.length === 0 ? (
         <div className="mt-6">
@@ -111,7 +114,7 @@ export default function ChoreTabs({
           />
         </div>
       ) : (
-        <ChoreList chores={allChores} isAdmin={isAdmin} />
+        <ChoreList chores={allChores} isAdmin={isAdmin} today={today} />
       )}
     </div>
   );
