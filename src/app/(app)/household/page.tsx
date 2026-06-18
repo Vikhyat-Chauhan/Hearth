@@ -51,7 +51,7 @@ export default async function HouseholdPage() {
         accent="accent"
         title={household.name}
         action={
-          <span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-medium capitalize text-accent-700 ring-1 ring-inset ring-accent-100">
+          <span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-medium capitalize text-accent-700 ring-1 ring-inset ring-accent-100 dark:bg-accent-900/40 dark:text-accent-200 dark:ring-accent-900/40">
             You are {role}
           </span>
         }
@@ -107,8 +107,8 @@ export default async function HouseholdPage() {
       )}
 
       {/* Danger zone — leaving (members) / transferring + deleting (admin). */}
-      <section className="mt-10 rounded-xl border border-red-200 bg-surface p-5 shadow-card">
-        <h2 className="font-display text-base font-semibold text-red-700">Danger zone</h2>
+      <section className="mt-10 rounded-xl border border-danger/40 bg-surface p-5 shadow-card">
+        <h2 className="font-display text-base font-semibold text-danger">Danger zone</h2>
 
         {role === "member" ? (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">

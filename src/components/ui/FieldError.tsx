@@ -3,7 +3,7 @@
 export default function FieldError({ id, children }: { id?: string; children?: string | null }) {
   if (!children) return null;
   return (
-    <p id={id} role="alert" className="flex items-center gap-1 text-sm text-red-600">
+    <p id={id} role="alert" className="flex items-center gap-1 text-sm text-danger">
       <span aria-hidden="true">⚠</span>
       {children}
     </p>

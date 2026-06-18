@@ -79,7 +79,7 @@ export default function SettingsMenu({
             <span aria-hidden="true">🏠</span>
             <span className="min-w-0 flex-1 truncate">{householdName ?? "Set up household"}</span>
             {role && (
-              <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium capitalize text-brand-700">
+              <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium capitalize text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
                 {role}
               </span>
             )}

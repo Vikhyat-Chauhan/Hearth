@@ -47,7 +47,7 @@ export default function BillPaidToggle({
       disabled={busy}
       className={`shrink-0 rounded-lg border px-3 py-1 text-sm font-medium transition disabled:opacity-50 ${
         isPaid
-          ? "border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
+          ? "border-success/40 bg-success-soft text-success hover:bg-success-soft/70"
           : "border-line text-muted hover:bg-surface-2"
       }`}
     >

@@ -51,8 +51,8 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
             className={cn(
               "pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-lg border px-4 py-3 text-sm shadow-card-hover",
               t.variant === "error"
-                ? "border-red-200 bg-red-50 text-red-700"
-                : "border-green-200 bg-green-50 text-green-700",
+                ? "border-danger/40 bg-danger-soft text-danger"
+                : "border-success/40 bg-success-soft text-success",
             )}
           >
             <span aria-hidden="true">{t.variant === "error" ? "⚠" : "✓"}</span>

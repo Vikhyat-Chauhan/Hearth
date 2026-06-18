@@ -10,28 +10,28 @@ import GoogleSignIn from "@/components/GoogleSignIn";
 // strings stay literal so Tailwind's content scan keeps them.
 const ACCENT = {
   brand: {
-    eyebrow: "text-brand-700",
-    chip: "bg-brand-50 text-brand-700",
-    glyph: "text-brand-600",
-    band: "bg-brand-50/40 border-brand-100",
+    eyebrow: "text-brand-700 dark:text-brand-300",
+    chip: "bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200",
+    glyph: "text-brand-600 dark:text-brand-400",
+    band: "bg-brand-50/40 border-brand-100 dark:bg-brand-900/10 dark:border-brand-900/40",
   },
   accent: {
-    eyebrow: "text-accent-700",
-    chip: "bg-accent-50 text-accent-700",
-    glyph: "text-accent-600",
-    band: "bg-accent-50/40 border-accent-100",
+    eyebrow: "text-accent-700 dark:text-accent-300",
+    chip: "bg-accent-50 text-accent-700 dark:bg-accent-900/40 dark:text-accent-200",
+    glyph: "text-accent-600 dark:text-accent-400",
+    band: "bg-accent-50/40 border-accent-100 dark:bg-accent-900/10 dark:border-accent-900/40",
   },
   amber: {
-    eyebrow: "text-amber-700",
-    chip: "bg-amber-50 text-amber-700",
-    glyph: "text-amber-600",
-    band: "bg-amber-50/40 border-amber-100",
+    eyebrow: "text-amber-700 dark:text-amber-300",
+    chip: "bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200",
+    glyph: "text-amber-600 dark:text-amber-400",
+    band: "bg-amber-50/40 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/40",
   },
   green: {
-    eyebrow: "text-green-700",
-    chip: "bg-green-50 text-green-700",
-    glyph: "text-green-600",
-    band: "bg-green-50/40 border-green-100",
+    eyebrow: "text-green-700 dark:text-green-300",
+    chip: "bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-200",
+    glyph: "text-green-600 dark:text-green-400",
+    band: "bg-green-50/40 border-green-100 dark:bg-green-900/10 dark:border-green-900/40",
   },
 } as const;
 
@@ -150,7 +150,7 @@ function GoogleCTA({
     >
       <span
         aria-hidden="true"
-        className="flex h-5 w-5 items-center justify-center rounded-full bg-surface text-xs font-bold text-brand-700"
+        className="flex h-5 w-5 items-center justify-center rounded-full bg-surface text-xs font-bold text-brand-700 dark:bg-brand-50"
       >
         G
       </span>
@@ -171,7 +171,7 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
       <div aria-hidden="true" className={`${shell} rotate-1`}>
         <div className="flex items-center justify-between">
           <p className="font-display text-lg font-semibold text-ink">This week</p>
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
             Apt 4B
           </span>
         </div>
@@ -254,11 +254,11 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
   if (kind === "bills") {
     return (
       <div aria-hidden="true" className={`${shell} rotate-1`}>
-        <div className="flex items-center justify-between rounded-xl bg-amber-50 px-3.5 py-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-amber-700">
+        <div className="flex items-center justify-between rounded-xl bg-warning-soft px-3.5 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-warning">
             Outstanding
           </p>
-          <p className="font-display text-lg font-semibold text-amber-700">$128.40</p>
+          <p className="font-display text-lg font-semibold text-warning">$128.40</p>
         </div>
         <ul className="mt-4 space-y-2.5">
           {[
@@ -275,7 +275,7 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
               <span className="text-sm font-medium text-muted">{b.amt}</span>
               <span
                 className={`rounded-md px-1.5 py-0.5 text-xs font-medium ${
-                  b.paid ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
+                  b.paid ? "bg-success-soft text-success" : "bg-warning-soft text-warning"
                 }`}
               >
                 {b.paid ? "Paid" : "Unpaid"}
@@ -293,8 +293,8 @@ function FeatureMockup({ kind }: { kind: MockupKind }) {
         <p className="font-display text-lg font-semibold text-ink">Balances</p>
         <ul className="mt-4 space-y-2.5">
           {[
-            { who: "Priya owes you", amt: "+$18.00", tone: "text-green-700" },
-            { who: "Sam owes you", amt: "+$11.50", tone: "text-green-700" },
+            { who: "Priya owes you", amt: "+$18.00", tone: "text-success" },
+            { who: "Sam owes you", amt: "+$11.50", tone: "text-success" },
             { who: "You owe Alex", amt: "−$6.00", tone: "text-muted" },
           ].map((r) => (
             <li
@@ -346,7 +346,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
         <div className="mx-auto max-w-6xl px-4 pt-4">
           <p
             role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="rounded-xl border border-danger/40 bg-danger-soft px-4 py-3 text-sm text-danger"
           >
             {error}
           </p>
@@ -370,7 +370,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
           {/* Copy */}
           <div>
             <p
-              className="animate-rise inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface/70 px-3.5 py-1.5 text-xs font-medium uppercase tracking-wide text-brand-700 backdrop-blur"
+              className="animate-rise inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface/70 px-3.5 py-1.5 text-xs font-medium uppercase tracking-wide text-brand-700 backdrop-blur dark:border-brand-700 dark:text-brand-300"
               style={{ animationDelay: "0ms" }}
             >
               <span aria-hidden="true">🔥</span> For students &amp; roommates
@@ -381,11 +381,11 @@ export default function LandingPage({ error = null }: { error?: string | null })
               style={{ animationDelay: "80ms" }}
             >
               Make the shared house{" "}
-              <span className="relative whitespace-nowrap text-brand-700">
+              <span className="relative whitespace-nowrap text-brand-700 dark:text-brand-300">
                 feel like home
                 <span
                   aria-hidden="true"
-                  className="absolute -bottom-1 left-0 h-2 w-full rounded-full bg-brand-200/70"
+                  className="absolute -bottom-1 left-0 h-2 w-full rounded-full bg-brand-200/70 dark:bg-brand-700/70"
                 />
               </span>
               .
@@ -441,7 +441,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
                   </p>
                   <p className="font-display text-xl font-semibold text-ink">Apt 4B</p>
                 </div>
-                <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
+                <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
                   4 roommates
                 </span>
               </div>
@@ -486,7 +486,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
             {/* Floating accent card */}
             <div className="absolute -bottom-6 -left-6 hidden -rotate-3 rounded-xl border border-line bg-surface p-3.5 shadow-card-hover sm:block">
               <p className="text-xs text-faint">You&apos;re owed</p>
-              <p className="font-display text-lg font-semibold text-green-700">
+              <p className="font-display text-lg font-semibold text-success">
                 <span aria-hidden="true">▲ </span>$42.50
               </p>
             </div>
@@ -497,7 +497,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
       {/* ─── Features intro + index ───────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 pt-20 sm:pt-24">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium uppercase tracking-wide text-brand-700">
+          <p className="text-sm font-medium uppercase tracking-wide text-brand-700 dark:text-brand-300">
             Five fewer things to argue about
           </p>
           <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
@@ -585,11 +585,11 @@ export default function LandingPage({ error = null }: { error?: string | null })
       </section>
 
       {/* ─── How it works ─────────────────────────────────────────────────── */}
-      <section id="how" className="relative scroll-mt-20 border-y border-brand-100 bg-brand-50/40">
+      <section id="how" className="relative scroll-mt-20 border-y border-brand-100 bg-brand-50/40 dark:border-brand-900/40 dark:bg-brand-900/10">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-hearth-grain opacity-50" />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:py-24">
           <div className="max-w-2xl">
-            <p className="text-sm font-medium uppercase tracking-wide text-brand-700">
+            <p className="text-sm font-medium uppercase tracking-wide text-brand-700 dark:text-brand-300">
               Up and running in minutes
             </p>
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
@@ -600,7 +600,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {STEPS.map((s) => (
               <div key={s.n} className="relative">
-                <span className="font-display text-5xl font-semibold text-brand-200">{s.n}</span>
+                <span className="font-display text-5xl font-semibold text-brand-200 dark:text-brand-800">{s.n}</span>
                 <h3 className="mt-3 font-display text-xl font-semibold text-ink">{s.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
               </div>
@@ -624,7 +624,7 @@ export default function LandingPage({ error = null }: { error?: string | null })
             Free to start, syncs with the calendar you already use. Your house will run itself.
           </p>
           <div className="mt-9 flex justify-center">
-            <GoogleSignIn className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-surface px-7 py-3.5 text-base font-semibold text-brand-700 shadow-card transition hover:bg-brand-50">
+            <GoogleSignIn className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-surface px-7 py-3.5 text-base font-semibold text-brand-700 shadow-card transition hover:bg-brand-50 dark:bg-brand-50 dark:text-brand-800 dark:hover:bg-brand-100">
               <span
                 aria-hidden="true"
                 className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white"
@@ -640,13 +640,13 @@ export default function LandingPage({ error = null }: { error?: string | null })
       {/* ─── Footer ───────────────────────────────────────────────────────── */}
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row">
-          <p className="font-display text-base font-semibold text-brand-700">
+          <p className="font-display text-base font-semibold text-brand-700 dark:text-brand-300">
             <span aria-hidden="true">🔥</span> Hearth
           </p>
           <p>Shared-home harmony for students &amp; roommates.</p>
           <GoogleSignIn
             showError={false}
-            className="font-medium text-muted hover:text-brand-700"
+            className="font-medium text-muted hover:text-brand-700 dark:hover:text-brand-300"
           >
             Sign in →
           </GoogleSignIn>

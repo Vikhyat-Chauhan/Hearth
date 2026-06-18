@@ -14,6 +14,13 @@
     --c-muted: 75 85 99; /* gray-600  */
     --c-faint: 156 163 175; /* gray-400  */
     --c-line: 229 231 235; /* gray-200  */
+    /* Semantic status colors: a readable text/icon tone + a soft chip fill, each. */
+    --c-success: 21 128 61; /* green-700 */
+    --c-success-soft: 240 253 244; /* green-50 */
+    --c-warning: 180 83 9; /* amber-700 */
+    --c-warning-soft: 255 251 235; /* amber-50 */
+    --c-danger: 185 28 28; /* red-700 */
+    --c-danger-soft: 254 242 242; /* red-50 */
   }
   .dark {
     --c-canvas: 9 9 11; /* zinc-950  */
@@ -23,6 +30,13 @@
     --c-muted: 161 161 170; /* zinc-400  */
     --c-faint: 113 113 122; /* zinc-500  */
     --c-line: 39 39 42; /* zinc-800  */
+    /* Lighter text tones + deep soft fills that read on the zinc-900 surface. */
+    --c-success: 134 239 172; /* green-300 */
+    --c-success-soft: 20 53 36;
+    --c-warning: 252 211 77; /* amber-300 */
+    --c-warning-soft: 60 45 15;
+    --c-danger: 252 165 165; /* red-300 */
+    --c-danger-soft: 64 26 26;
   }
 }
 

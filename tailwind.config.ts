@@ -21,6 +21,15 @@ const config: Config = {
         muted: "rgb(var(--c-muted) / <alpha-value>)", // secondary text
         faint: "rgb(var(--c-faint) / <alpha-value>)", // tertiary text / icons / placeholders
         line: "rgb(var(--c-line) / <alpha-value>)", // borders / dividers
+        // Semantic status colors (success/warning/danger), each with a `-soft`
+        // chip-fill companion. CSS-var backed so they flip under `.dark` like the
+        // surface/text tokens — never hardcode green/amber/red for status UI.
+        success: "rgb(var(--c-success) / <alpha-value>)",
+        "success-soft": "rgb(var(--c-success-soft) / <alpha-value>)",
+        warning: "rgb(var(--c-warning) / <alpha-value>)",
+        "warning-soft": "rgb(var(--c-warning-soft) / <alpha-value>)",
+        danger: "rgb(var(--c-danger) / <alpha-value>)",
+        "danger-soft": "rgb(var(--c-danger-soft) / <alpha-value>)",
         // Warm ember/terracotta — the "hearth" brand accent. Used for the
         // primary action on every surface and the active nav state.
         brand: {
