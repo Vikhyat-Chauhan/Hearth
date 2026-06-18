@@ -57,7 +57,7 @@ export default function RemoveMemberButton({
       onClick={remove}
       disabled={busy}
       aria-label={`Remove ${name}`}
-      className="text-xs font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
+      className="text-xs font-medium text-danger hover:text-danger/80 disabled:opacity-50"
     >
       {busy ? "Removing…" : error ? "Retry" : "Remove"}
     </button>

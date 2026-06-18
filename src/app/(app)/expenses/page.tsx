@@ -63,7 +63,7 @@ export default async function ExpensesPage() {
               </span>
               <span
                 className={
-                  b.netCents > 0 ? "font-medium text-green-600" : b.netCents < 0 ? "font-medium text-red-600" : "text-faint"
+                  b.netCents > 0 ? "font-medium text-success" : b.netCents < 0 ? "font-medium text-danger" : "text-faint"
                 }
               >
                 {b.netCents > 0 && (

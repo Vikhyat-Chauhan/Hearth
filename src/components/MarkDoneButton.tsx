@@ -49,7 +49,7 @@ export default function MarkDoneButton({
   }
 
   if (isDone) {
-    return <span className="text-sm font-medium text-green-600">✓ Done</span>;
+    return <span className="text-sm font-medium text-success">✓ Done</span>;
   }
 
   // Not yet due — can't be marked done until its date arrives.

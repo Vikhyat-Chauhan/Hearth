@@ -31,7 +31,7 @@ export function EmptyState({
     <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
       <div
         aria-hidden="true"
-        className="mb-1 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-50 to-accent-50 text-2xl ring-1 ring-inset ring-brand-100"
+        className="mb-1 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-50 to-accent-50 text-2xl ring-1 ring-inset ring-brand-100 dark:from-brand-900/30 dark:to-accent-900/30 dark:ring-brand-900/40"
       >
         {icon}
       </div>
@@ -58,12 +58,12 @@ export function ErrorState({
     >
       <div
         aria-hidden="true"
-        className="mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-2xl"
+        className="mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-danger-soft text-2xl"
       >
         ⚠
       </div>
-      <p className="text-lg font-medium text-red-700">{title}</p>
-      {description && <p className="max-w-sm text-sm text-red-500">{description}</p>}
+      <p className="text-lg font-medium text-danger">{title}</p>
+      {description && <p className="max-w-sm text-sm text-danger/80">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

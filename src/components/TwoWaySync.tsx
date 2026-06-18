@@ -42,7 +42,7 @@ export default function TwoWaySync({ active }: { active: boolean }) {
         On by default once Google is connected — changes you make on Google Calendar flow back to
         Hearth. If you delete a chore&apos;s event on your calendar, Hearth drops that calendar link.
       </p>
-      {active && <p className="mt-3 text-sm text-green-700">✓ Two-way sync is active.</p>}
+      {active && <p className="mt-3 text-sm text-success">✓ Two-way sync is active.</p>}
       <Button
         variant="secondary"
         onClick={enable}

@@ -13,10 +13,10 @@ export const ACCENTS: Record<
   { chip: string; line: string; badge: string }
 > = {
   // chip: icon tile bg + text · line: thin top accent rule · badge: count pill
-  brand: { chip: "bg-brand-50 text-brand-700", line: "bg-brand-400", badge: "bg-brand-50 text-brand-700" },
-  accent: { chip: "bg-accent-50 text-accent-700", line: "bg-accent-400", badge: "bg-accent-50 text-accent-700" },
-  green: { chip: "bg-green-50 text-green-700", line: "bg-green-400", badge: "bg-green-50 text-green-700" },
-  amber: { chip: "bg-amber-50 text-amber-700", line: "bg-amber-400", badge: "bg-amber-50 text-amber-700" },
+  brand: { chip: "bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200", line: "bg-brand-400", badge: "bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200" },
+  accent: { chip: "bg-accent-50 text-accent-700 dark:bg-accent-900/40 dark:text-accent-200", line: "bg-accent-400", badge: "bg-accent-50 text-accent-700 dark:bg-accent-900/40 dark:text-accent-200" },
+  green: { chip: "bg-success-soft text-success", line: "bg-green-400", badge: "bg-success-soft text-success" },
+  amber: { chip: "bg-warning-soft text-warning", line: "bg-amber-400", badge: "bg-warning-soft text-warning" },
   neutral: { chip: "bg-surface-2 text-muted", line: "bg-line", badge: "bg-surface-2 text-muted" },
 };
 

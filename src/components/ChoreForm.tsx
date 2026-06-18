@@ -322,7 +322,7 @@ export default function ChoreForm({
               ))}
             </div>
             {missingDays && (
-              <p className="mt-1.5 text-xs text-amber-600">Pick at least one day.</p>
+              <p className="mt-1.5 text-xs text-warning">Pick at least one day.</p>
             )}
           </div>
         )}
@@ -340,7 +340,7 @@ export default function ChoreForm({
               className="mt-1"
             />
             {startDate && startDate < today && (
-              <p className="mt-1.5 text-xs text-amber-600">Start date can&apos;t be before today.</p>
+              <p className="mt-1.5 text-xs text-warning">Start date can&apos;t be before today.</p>
             )}
           </div>
         )}
@@ -357,7 +357,7 @@ export default function ChoreForm({
             className="mt-1"
           />
           {endDate && endDate < endFloor && (
-            <p className="mt-1.5 text-xs text-amber-600">
+            <p className="mt-1.5 text-xs text-warning">
               {isEdit ? "End date can't be before today." : "End date can't be before the start date."}
             </p>
           )}
@@ -420,7 +420,7 @@ export default function ChoreForm({
                 className={cn(
                   "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition",
                   on
-                    ? "border-brand-500 bg-brand-50 shadow-glow"
+                    ? "border-brand-500 bg-brand-50 shadow-glow dark:bg-brand-900/30"
                     : "border-line hover:border-line hover:bg-surface-2",
                 )}
               >
@@ -441,7 +441,7 @@ export default function ChoreForm({
           })}
         </div>
         {assignees.size > 1 && (
-          <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-medium text-accent-700">
+          <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200">
             <span aria-hidden="true">👥</span>
             Shared — anyone assigned can clear it, on everyone&apos;s calendar.
           </p>

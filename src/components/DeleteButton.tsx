@@ -56,7 +56,7 @@ export default function DeleteButton({
       aria-label={label}
       className={
         className ??
-        "shrink-0 text-sm text-faint transition hover:text-red-600 disabled:opacity-50"
+        "shrink-0 text-sm text-faint transition hover:text-danger disabled:opacity-50"
       }
     >
       {busy ? "…" : error ? "Retry" : label}

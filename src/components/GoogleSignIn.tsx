@@ -55,7 +55,7 @@ export default function GoogleSignIn({
         {children}
       </button>
       {showError && error && (
-        <p role="alert" className="mt-2 text-sm text-red-600">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {error}
         </p>
       )}

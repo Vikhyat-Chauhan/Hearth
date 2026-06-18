@@ -98,7 +98,7 @@ export default function ChoreList({
                       {row.title}
                     </span>
                     {sharedNames.length > 0 && (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700">
+                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200">
                         <span aria-hidden="true">👥</span>
                         {interactive ? `Shared with ${joinNames(sharedNames)}` : joinNames(sharedNames)}
                       </span>
@@ -113,7 +113,7 @@ export default function ChoreList({
                         upcoming={isFutureOccurrence(row.date, today)}
                       />
                     ) : row.done ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-medium text-success">
                         <span aria-hidden="true">✓</span> Done
                       </span>
                     ) : null}

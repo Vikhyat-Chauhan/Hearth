@@ -52,7 +52,7 @@ export default function ConnectCalendar({ connected }: { connected: boolean }) {
     <div className="mt-6 space-y-4">
       {connected ? (
         <>
-          <p className="text-sm text-green-700">✓ Google Calendar is connected.</p>
+          <p className="text-sm text-success">✓ Google Calendar is connected.</p>
           <Button onClick={backfill} disabled={busy}>
             {busy ? "Syncing…" : "Backfill my chores to my calendar"}
           </Button>

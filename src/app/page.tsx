@@ -111,7 +111,7 @@ export default async function Home({
               {ctx.household.name}
             </h1>
           </div>
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium capitalize text-brand-700 ring-1 ring-inset ring-brand-100">
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium capitalize text-brand-700 ring-1 ring-inset ring-brand-100 dark:bg-brand-900/40 dark:text-brand-200 dark:ring-brand-900/40">
             {ctx.role}
           </span>
         </div>
@@ -236,7 +236,7 @@ export default async function Home({
               ) : myBalance.netCents > 0 ? (
                 <>
                   You&apos;re owed{" "}
-                  <span className="font-semibold text-green-700">
+                  <span className="font-semibold text-success">
                     <span aria-hidden="true">▲ </span>
                     {formatCents(myBalance.netCents)}
                   </span>
@@ -244,7 +244,7 @@ export default async function Home({
               ) : (
                 <>
                   You owe{" "}
-                  <span className="font-semibold text-red-700">
+                  <span className="font-semibold text-danger">
                     <span aria-hidden="true">▼ </span>
                     {formatCents(-myBalance.netCents)}
                   </span>

@@ -67,7 +67,7 @@ export default function NotificationPrefs({ initial }: { initial: Prefs }) {
             disabled={busy === t.key}
             onClick={() => toggle(t.key)}
             className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition disabled:opacity-50 ${
-              prefs[t.key] ? "bg-brand-600" : "bg-gray-300 dark:bg-zinc-600"
+              prefs[t.key] ? "bg-brand-600" : "bg-line"
             }`}
           >
             <span
@@ -79,7 +79,7 @@ export default function NotificationPrefs({ initial }: { initial: Prefs }) {
         </div>
       ))}
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

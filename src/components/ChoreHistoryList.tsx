@@ -58,7 +58,7 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
               </div>
               {done ? (
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-medium text-success">
                     <span aria-hidden="true">✓</span> Done
                   </span>
                   {canMarkUndone && (
@@ -67,7 +67,7 @@ export default function ChoreHistoryList({ entries }: { entries: ChoreHistoryEnt
                 </div>
               ) : (
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-danger-soft px-2.5 py-0.5 text-xs font-medium text-danger">
                     Overdue
                   </span>
                   {canMarkDone && (

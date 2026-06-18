@@ -6,10 +6,10 @@ type Variant = "paid" | "unpaid" | "done" | "pending" | "neutral";
 // Always pairs color WITH an icon glyph + text label so status never relies on
 // color alone (accessibility). The glyph is decorative; the label carries meaning.
 const variants: Record<Variant, { className: string; glyph: string }> = {
-  paid: { className: "bg-green-50 text-green-700", glyph: "✓" },
-  done: { className: "bg-green-50 text-green-700", glyph: "✓" },
-  unpaid: { className: "bg-amber-50 text-amber-700", glyph: "●" },
-  pending: { className: "bg-amber-50 text-amber-700", glyph: "●" },
+  paid: { className: "bg-success-soft text-success", glyph: "✓" },
+  done: { className: "bg-success-soft text-success", glyph: "✓" },
+  unpaid: { className: "bg-warning-soft text-warning", glyph: "●" },
+  pending: { className: "bg-warning-soft text-warning", glyph: "●" },
   neutral: { className: "bg-surface-2 text-muted", glyph: "•" },
 };
 

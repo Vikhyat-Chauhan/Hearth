@@ -52,7 +52,7 @@ export default async function BillsPage() {
         title="Bills"
         subtitle={`Shared utilities and bills for ${ctx.household.name}.`}
         action={
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-100">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-3 py-1.5 text-sm font-medium text-warning ring-1 ring-inset ring-warning/30">
             Outstanding
             <span className="font-semibold">{formatCents(outstandingCents)}</span>
           </span>
