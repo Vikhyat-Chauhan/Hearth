@@ -29,24 +29,36 @@ const chores: MyChore[] = [
 ];
 
 describe("ChoreList", () => {
-  it("flattens occurrences and groups them under one header per date, date-sorted", () => {
+  it("pins today's occurrences under a 'Today' header and groups the rest by date", () => {
     render(<ChoreList chores={chores} isAdmin={false} today="2026-06-12" />);
 
-    // One section heading per distinct date, in ascending order.
+    // Jun 12 is today → it becomes the pinned "Today" section; Jun 14 stays a
+    // date section below it.
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    expect(headings.map((h) => h.textContent)).toEqual(["Today", "Sun, Jun 14"]);
+
+    // Two chores share today → both rows sit under the "Today" header.
+    const todaySection = headings[0].parentElement as HTMLElement;
+    expect(within(todaySection).getByText("Trash")).toBeInTheDocument();
+    expect(within(todaySection).getByText("Vacuum")).toBeInTheDocument();
+  });
+
+  it("always renders the 'Today' section with an empty state when nothing is due today", () => {
+    render(<ChoreList chores={[{ ...chores[0], occurrences: [] }]} isAdmin={false} today="2026-06-12" />);
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    expect(headings.map((h) => h.textContent)).toEqual(["Today"]);
+    expect(screen.getByText("Nothing due today 🎉")).toBeInTheDocument();
+  });
+
+  it("shows the 'Today' empty state and lists future occurrences below when none fall on today", () => {
+    render(<ChoreList chores={chores} isAdmin={false} today="2026-06-10" />);
+
     const headings = screen.getAllByRole("heading", { level: 2 });
     expect(headings.map((h) => h.textContent)).toEqual([
+      "Today",
       "Fri, Jun 12",
       "Sun, Jun 14",
     ]);
-
-    // Two chores share Jun 12 → both rows sit under that single header.
-    const jun12 = headings[0].parentElement as HTMLElement;
-    expect(within(jun12).getByText("Trash")).toBeInTheDocument();
-    expect(within(jun12).getByText("Vacuum")).toBeInTheDocument();
-  });
-
-  it("shows an empty line when no chore has upcoming occurrences", () => {
-    render(<ChoreList chores={[{ ...chores[0], occurrences: [] }]} isAdmin={false} today="2026-06-12" />);
-    expect(screen.getByText("No upcoming occurrences.")).toBeInTheDocument();
+    expect(screen.getByText("Nothing due today 🎉")).toBeInTheDocument();
   });
 });
