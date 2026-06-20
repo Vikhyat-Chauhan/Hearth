@@ -10,7 +10,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/auth/callback"];
+const PUBLIC_PATHS = ["/auth/callback", "/privacy"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

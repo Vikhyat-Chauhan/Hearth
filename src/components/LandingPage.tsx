@@ -644,12 +644,20 @@ export default function LandingPage({ error = null }: { error?: string | null })
             <span aria-hidden="true">🔥</span> Hearth
           </p>
           <p>Shared-home harmony for students &amp; roommates.</p>
-          <GoogleSignIn
-            showError={false}
-            className="font-medium text-muted hover:text-brand-700 dark:hover:text-brand-300"
-          >
-            Sign in →
-          </GoogleSignIn>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/privacy"
+              className="font-medium text-muted hover:text-brand-700 dark:hover:text-brand-300"
+            >
+              Privacy
+            </Link>
+            <GoogleSignIn
+              showError={false}
+              className="font-medium text-muted hover:text-brand-700 dark:hover:text-brand-300"
+            >
+              Sign in →
+            </GoogleSignIn>
+          </div>
         </div>
       </footer>
     </main>
