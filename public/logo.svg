@@ -1,0 +1,36 @@
+<svg width="420" height="128" viewBox="0 0 420 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hearth">
+  <defs>
+    <linearGradient id="hearthEmber2" x1="64" y1="14" x2="64" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e58a64"/>
+      <stop offset="0.55" stop-color="#dd6a3f"/>
+      <stop offset="1" stop-color="#c2410c"/>
+    </linearGradient>
+    <linearGradient id="hearthFlame2" x1="64" y1="52" x2="64" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbe9e1"/>
+      <stop offset="0.5" stop-color="#f6cfbd"/>
+      <stop offset="1" stop-color="#e58a64"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mark -->
+  <path d="M64 12 L114 50 a8 8 0 0 1 3 6 V104 a14 14 0 0 1-14 14 H25 a14 14 0 0 1-14-14 V56 a8 8 0 0 1 3-6 Z"
+        fill="url(#hearthEmber2)"/>
+  <path d="M64 30 L98 56 a4 4 0 0 1 1.5 3 V102 a6 6 0 0 1-6 6 H34.5 a6 6 0 0 1-6-6 V59 a4 4 0 0 1 1.5-3 Z"
+        fill="#fdf6f3"/>
+  <!-- Flame at the heart of the home -->
+  <path d="M64 50
+           c 9 12 17 18 17 31
+           c 0 14-10 24-17 24
+           c -7 0-17-9-17-23
+           c 0-8 4-12 8-17
+           c 1 5 4 8 6 8
+           c 0-9-3-16 3-23 Z"
+        fill="url(#hearthFlame2)"/>
+  <!-- Inner flame core -->
+  <path d="M64 72 c5 5 8 10 8 16 c0 8-5 12-8 12 c-3 0-8-4-8-12 c0-5 3-9 8-16 Z"
+        fill="#c2410c"/>
+
+  <!-- Wordmark -->
+  <text x="142" y="82" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+        font-size="62" font-weight="700" letter-spacing="-1.5" fill="#9a350f">Hearth</text>
+</svg>
