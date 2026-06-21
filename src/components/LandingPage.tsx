@@ -651,6 +651,12 @@ export default function LandingPage({ error = null }: { error?: string | null })
             >
               Privacy
             </Link>
+            <Link
+              href="/terms"
+              className="font-medium text-muted hover:text-brand-700 dark:hover:text-brand-300"
+            >
+              Terms
+            </Link>
             <GoogleSignIn
               showError={false}
               className="font-medium text-muted hover:text-brand-700 dark:hover:text-brand-300"
