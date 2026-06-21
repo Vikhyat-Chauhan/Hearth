@@ -42,8 +42,13 @@ export default async function Navbar() {
   return (
     <header className="border-b border-line bg-surface">
       <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="font-display text-xl font-bold text-brand-700">
-          <span aria-hidden="true">🔥</span> Hearth
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-display text-xl font-bold text-brand-700"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-mark.svg" alt="" aria-hidden="true" className="h-7 w-7" />
+          Hearth
         </Link>
 
         <div className="flex items-center gap-4 text-sm">
