@@ -35,9 +35,17 @@ const display = Fraunces({
   weight: ["500", "600", "700"],
 });
 
+// Google Search Console "URL prefix" verification via the HTML-tag method.
+// Next renders this as <meta name="google-site-verification" ...> in <head>.
+// The token is public (it's in the page source), so it's safe to ship as the
+// default; GOOGLE_SITE_VERIFICATION can override it to rotate without a code change.
+const googleSiteVerification =
+  process.env.GOOGLE_SITE_VERIFICATION ?? "shnxz-hWwny9pR1i9LLXcp7LqySfhph17nV6ipVnMP0";
+
 export const metadata: Metadata = {
   title: "Hearth",
   description: "Shared-household chores for students and roommates, synced to Google Calendar.",
+  verification: { google: googleSiteVerification },
 };
 
 export default async function RootLayout({
