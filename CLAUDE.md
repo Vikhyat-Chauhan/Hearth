@@ -2,7 +2,7 @@
 
 > A shared-household app for students and roommates: the main roommate creates a household, invites the others, and assigns recurring chores that show up on everyone's Google Calendar.
 
-Live URL: **https://hearth-ruby-eight.vercel.app**
+Live URL: **https://hearth.tnmlabs.com**
 
 ---
 
@@ -87,9 +87,9 @@ Keeps parallel agents off each other's files. Update as files are created.
 
 ---
 
-## Backlog
+## Backlog (all shipped)
 
-*(From spec, sorted P0 → P1 → P2. V1 = SCOPE Phase 1 only.)*
+*(From spec, sorted P0 → P1 → P2. Everything below has shipped — see Implemented Features. Kept as a completed history.)*
 
 | Priority | Feature | Notes |
 |----------|---------|-------|
@@ -234,14 +234,6 @@ ACCEPTANCE CRITERIA:
   - Happy path: after connecting, every chore already assigned to the member has a calendar event and CalendarLink; survives a reload.
   - Failure path: a failed backfill is retryable and surfaces a clear status, never a 500.
   - Ownership: events are written only to the connecting user's own calendar.
-
----
-
-## Active Feature Streams
-
-| Status | Stream ID | Feature |
-|--------|-----------|---------|
-| —      | —         | *(set by the orchestrator at sprint start)* |
 
 ---
 
