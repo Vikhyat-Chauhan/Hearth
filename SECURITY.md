@@ -29,7 +29,7 @@ Please include:
 ## Scope
 
 In scope: the Hearth application code in this repository and its deployment at
-`https://hearth-ruby-eight.vercel.app`. Out of scope: vulnerabilities in third-party
+`https://hearth.tnmlabs.com`. Out of scope: vulnerabilities in third-party
 platforms we build on (Vercel, Supabase, Google) — report those to the respective vendor.
 
 ## Operational hardening
